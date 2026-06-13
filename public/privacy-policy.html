@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - SubFinance</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #8b5cf6;
+            border-bottom: 3px solid #8b5cf6;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #8b5cf6;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #22d3ee;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background: #8b5cf6;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .updated {
+            color: #666;
+            font-style: italic;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        a {
+            color: #8b5cf6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Privacy Policy for SubFinance</h1>
+        <p class="updated"><strong>Last Updated:</strong> June 3, 2026</p>
+
+        <h2>1. Introduction</h2>
+        <p>SubFinance ("we," "us," "our," or "Company") operates the SubFinance mobile application and website (the "Service"). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our Service.</p>
+        <p>Please read this Privacy Policy carefully. If you do not agree with our policies and practices, please do not use our Service.</p>
+
+        <h2>2. Information We Collect</h2>
+
+        <h3>2.1 Information You Directly Provide</h3>
+        <ul>
+            <li><strong>Account Information:</strong> Email address, password, profile name</li>
+            <li><strong>Subscription Data:</strong> Names, costs, billing cycles, renewal dates, and notes about your subscriptions</li>
+            <li><strong>Payment Information:</strong> Through Stripe or your payment processor (we do not store full card details)</li>
+        </ul>
+
+        <h3>2.2 Information Collected Automatically</h3>
+        <ul>
+            <li><strong>Device Information:</strong> Device type, operating system, app version, unique identifiers</li>
+            <li><strong>Usage Data:</strong> Features used, time spent in app, navigation patterns</li>
+            <li><strong>Crash Reports:</strong> Error logs and diagnostic information (via Sentry)</li>
+        </ul>
+
+        <h3>2.3 Bank Connection Data (via Plaid)</h3>
+        <p>When you connect your bank account through Plaid:</p>
+        <ul>
+            <li>We receive read-only access to transaction data</li>
+            <li><strong>We do not store your bank password</strong></li>
+            <li>Plaid is a third-party service; their privacy policy applies to how they handle your data</li>
+            <li>You can disconnect your bank at any time in Settings</li>
+        </ul>
+
+        <h3>2.4 Email Integration (via Gmail)</h3>
+        <p>When you connect Gmail to scan subscription receipts:</p>
+        <ul>
+            <li>We access your email subject lines and sender addresses only</li>
+            <li><strong>We do not read email body content</strong></li>
+            <li>We do not store your email password</li>
+            <li>This is handled by Google's OAuth service</li>
+        </ul>
+
+        <h2>3. How We Use Your Information</h2>
+        <p>We use the collected information for:</p>
+        <ul>
+            <li><strong>Service Delivery:</strong> Managing your subscriptions, sending renewal reminders</li>
+            <li><strong>Authentication:</strong> Verifying your identity and account security</li>
+            <li><strong>Analytics:</strong> Understanding how you use SubFinance to improve the app</li>
+            <li><strong>Notifications:</strong> Sending trial expiry alerts and renewal reminders</li>
+            <li><strong>Customer Support:</strong> Responding to your inquiries</li>
+            <li><strong>Legal Compliance:</strong> Meeting regulatory requirements</li>
+        </ul>
+
+        <h2>4. Data Sharing and Third-Party Services</h2>
+        <p>We share limited information with trusted third parties:</p>
+        <table>
+            <tr>
+                <th>Service</th>
+                <th>Purpose</th>
+                <th>Data Shared</th>
+            </tr>
+            <tr>
+                <td>Supabase</td>
+                <td>Database & authentication</td>
+                <td>Email, encrypted password, subscription data</td>
+            </tr>
+            <tr>
+                <td>Plaid</td>
+                <td>Bank data connection</td>
+                <td>Bank connection token (no credentials)</td>
+            </tr>
+            <tr>
+                <td>Google OAuth</td>
+                <td>Gmail integration</td>
+                <td>Email authorization only</td>
+            </tr>
+            <tr>
+                <td>Anthropic</td>
+                <td>AI alternative recommendations</td>
+                <td>Subscription names and costs</td>
+            </tr>
+            <tr>
+                <td>Sentry</td>
+                <td>Error tracking</td>
+                <td>Crash logs, app diagnostics</td>
+            </tr>
+            <tr>
+                <td>Stripe</td>
+                <td>Payments</td>
+                <td>Transaction data (processed securely)</td>
+            </tr>
+        </table>
+        <p><strong>We do NOT sell or rent your personal information to third parties.</strong></p>
+
+        <h2>5. Data Security</h2>
+        <ul>
+            <li>All data is transmitted over encrypted HTTPS connections</li>
+            <li>Passwords are securely hashed using industry-standard algorithms</li>
+            <li>Sensitive data at rest is encrypted</li>
+            <li>Bank connection is handled only through Plaid's secure OAuth</li>
+            <li>Access to data is restricted to authorized personnel only</li>
+        </ul>
+
+        <h2>6. Data Retention</h2>
+        <ul>
+            <li>Account data is retained while your account is active</li>
+            <li>You can delete your account and all associated data at any time</li>
+            <li>After account deletion, data is permanently removed within 30 days</li>
+            <li>Crash logs and analytics data are retained for 90 days</li>
+        </ul>
+
+        <h2>7. Your Rights and Choices</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li><strong>Access:</strong> Request a copy of your personal data</li>
+            <li><strong>Correct:</strong> Update or correct inaccurate information</li>
+            <li><strong>Delete:</strong> Request deletion of your account and data</li>
+            <li><strong>Opt-out:</strong> Disable analytics, crash reporting, or email notifications</li>
+        </ul>
+        <p>To exercise these rights, email us at: <code>privacy@subfinance.app</code></p>
+
+        <h2>8. Children's Privacy</h2>
+        <p>SubFinance is not intended for children under 13. We do not knowingly collect information from children under 13. If we discover we've collected data from a child under 13, we will delete it immediately.</p>
+
+        <h2>9. International Data Transfers</h2>
+        <p>Your data may be transferred to, and stored in, countries other than your country of residence. These countries may have data protection laws that differ from your home country. By using SubFinance, you consent to this transfer.</p>
+
+        <h2>10. Changes to This Privacy Policy</h2>
+        <p>We may update this Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last Updated" date above.</p>
+        <p>Your continued use of SubFinance after changes means you accept the updated Privacy Policy.</p>
+
+        <h2>11. Contact Us</h2>
+        <p>If you have questions about this Privacy Policy or our privacy practices, please contact us at:</p>
+        <ul>
+            <li><strong>Email:</strong> privacy@subfinance.app</li>
+            <li><strong>Website:</strong> https://subfinance.app</li>
+        </ul>
+
+        <hr style="margin-top: 40px;">
+        <p style="font-size: 12px; color: #666;">© 2026 SubFinance. All rights reserved.</p>
+    </div>
+</body>
+</html>
