@@ -271,17 +271,19 @@ function detectSubscriptions(txns: Transaction[]) {
   });
 }
 
-// Sandbox helper (sandbox only)
-router.post('/sandbox-token', requireAuth, async (req, res) => {
-  try {
-    const response = await plaidClient.sandboxPublicTokenCreate({
-      institution_id: 'ins_109508',
-      initial_products: [Products.Transactions],
-    });
-    res.json({ public_token: response.data.public_token });
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// Sandbox helper — only mounted outside production so it can't be hit live.
+if ((process.env.PLAID_ENV?.trim() ?? 'sandbox') !== 'production') {
+  router.post('/sandbox-token', requireAuth, async (req, res) => {
+    try {
+      const response = await plaidClient.sandboxPublicTokenCreate({
+        institution_id: 'ins_109508',
+        initial_products: [Products.Transactions],
+      });
+      res.json({ public_token: response.data.public_token });
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+}
 
 export default router;
