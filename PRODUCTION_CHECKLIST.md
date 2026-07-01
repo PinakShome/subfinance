@@ -1,61 +1,46 @@
 # SubFinance Production Checklist
 
-## Before First Release
+Last verified: 2026-06-30
 
-### Supabase
-- [ ] Enable Row Level Security on all tables (subscriptions, categories, notification_prefs, price_history)
-- [ ] Set up Supabase Auth email templates (confirm email, reset password)
-- [ ] Enable Supabase realtime for subscriptions table
-- [ ] Set up database backups (daily)
-- [ ] Run price_history migration: `supabase/migrations/add_price_history.sql`
+## ✅ Done & verified live
+- [x] Supabase Row Level Security enforced (verified: anonymous request sees 0 of 24 real rows)
+- [x] DB schema + `price_history` migration applied (all tables exist)
+- [x] `PLAID_ENV=production` set in Railway (real banks link)
+- [x] Plaid credentials set (client ID + rotated secret)
+- [x] Anthropic API key set in Railway
+- [x] Sentry error monitoring active (DSN set, error handler wired)
+- [x] PII logging stripped from Plaid endpoint (counts only, never merchant names/amounts)
+- [x] Secrets rotated — GitHub PAT, Vercel token, Plaid secret
+- [x] Vercel env vars set (SUPABASE_URL, ANON_KEY, API_URL, DEMO_MODE=false)
+- [x] API auth — all routes behind `requireAuth`
+- [x] Rate limiting added (300 req/15min on /api, 30 req/hr on /api/alternatives)
+- [x] CORS locked to allowlist (Vercel domains + localhost + CORS_ORIGINS)
+- [x] Sandbox-token route mounted only outside production
 
-### EAS / App Store
-- [ ] Run `eas build:configure` and replace `your-eas-project-id` in app.json
-- [ ] Create app icons (1024x1024) for iOS, Android adaptive icon
-- [ ] Create splash screen (dark bg #080d14 with SubFinance logo)
-- [ ] Set Apple Developer Team ID in eas.json
-- [ ] Create App Store Connect listing (screenshots, description, keywords)
-- [ ] Create Google Play listing
+## 🔴 Blocking — before real users
+- [ ] Railway connected to GitHub (Settings → Source → PinakShome/subfinance, root `server`) so pushes auto-deploy the new backend
+- [ ] Verify latest Vercel deploy is `Ready` (bakes in EXPO_PUBLIC_* env vars)
+- [ ] End-to-end smoke test: sign up → confirm email → link real bank → subscriptions detected
 
-### Backend (Server)
-- [ ] Deploy server to a production host (Railway, Render, Fly.io, or AWS)
-- [ ] Set all env vars in production (see server/.env.example)
-- [ ] Switch PLAID_ENV from `sandbox` to `production`
-- [ ] Set up HTTPS (SSL certificate)
-- [ ] Add rate limiting (express-rate-limit)
+## 🟡 Recommended before scaling
+- [ ] Supabase daily backups enabled (Database → Backups; plan-dependent)
+- [ ] Supabase reset-password email template configured
+- [ ] Confirm rate-limit headers live after deploy (`RateLimit-Policy: 30;w=3600` on /api/alternatives)
 
-### Security
-- [ ] Replace anon Supabase key references in client with proper RLS policies
-- [ ] Rotate any test API keys used during development
-- [ ] Add Sentry or similar for error tracking
+## 🟢 Optional / later
+- [ ] Fine-tune subscription detection (ambiguous merchants, variable amounts)
+- [ ] Remove/guard the still-mounted `/api/gmail` route (auth-gated, OAuth unconfigured)
+- [ ] Native store builds (iOS/Android only): fill app.json/eas.json placeholders, then `eas build`
 
-### Testing
-- [ ] Test auth flow on physical iOS device
-- [ ] Test auth flow on physical Android device
-- [ ] Test Plaid bank import in production mode
-- [ ] Test push notifications on physical devices
-- [ ] Load test with 50+ subscriptions
+## Environment Variables
+- App (Vercel): `EXPO_PUBLIC_SUPABASE_URL`, `EXPO_PUBLIC_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_DEMO_MODE`
+- API (Railway): see `server/.env.example` (Supabase service role, Plaid, Anthropic, PLAID_ENV, optional SENTRY_DSN, CORS_ORIGINS)
 
-## Environment Variables Required
-See `server/.env.example` for the complete list.
-
-## EAS Build Commands
+## EAS Build Commands (native only)
 ```bash
-# Install EAS CLI
 npm install -g eas-cli
-
-# Login
 eas login
-
-# Configure project
 eas build:configure
-
-# Build for internal testing
-eas build --profile preview --platform all
-
-# Build for production
 eas build --profile production --platform all
-
-# Submit to stores
 eas submit --profile production --platform all
 ```
