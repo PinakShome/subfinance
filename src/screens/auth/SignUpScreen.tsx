@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform, Alert,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
 import { AuthStackParamList } from '../../navigation/types';
@@ -20,13 +21,13 @@ export default function SignUpScreen({ navigation }: Props) {
 
   const handleSignUp = async () => {
     if (!email || !password) return;
-    if (password !== confirm) { Alert.alert('Passwords do not match'); return; }
-    if (password.length < 6) { Alert.alert('Password must be at least 6 characters'); return; }
+    if (password !== confirm) { showAlert('Passwords do not match'); return; }
+    if (password.length < 6) { showAlert('Password must be at least 6 characters'); return; }
     setBusy(true);
     const err = await signUpWithEmail(email.trim(), password);
     setBusy(false);
-    if (err) { Alert.alert('Sign up failed', err); return; }
-    Alert.alert('Check your email', 'We sent you a confirmation link.');
+    if (err) { showAlert('Sign up failed', err); return; }
+    showAlert('Check your email', 'We sent you a confirmation link.');
     navigation.navigate('Login');
   };
 

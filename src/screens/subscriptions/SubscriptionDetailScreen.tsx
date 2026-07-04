@@ -2,6 +2,7 @@ import React from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, Linking,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
@@ -92,7 +93,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
   const renewal = getRenewalDisplay();
 
   const handleDelete = () => {
-    Alert.alert('Remove Subscription', `Remove "${sub.name}"?`, [
+    showAlert('Remove Subscription', `Remove "${sub.name}"?`, [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Remove', style: 'destructive', onPress: async () => { await remove(sub.id); navigation.goBack(); } },
     ]);

@@ -3,6 +3,7 @@ import {
   View, Text, TouchableOpacity, StyleSheet, ActivityIndicator,
   FlatList, Alert, Platform,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { formatCurrency } from '../../lib/subscriptionUtils';
 import { BillingCycle } from '../../types/database';
@@ -78,7 +79,7 @@ export default function BankImportScreen() {
         setStep('linking');
       }
     } catch (e: any) {
-      Alert.alert('Connection Error', e.message);
+      showAlert('Connection Error', e.message);
     } finally {
       if (Platform.OS === 'web') setBusy(false);
       else setBusy(false);
@@ -97,7 +98,7 @@ export default function BankImportScreen() {
       } as any);
       setDetected(json.detected ?? []);
     } catch (e: any) {
-      Alert.alert('Error', e.message);
+      showAlert('Error', e.message);
     } finally {
       setBusy(false);
     }
@@ -124,7 +125,7 @@ export default function BankImportScreen() {
       started_on: null,
     });
 
-    if (err) { Alert.alert('Error', err); return; }
+    if (err) { showAlert('Error', err); return; }
     setDetected((prev) =>
       prev.map((d, i) => (i === index ? { ...d, added: true } : d)),
     );

@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { supabase } from '../../lib/supabase';
@@ -19,7 +20,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
   const handleReset = async () => {
     if (!email.trim()) {
-      Alert.alert('Enter your email', 'Please enter the email address for your account.');
+      showAlert('Enter your email', 'Please enter the email address for your account.');
       return;
     }
     setBusy(true);
@@ -28,7 +29,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     });
     setBusy(false);
     if (error) {
-      Alert.alert('Error', error.message);
+      showAlert('Error', error.message);
     } else {
       setSent(true);
     }

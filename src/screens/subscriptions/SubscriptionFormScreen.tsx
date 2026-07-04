@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Switch,
 } from 'react-native';
+import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
@@ -47,11 +48,11 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   useEffect(() => { fetchCategories(); }, []);
 
   const handleSave = async () => {
-    if (!name.trim()) { Alert.alert('Name is required'); return; }
+    if (!name.trim()) { showAlert('Name is required'); return; }
     const costNum = parseFloat(cost);
-    if (isNaN(costNum) || costNum < 0) { Alert.alert('Enter a valid cost'); return; }
+    if (isNaN(costNum) || costNum < 0) { showAlert('Enter a valid cost'); return; }
     if (!nextRenewal.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      Alert.alert('Enter renewal date as YYYY-MM-DD'); return;
+      showAlert('Enter renewal date as YYYY-MM-DD'); return;
     }
 
     const payload: SubscriptionInsert = {
@@ -73,7 +74,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
     setBusy(true);
     const err = editId ? await update(editId, payload) : await add(payload);
     setBusy(false);
-    if (err) { Alert.alert('Error', err); return; }
+    if (err) { showAlert('Error', err); return; }
     navigation.goBack();
   };
 

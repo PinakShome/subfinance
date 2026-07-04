@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
 import { totalMonthlySpend } from '../lib/subscriptionUtils';
+import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
 
 type Props = {
@@ -57,15 +58,7 @@ export default function SettingsScreen({ navigation }: Props) {
   const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : null;
 
   const handleSignOut = () => {
-    // Alert.alert button callbacks don't fire on react-native-web, so use the
-    // browser's native confirm there and Alert.alert on iOS/Android.
-    if (Platform.OS === 'web') {
-      if (typeof window !== 'undefined' && window.confirm('Are you sure you want to sign out?')) {
-        signOut();
-      }
-      return;
-    }
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+    showAlert('Sign Out', 'Are you sure you want to sign out?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },
     ]);
@@ -131,7 +124,7 @@ export default function SettingsScreen({ navigation }: Props) {
           description="Get notified before subscriptions renew"
           color="#fbbf24"
           badge="7 days"
-          onPress={() => Alert.alert('Notifications', 'Configure your notification settings.')}
+          onPress={() => showAlert('Notifications', 'Configure your notification settings.')}
         />
         <SettingsRow
           icon="cash-outline"
@@ -139,14 +132,14 @@ export default function SettingsScreen({ navigation }: Props) {
           description="Used for new subscriptions"
           color="#34d399"
           badge="USD"
-          onPress={() => Alert.alert('Currency', 'Currency settings coming soon.')}
+          onPress={() => showAlert('Currency', 'Currency settings coming soon.')}
         />
         <SettingsRow
           icon="moon-outline"
           label="Appearance"
           description="Dark mode (default)"
           color="#94a3b8"
-          onPress={() => Alert.alert('Appearance', 'Theme settings coming soon.')}
+          onPress={() => showAlert('Appearance', 'Theme settings coming soon.')}
         />
       </View>
 
@@ -158,14 +151,14 @@ export default function SettingsScreen({ navigation }: Props) {
           label="Privacy & Security"
           description="Manage your data and permissions"
           color="#22d3ee"
-          onPress={() => Alert.alert('Privacy', 'Your data is encrypted and never sold.')}
+          onPress={() => showAlert('Privacy', 'Your data is encrypted and never sold.')}
         />
         <SettingsRow
           icon="help-circle-outline"
           label="Help & Support"
           description="FAQs, contact and feedback"
           color="#94a3b8"
-          onPress={() => Alert.alert('Support', 'Contact support@subtracker.app')}
+          onPress={() => showAlert('Support', 'Contact support@subtracker.app')}
         />
         <SettingsRow
           icon="log-out-outline"
