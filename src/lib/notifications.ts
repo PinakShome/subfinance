@@ -60,6 +60,45 @@ export async function registerForPushNotificationsAsync(): Promise<string | null
   }
 }
 
+/** Read whether the current user has notifications enabled (defaults to on). */
+export async function getNotificationsEnabled(): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+  const { data } = await supabase
+    .from('notification_prefs')
+    .select('enabled')
+    .eq('user_id', user.id)
+    .maybeSingle();
+  // No row yet = not configured; treat as off until the user opts in.
+  return data?.enabled ?? false;
+}
+
+/**
+ * Turn notifications on/off. Enabling requests permission and registers this
+ * device's push token; disabling clears any scheduled local reminders.
+ * Returns the effective enabled state (enabling can fail if permission is
+ * denied or push isn't available on this platform).
+ */
+export async function setNotificationsEnabled(enabled: boolean): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  if (!enabled) {
+    await Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
+    await supabase
+      .from('notification_prefs')
+      .upsert({ user_id: user.id, enabled: false }, { onConflict: 'user_id' });
+    return false;
+  }
+
+  const token = await registerForPushNotificationsAsync();
+  await supabase.from('notification_prefs').upsert(
+    { user_id: user.id, enabled: true, ...(token ? { push_token: token } : {}) },
+    { onConflict: 'user_id' },
+  );
+  return true;
+}
+
 /** Persist the push token so the backend can target this user. */
 export async function savePushToken(token: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();

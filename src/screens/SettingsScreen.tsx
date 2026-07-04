@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
 import { totalMonthlySpend } from '../lib/subscriptionUtils';
+import { getNotificationsEnabled, setNotificationsEnabled } from '../lib/notifications';
 import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
 
@@ -41,6 +42,32 @@ function SettingsRow({
   );
 }
 
+function SettingsToggleRow({
+  icon, label, description, color = '#8b5cf6', value, onValueChange, disabled,
+}: {
+  icon: string; label: string; description?: string; color?: string;
+  value: boolean; onValueChange: (v: boolean) => void; disabled?: boolean;
+}) {
+  return (
+    <View style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
+        <Ionicons name={icon as any} size={18} color={color} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{label}</Text>
+        {description && <Text style={styles.rowDesc}>{description}</Text>}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        disabled={disabled}
+        thumbColor={value ? color : '#475569'}
+        trackColor={{ true: color + '80', false: '#1e293b' }}
+      />
+    </View>
+  );
+}
+
 function SectionHeader({ title }: { title: string }) {
   return <Text style={styles.sectionHdr}>{title}</Text>;
 }
@@ -56,6 +83,28 @@ export default function SettingsScreen({ navigation }: Props) {
     return d < 0;
   }).length;
   const joinDate = user?.created_at ? new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : null;
+
+  const [notifEnabled, setNotifEnabled] = useState(false);
+  const [notifBusy, setNotifBusy] = useState(false);
+
+  useEffect(() => {
+    getNotificationsEnabled().then(setNotifEnabled).catch(() => {});
+  }, [user?.id]);
+
+  const handleToggleNotifications = async (next: boolean) => {
+    setNotifBusy(true);
+    const effective = await setNotificationsEnabled(next);
+    setNotifEnabled(effective);
+    setNotifBusy(false);
+    // If the user tried to enable but it didn't stick, permission was denied
+    // or push isn't available on this platform/build.
+    if (next && !effective) {
+      showAlert(
+        'Notifications unavailable',
+        'Enable notifications for SubFinance in your device settings, then try again.',
+      );
+    }
+  };
 
   const handleSignOut = () => {
     showAlert('Sign Out', 'Are you sure you want to sign out?', [
@@ -118,13 +167,14 @@ export default function SettingsScreen({ navigation }: Props) {
       {/* ─── Preferences Section ─── */}
       <SectionHeader title="PREFERENCES" />
       <View style={styles.section}>
-        <SettingsRow
+        <SettingsToggleRow
           icon="notifications-outline"
           label="Renewal Reminders"
           description="Get notified before subscriptions renew"
           color="#fbbf24"
-          badge="7 days"
-          onPress={() => showAlert('Notifications', 'Configure your notification settings.')}
+          value={notifEnabled}
+          onValueChange={handleToggleNotifications}
+          disabled={notifBusy}
         />
         <SettingsRow
           icon="cash-outline"
