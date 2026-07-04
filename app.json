@@ -16,10 +16,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.subfinance.app",
       "buildNumber": "1",
-      "teamId": "YOUR_APPLE_TEAM_ID",
       "infoPlist": {
         "NSFaceIDUsageDescription": "Used for secure authentication",
-        "NSCameraUsageDescription": "Used to scan receipts"
+        "NSCameraUsageDescription": "Used to scan receipts",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
