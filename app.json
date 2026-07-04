@@ -31,7 +31,10 @@
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["NOTIFICATIONS", "VIBRATE"]
+      "permissions": [
+        "NOTIFICATIONS",
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -52,8 +55,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "your-eas-project-id"
+        "projectId": "96dec651-eac4-42a6-ac6a-d08953308d67"
       }
-    }
+    },
+    "owner": "pinak_shome"
   }
 }
