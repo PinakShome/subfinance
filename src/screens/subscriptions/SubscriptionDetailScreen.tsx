@@ -290,11 +290,11 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
       />
       <ActionButton
         icon="search-outline"
-        label="Find Cheaper Alternatives"
+        label="Cheaper Alternatives — Soon"
         color="#34d399"
         bg="#052514"
         borderColor="#34d39933"
-        onPress={() => navigation.navigate('Alternatives', { id: sub.id, name: sub.name })}
+        onPress={() => showAlert('Coming soon', 'AI-powered alternative suggestions are being polished and will be fully available shortly.')}
       />
       <ActionButton
         icon="trash-outline"

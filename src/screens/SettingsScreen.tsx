@@ -156,12 +156,19 @@ export default function SettingsScreen({ navigation }: Props) {
         <SettingsRow
           icon="business-outline"
           label="Import from Bank"
-          description="Connect via Plaid to auto-detect subscriptions"
+          description="Auto-detect subscriptions from your bank via Plaid"
           color="#6366f1"
-          badge="Plaid"
-          onPress={() => navigation.navigate('BankImport')}
+          badge="Soon"
+          onPress={() => showAlert('Coming soon', 'Bank import is being polished and will be fully available shortly.')}
         />
-        {/* Gmail import hidden until Google OAuth is configured in production. */}
+        <SettingsRow
+          icon="mail-outline"
+          label="Import from Email"
+          description="Find subscriptions from receipts in your inbox"
+          color="#22d3ee"
+          badge="Soon"
+          onPress={() => showAlert('Coming soon', 'Email import is being polished and will be fully available shortly.')}
+        />
       </View>
 
       {/* ─── Preferences Section ─── */}
