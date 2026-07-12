@@ -45,7 +45,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
       {/* Back button */}
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={20} color="#94a3b8" />
+        <Ionicons name="arrow-back" size={20} color="#6a6782" />
         <Text style={styles.backText}>Back to sign in</Text>
       </TouchableOpacity>
 
@@ -78,11 +78,11 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
             <Text style={styles.label}>EMAIL</Text>
             <View style={styles.inputWrap}>
-              <Ionicons name="mail-outline" size={16} color="#4b5563" style={{ marginRight: 10 }} />
+              <Ionicons name="mail-outline" size={16} color="#8a8698" style={{ marginRight: 10 }} />
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
-                placeholderTextColor="#374151"
+                placeholderTextColor="#b6b2c6"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={email}
@@ -109,7 +109,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, backgroundColor: '#09090f',
+    flex: 1, backgroundColor: '#f5f4fb',
     justifyContent: 'center', padding: 20,
   },
   glow: {
@@ -121,10 +121,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 8,
     marginBottom: 32, alignSelf: 'flex-start',
   },
-  backText: { color: '#94a3b8', fontSize: 14 },
+  backText: { color: '#6a6782', fontSize: 14 },
 
   card: {
-    backgroundColor: '#0e0e1f', borderRadius: 28, padding: 28,
+    backgroundColor: '#ffffff', borderRadius: 28, padding: 28,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
   },
   iconWrap: {
@@ -132,26 +132,26 @@ const styles = StyleSheet.create({
     backgroundColor: '#8b5cf618', borderWidth: 1, borderColor: '#8b5cf630',
     justifyContent: 'center', alignItems: 'center', marginBottom: 20,
   },
-  title: { color: '#f1f5f9', fontSize: 22, fontWeight: '800', marginBottom: 8 },
-  sub: { color: '#6b7280', fontSize: 14, lineHeight: 22, marginBottom: 24 },
-  emailHighlight: { color: '#a78bfa', fontWeight: '700' },
+  title: { color: '#1b1830', fontSize: 22, fontWeight: '800', marginBottom: 8 },
+  sub: { color: '#787591', fontSize: 14, lineHeight: 22, marginBottom: 24 },
+  emailHighlight: { color: '#7c4dff', fontWeight: '700' },
   hint: {
-    color: '#4b5563', fontSize: 13, lineHeight: 20,
-    marginBottom: 24, backgroundColor: '#13132a',
+    color: '#8a8698', fontSize: 13, lineHeight: 20,
+    marginBottom: 24, backgroundColor: '#ffffff',
     padding: 14, borderRadius: 12,
   },
 
   label: {
-    color: '#4b5563', fontSize: 10, fontWeight: '800',
+    color: '#8a8698', fontSize: 10, fontWeight: '800',
     letterSpacing: 1.5, marginBottom: 8,
   },
   inputWrap: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#13132a', borderRadius: 14,
+    backgroundColor: '#ffffff', borderRadius: 14,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
     paddingHorizontal: 14, marginBottom: 20,
   },
-  input: { flex: 1, color: '#f1f5f9', fontSize: 15, paddingVertical: 14 },
+  input: { flex: 1, color: '#1b1830', fontSize: 15, paddingVertical: 14 },
 
   btn: {
     backgroundColor: '#8b5cf6', borderRadius: 16,

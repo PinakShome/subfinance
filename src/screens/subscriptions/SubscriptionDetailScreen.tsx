@@ -19,8 +19,8 @@ type Props = {
 };
 
 const VIVID_COLORS = [
-  '#f43f5e', '#a855f7', '#3b82f6', '#22d3ee', '#34d399',
-  '#fbbf24', '#e879f9', '#8b5cf6', '#2dd4bf', '#fb923c',
+  '#f43f5e', '#a855f7', '#3b82f6', '#06b6d4', '#10b981',
+  '#f59e0b', '#d946ef', '#8b5cf6', '#0d9488', '#f97316',
 ];
 
 function getSubColor(name: string): string {
@@ -70,7 +70,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
   if (!sub) {
     return (
       <View style={styles.centerContainer}>
-        <Ionicons name="warning-outline" size={48} color="#334155" />
+        <Ionicons name="warning-outline" size={48} color="#e5e3ef" />
         <Text style={styles.notFound}>Subscription not found</Text>
       </View>
     );
@@ -84,10 +84,10 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
   const isOverdue = days < 0;
 
   const getRenewalDisplay = () => {
-    if (days < 0) return { text: `Overdue by ${-days}d · ${formatDate(sub.next_renewal)}`, color: '#f87171', bg: '#450a0a', borderColor: '#ef444433', icon: 'warning-outline' };
-    if (days === 0) return { text: `Renews today · ${formatDate(sub.next_renewal)}`, color: '#fbbf24', bg: '#78350f', borderColor: '#f59e0b33', icon: 'time-outline' };
-    if (days <= 3) return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#fca5a5', bg: '#7f1d1d', borderColor: '#ef444433', icon: 'time-outline' };
-    return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#93c5fd', bg: '#1e3a5f22', borderColor: '#3b82f633', icon: 'calendar-outline' };
+    if (days < 0) return { text: `Overdue by ${-days}d · ${formatDate(sub.next_renewal)}`, color: '#ef4444', bg: '#fef2f2', borderColor: '#ef444433', icon: 'warning-outline' };
+    if (days === 0) return { text: `Renews today · ${formatDate(sub.next_renewal)}`, color: '#f59e0b', bg: '#fff7ed', borderColor: '#f59e0b33', icon: 'time-outline' };
+    if (days <= 3) return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#ef4444', bg: '#fee2e2', borderColor: '#ef444433', icon: 'time-outline' };
+    return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#3b82f6', bg: '#e8f1ff22', borderColor: '#3b82f633', icon: 'calendar-outline' };
   };
 
   const renewal = getRenewalDisplay();
@@ -127,7 +127,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         )}
         {sub.is_trial && (
           <View style={styles.trialBadge}>
-            <Ionicons name="flask-outline" size={12} color="#fbbf24" />
+            <Ionicons name="flask-outline" size={12} color="#f59e0b" />
             <Text style={styles.trialText}>FREE TRIAL</Text>
           </View>
         )}
@@ -158,14 +158,14 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
           : null;
 
         const trialBannerStyle = trialDays === null
-          ? { bg: '#1a1035', borderColor: '#7c3aed33', color: '#a78bfa', icon: 'flask-outline' }
+          ? { bg: '#f0ecff', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' }
           : trialDays < 0
-          ? { bg: '#450a0a', borderColor: '#ef444433', color: '#f87171', icon: 'warning-outline' }
+          ? { bg: '#fef2f2', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
           : trialDays <= 1
-          ? { bg: '#450a0a', borderColor: '#ef444433', color: '#f87171', icon: 'warning-outline' }
+          ? { bg: '#fef2f2', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
           : trialDays <= 3
-          ? { bg: '#78350f', borderColor: '#f59e0b33', color: '#fbbf24', icon: 'time-outline' }
-          : { bg: '#1a1035', borderColor: '#7c3aed33', color: '#a78bfa', icon: 'flask-outline' };
+          ? { bg: '#fff7ed', borderColor: '#f59e0b33', color: '#f59e0b', icon: 'time-outline' }
+          : { bg: '#f0ecff', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' };
 
         const trialMsg = trialDays === null
           ? 'Free trial active'
@@ -233,7 +233,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         </View>
         <View style={styles.quickDiv} />
         <View style={styles.quickStat}>
-          <Text style={[styles.quickVal, { color: isOverdue ? '#f87171' : '#a78bfa' }]}>
+          <Text style={[styles.quickVal, { color: isOverdue ? '#ef4444' : '#7c4dff' }]}>
             {isOverdue ? `${-days}d ago` : days === 0 ? 'Today' : `in ${days}d`}
           </Text>
           <Text style={styles.quickLbl}>next payment</Text>
@@ -256,18 +256,18 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
                 <Ionicons
                   name={increased ? 'arrow-up-outline' : 'arrow-down-outline'}
                   size={14}
-                  color={increased ? '#f87171' : '#34d399'}
+                  color={increased ? '#ef4444' : '#10b981'}
                 />
                 <Text style={styles.priceHistoryDate}>{date}</Text>
                 <View style={styles.priceHistoryChange}>
                   <Text style={styles.priceHistoryOld}>{formatCurrency(entry.old_cost, entry.currency)}</Text>
-                  <Ionicons name="arrow-forward" size={10} color="#475569" />
-                  <Text style={[styles.priceHistoryNew, { color: increased ? '#f87171' : '#34d399' }]}>
+                  <Ionicons name="arrow-forward" size={10} color="#8a8698" />
+                  <Text style={[styles.priceHistoryNew, { color: increased ? '#ef4444' : '#10b981' }]}>
                     {formatCurrency(entry.new_cost, entry.currency)}
                   </Text>
                 </View>
-                <View style={[styles.priceHistoryBadge, { backgroundColor: increased ? '#450a0a' : '#052514' }]}>
-                  <Text style={[styles.priceHistoryBadgeText, { color: increased ? '#f87171' : '#34d399' }]}>
+                <View style={[styles.priceHistoryBadge, { backgroundColor: increased ? '#fef2f2' : '#ecfdf5' }]}>
+                  <Text style={[styles.priceHistoryBadgeText, { color: increased ? '#ef4444' : '#10b981' }]}>
                     {increased ? '+' : ''}{pct}%
                   </Text>
                 </View>
@@ -284,23 +284,23 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         icon="create-outline"
         label="Edit Subscription"
         color="#8b5cf6"
-        bg="#13132a"
+        bg="#ffffff"
         borderColor="#8b5cf633"
         onPress={() => navigation.navigate('EditSubscription', { id: sub.id })}
       />
       <ActionButton
         icon="search-outline"
         label="Cheaper Alternatives — Soon"
-        color="#34d399"
-        bg="#052514"
-        borderColor="#34d39933"
+        color="#10b981"
+        bg="#ecfdf5"
+        borderColor="#10b98133"
         onPress={() => showAlert('Coming soon', 'AI-powered alternative suggestions are being polished and will be fully available shortly.')}
       />
       <ActionButton
         icon="trash-outline"
         label="Remove Subscription"
         color="#f43f5e"
-        bg="#1f0a0a"
+        bg="#fef2f2"
         borderColor="#f43f5e33"
         onPress={handleDelete}
       />
@@ -309,15 +309,15 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090f' },
+  container: { flex: 1, backgroundColor: '#f5f4fb' },
   content: { padding: 16, paddingBottom: 60 },
-  centerContainer: { flex: 1, backgroundColor: '#09090f', justifyContent: 'center', alignItems: 'center', gap: 16 },
-  notFound: { color: '#6b7280', fontSize: 16 },
+  centerContainer: { flex: 1, backgroundColor: '#f5f4fb', justifyContent: 'center', alignItems: 'center', gap: 16 },
+  notFound: { color: '#787591', fontSize: 16 },
 
   // Hero
   hero: {
     alignItems: 'center', padding: 32,
-    backgroundColor: '#0e0e1f',
+    backgroundColor: '#ffffff',
     borderRadius: 28, marginBottom: 14,
     borderWidth: 1, overflow: 'hidden',
   },
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5, shadowRadius: 20, elevation: 10,
   },
   heroLogoText: { fontSize: 26, fontWeight: '900' },
-  heroName: { color: '#f1f5f9', fontSize: 28, fontWeight: '900', marginBottom: 10, letterSpacing: -0.5 },
+  heroName: { color: '#1b1830', fontSize: 28, fontWeight: '900', marginBottom: 10, letterSpacing: -0.5 },
   heroCatBadge: {
     paddingHorizontal: 14, paddingVertical: 6,
     borderRadius: 20, borderWidth: 1, marginBottom: 4,
@@ -339,24 +339,24 @@ const styles = StyleSheet.create({
   heroCatText: { fontSize: 13, fontWeight: '700' },
   trialBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 10,
-    backgroundColor: '#fbbf2418', borderRadius: 10,
+    backgroundColor: '#f59e0b18', borderRadius: 10,
     paddingHorizontal: 12, paddingVertical: 5,
-    borderWidth: 1, borderColor: '#fbbf2440',
+    borderWidth: 1, borderColor: '#f59e0b40',
   },
-  trialText: { color: '#fbbf24', fontSize: 11, fontWeight: '800' },
+  trialText: { color: '#f59e0b', fontSize: 11, fontWeight: '800' },
 
   // Cost cards
   costRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
   costCard: {
-    backgroundColor: '#0e0e1f', borderRadius: 18, padding: 18,
+    backgroundColor: '#ffffff', borderRadius: 18, padding: 18,
     borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
   },
   costMain: { flex: 1.4, justifyContent: 'center' },
   costGroup: { flex: 1, gap: 10, backgroundColor: 'transparent', borderWidth: 0, padding: 0 },
   costSmall: { flex: 1 },
-  costLabel: { color: '#4b5563', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
+  costLabel: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
   costCardAmount: { fontSize: 34, fontWeight: '900', letterSpacing: -0.5 },
-  costAmount: { color: '#f1f5f9', fontSize: 15, fontWeight: '800' },
+  costAmount: { color: '#1b1830', fontSize: 15, fontWeight: '800' },
 
   // Banners
   banner: {
@@ -365,54 +365,54 @@ const styles = StyleSheet.create({
   },
   bannerText: { fontSize: 14, fontWeight: '700', flex: 1 },
   priceAlertBanner: {
-    backgroundColor: '#78350f22', borderColor: '#f59e0b33',
+    backgroundColor: '#fff7ed22', borderColor: '#f59e0b33',
   },
-  priceAlertText: { color: '#fbbf24' },
+  priceAlertText: { color: '#f59e0b' },
 
   // Detail card
   detailCard: {
-    backgroundColor: '#0e0e1f', borderRadius: 18, padding: 16,
+    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
     marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
   },
-  detailTitle: { color: '#4b5563', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12 },
+  detailTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12 },
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   infoRowLast: { borderBottomWidth: 0 },
-  infoLabel: { color: '#6b7280', fontSize: 13 },
-  infoValue: { color: '#cbd5e1', fontSize: 13, fontWeight: '600', maxWidth: '55%', textAlign: 'right' },
+  infoLabel: { color: '#787591', fontSize: 13 },
+  infoValue: { color: '#4b4864', fontSize: 13, fontWeight: '600', maxWidth: '55%', textAlign: 'right' },
 
   // Quick stats
   quickRow: {
-    flexDirection: 'row', backgroundColor: '#0e0e1f', borderRadius: 18,
+    flexDirection: 'row', backgroundColor: '#ffffff', borderRadius: 18,
     padding: 18, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
   },
   quickStat: { flex: 1, alignItems: 'center' },
-  quickVal: { color: '#a78bfa', fontSize: 18, fontWeight: '800' },
-  quickLbl: { color: '#4b5563', fontSize: 11, marginTop: 4, textAlign: 'center' },
+  quickVal: { color: '#7c4dff', fontSize: 18, fontWeight: '800' },
+  quickLbl: { color: '#8a8698', fontSize: 11, marginTop: 4, textAlign: 'center' },
   quickDiv: { width: 1, backgroundColor: 'rgba(255,255,255,0.07)', marginVertical: 4 },
 
   // Price history
   priceHistoryCard: {
-    backgroundColor: '#0e0e1f', borderRadius: 18, padding: 16,
+    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
     marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
   },
   priceHistoryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
-  priceHistoryTitle: { color: '#4b5563', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
+  priceHistoryTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
   priceHistoryRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
     paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
   },
-  priceHistoryDate: { color: '#6b7280', fontSize: 12, flex: 1 },
+  priceHistoryDate: { color: '#787591', fontSize: 12, flex: 1 },
   priceHistoryChange: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  priceHistoryOld: { color: '#4b5563', fontSize: 12, textDecorationLine: 'line-through' },
+  priceHistoryOld: { color: '#8a8698', fontSize: 12, textDecorationLine: 'line-through' },
   priceHistoryNew: { fontSize: 13, fontWeight: '700' },
   priceHistoryBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 4 },
   priceHistoryBadgeText: { fontSize: 11, fontWeight: '700' },
 
   // Actions
-  actionsTitle: { color: '#4b5563', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 10 },
+  actionsTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 10 },
   actionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderRadius: 18, padding: 18, marginBottom: 10, borderWidth: 1,

@@ -81,7 +81,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>Name</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Netflix" placeholderTextColor="#475569" />
+      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" />
 
       <Text style={styles.sectionLabel}>Cost</Text>
       <View style={styles.row}>
@@ -98,7 +98,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
           onChangeText={setCost}
           keyboardType="decimal-pad"
           placeholder="0.00"
-          placeholderTextColor="#475569"
+          placeholderTextColor="#8a8698"
         />
       </View>
 
@@ -121,12 +121,12 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
           onChangeText={setIntervalDays}
           keyboardType="number-pad"
           placeholder="Every X days"
-          placeholderTextColor="#475569"
+          placeholderTextColor="#8a8698"
         />
       )}
 
       <Text style={styles.sectionLabel}>Next Renewal Date (YYYY-MM-DD)</Text>
-      <TextInput style={styles.input} value={nextRenewal} onChangeText={setNextRenewal} placeholder="2025-01-01" placeholderTextColor="#475569" />
+      <TextInput style={styles.input} value={nextRenewal} onChangeText={setNextRenewal} placeholder="2025-01-01" placeholderTextColor="#8a8698" />
 
       <Text style={styles.sectionLabel}>Category</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
@@ -142,16 +142,16 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
       </ScrollView>
 
       <Text style={styles.sectionLabel}>Website URL (optional)</Text>
-      <TextInput style={styles.input} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." placeholderTextColor="#475569" autoCapitalize="none" keyboardType="url" />
+      <TextInput style={styles.input} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." placeholderTextColor="#8a8698" autoCapitalize="none" keyboardType="url" />
 
       <View style={styles.row}>
         <Text style={styles.sectionLabel}>Free Trial?</Text>
-        <Switch value={isTrial} onValueChange={setIsTrial} thumbColor={isTrial ? '#6366f1' : '#475569'} trackColor={{ true: '#4338ca', false: '#1e293b' }} />
+        <Switch value={isTrial} onValueChange={setIsTrial} thumbColor={isTrial ? '#6366f1' : '#8a8698'} trackColor={{ true: '#4f46e5', false: '#f1eff9' }} />
       </View>
       {isTrial && (
         <>
           <Text style={styles.sectionLabel}>Trial Ends (YYYY-MM-DD)</Text>
-          <TextInput style={styles.input} value={trialEndsOn} onChangeText={setTrialEndsOn} placeholder="2025-01-15" placeholderTextColor="#475569" />
+          <TextInput style={styles.input} value={trialEndsOn} onChangeText={setTrialEndsOn} placeholder="2025-01-15" placeholderTextColor="#8a8698" />
         </>
       )}
 
@@ -162,7 +162,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
         onChangeText={setNotes}
         multiline
         placeholder="Any extra info…"
-        placeholderTextColor="#475569"
+        placeholderTextColor="#8a8698"
       />
 
       <TouchableOpacity style={[styles.button, busy && styles.buttonDisabled]} onPress={handleSave} disabled={busy}>
@@ -173,20 +173,20 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
+  container: { flex: 1, backgroundColor: '#ffffff' },
   content: { padding: 20, paddingBottom: 60 },
-  sectionLabel: { color: '#94a3b8', fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 16 },
+  sectionLabel: { color: '#6a6782', fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 16 },
   input: {
-    backgroundColor: '#1e293b', borderRadius: 12, padding: 14,
-    color: '#f8fafc', fontSize: 15, borderWidth: 1, borderColor: '#334155',
+    backgroundColor: '#f1eff9', borderRadius: 12, padding: 14,
+    color: '#1b1830', fontSize: 15, borderWidth: 1, borderColor: '#e5e3ef',
   },
   row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
   chip: {
     borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1, borderColor: '#334155', backgroundColor: '#1e293b',
+    borderWidth: 1, borderColor: '#e5e3ef', backgroundColor: '#f1eff9',
   },
   chipActive: { backgroundColor: '#6366f1', borderColor: '#6366f1' },
-  chipText: { color: '#94a3b8', fontSize: 13, fontWeight: '600' },
+  chipText: { color: '#6a6782', fontSize: 13, fontWeight: '600' },
   chipTextActive: { color: '#fff' },
   button: {
     backgroundColor: '#6366f1', borderRadius: 12, padding: 16,

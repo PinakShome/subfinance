@@ -42,7 +42,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor="#6a6782"
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -51,7 +51,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor="#6a6782"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -59,7 +59,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
-        placeholderTextColor="#94a3b8"
+        placeholderTextColor="#6a6782"
         secureTextEntry
         value={confirm}
         onChangeText={setConfirm}
@@ -81,13 +81,13 @@ export default function SignUpScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a', justifyContent: 'center', padding: 24 },
+  container: { flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', padding: 24 },
   title: { fontSize: 32, fontWeight: '800', color: '#6366f1', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#94a3b8', textAlign: 'center', marginBottom: 32 },
+  subtitle: { fontSize: 16, color: '#6a6782', textAlign: 'center', marginBottom: 32 },
   input: {
-    backgroundColor: '#1e293b', borderRadius: 12, padding: 16,
-    color: '#f8fafc', fontSize: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: '#334155',
+    backgroundColor: '#f1eff9', borderRadius: 12, padding: 16,
+    color: '#1b1830', fontSize: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: '#e5e3ef',
   },
   button: {
     backgroundColor: '#6366f1', borderRadius: 12, padding: 16,
@@ -95,6 +95,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  link: { color: '#94a3b8', textAlign: 'center', fontSize: 14 },
+  link: { color: '#6a6782', textAlign: 'center', fontSize: 14 },
   linkBold: { color: '#6366f1', fontWeight: '700' },
 });

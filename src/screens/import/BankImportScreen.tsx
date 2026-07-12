@@ -238,19 +238,19 @@ export default function BankImportScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a', padding: 24 },
+  container: { flex: 1, backgroundColor: '#ffffff', padding: 24 },
   iconCircle: {
     width: 80, height: 80, borderRadius: 40,
-    backgroundColor: '#1e293b', justifyContent: 'center', alignItems: 'center',
+    backgroundColor: '#f1eff9', justifyContent: 'center', alignItems: 'center',
     alignSelf: 'center', marginTop: 40, marginBottom: 24,
   },
   iconText: { fontSize: 36 },
-  title: { color: '#f8fafc', fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 10 },
-  subtitle: { color: '#94a3b8', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 28 },
-  bulletBox: { backgroundColor: '#1e293b', borderRadius: 14, padding: 16, marginBottom: 32 },
+  title: { color: '#1b1830', fontSize: 24, fontWeight: '800', textAlign: 'center', marginBottom: 10 },
+  subtitle: { color: '#6a6782', fontSize: 15, textAlign: 'center', lineHeight: 22, marginBottom: 28 },
+  bulletBox: { backgroundColor: '#f1eff9', borderRadius: 14, padding: 16, marginBottom: 32 },
   bullet: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10 },
   checkmark: { fontSize: 16 },
-  bulletText: { color: '#cbd5e1', fontSize: 14, flex: 1 },
+  bulletText: { color: '#4b4864', fontSize: 14, flex: 1 },
   btn: {
     backgroundColor: '#6366f1', borderRadius: 12, padding: 16,
     alignItems: 'center', marginTop: 8,
@@ -259,18 +259,18 @@ const styles = StyleSheet.create({
   btnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
   card: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#1e293b', borderRadius: 14, padding: 16, marginBottom: 10,
+    backgroundColor: '#f1eff9', borderRadius: 14, padding: 16, marginBottom: 10,
   },
   cardInfo: { flex: 1 },
-  cardName: { color: '#f8fafc', fontSize: 15, fontWeight: '700' },
-  cardMeta: { color: '#64748b', fontSize: 13, marginTop: 3 },
+  cardName: { color: '#1b1830', fontSize: 15, fontWeight: '700' },
+  cardMeta: { color: '#787591', fontSize: 13, marginTop: 3 },
   addBtn: {
     width: 36, height: 36, borderRadius: 18,
     backgroundColor: '#6366f1', justifyContent: 'center', alignItems: 'center',
   },
   addBtnText: { color: '#fff', fontSize: 20, fontWeight: '700', lineHeight: 22 },
   loadingOverlay: { alignItems: 'center', marginBottom: 24 },
-  loadingText: { color: '#94a3b8', marginTop: 12, fontSize: 14 },
+  loadingText: { color: '#6a6782', marginTop: 12, fontSize: 14 },
   empty: { alignItems: 'center', marginTop: 60 },
-  emptyText: { color: '#475569', fontSize: 16, marginTop: 12 },
+  emptyText: { color: '#8a8698', fontSize: 16, marginTop: 12 },
 });

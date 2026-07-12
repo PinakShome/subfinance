@@ -9,13 +9,13 @@ import { Subscription } from '../../types/database';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_WIDTH = SCREEN_WIDTH - 48;
 
-const PIE_COLORS = ['#8b5cf6', '#22d3ee', '#34d399', '#fbbf24', '#fb7185', '#e879f9', '#fb923c', '#3b82f6'];
+const PIE_COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#d946ef', '#f97316', '#3b82f6'];
 
 const CHART_CONFIG = {
-  backgroundGradientFrom: '#0e0e1f',
-  backgroundGradientTo: '#0e0e1f',
+  backgroundGradientFrom: '#ffffff',
+  backgroundGradientTo: '#ffffff',
   color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
-  labelColor: () => '#4b5563',
+  labelColor: () => '#8a8698',
   barPercentage: 0.55,
   decimalPlaces: 0,
   propsForBackgroundLines: { stroke: 'rgba(255,255,255,0.05)', strokeDasharray: '' },
@@ -49,7 +49,7 @@ function UpcomingRow({ sub }: { sub: Subscription }) {
   const days = daysUntilRenewal(sub.next_renewal);
   const monthly = monthlyEquivalent(sub.cost, sub.billing_cycle, sub.interval_days);
   const urgent = days <= 3;
-  const dotColor = days < 0 ? '#fb7185' : urgent ? '#fb923c' : '#8b5cf6';
+  const dotColor = days < 0 ? '#f43f5e' : urgent ? '#f97316' : '#8b5cf6';
   return (
     <View style={styles.upcomingRow}>
       <View style={[styles.upcomingDot, { backgroundColor: dotColor }]} />
@@ -121,7 +121,7 @@ export default function AnalyticsScreen() {
     name: name.length > 10 ? name.slice(0, 10) : name,
     population: Math.round(amount * 100) / 100,
     color: color ?? PIE_COLORS[i % PIE_COLORS.length],
-    legendFontColor: '#64748b',
+    legendFontColor: '#787591',
     legendFontSize: 12,
   }));
 
@@ -138,7 +138,7 @@ export default function AnalyticsScreen() {
   if (active.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="bar-chart-outline" size={52} color="#1f2937" />
+        <Ionicons name="bar-chart-outline" size={52} color="#f1eff9" />
         <Text style={styles.emptyText}>No data yet</Text>
         <Text style={styles.emptySubText}>Add subscriptions to see analytics</Text>
       </View>
@@ -151,28 +151,28 @@ export default function AnalyticsScreen() {
       {/* ─── KPI Grid ─── */}
       <View style={styles.kpiGrid}>
         <MetricCard label="Monthly" value={formatCurrency(monthly)} icon="trending-up-outline" accentColor="#8b5cf6" />
-        <MetricCard label="Annual" value={formatCurrency(monthly * 12)} icon="calendar-outline" accentColor="#22d3ee" />
-        <MetricCard label="Daily avg" value={formatCurrency(daily)} icon="sunny-outline" accentColor="#34d399" />
-        <MetricCard label="Per sub" value={formatCurrency(avgPerSub)} icon="layers-outline" accentColor="#fbbf24" />
+        <MetricCard label="Annual" value={formatCurrency(monthly * 12)} icon="calendar-outline" accentColor="#06b6d4" />
+        <MetricCard label="Daily avg" value={formatCurrency(daily)} icon="sunny-outline" accentColor="#10b981" />
+        <MetricCard label="Per sub" value={formatCurrency(avgPerSub)} icon="layers-outline" accentColor="#f59e0b" />
       </View>
 
       {/* ─── Highlight Cards ─── */}
       {mostExpensive && (
         <View style={styles.highlightRow}>
           <View style={[styles.highlightCard, styles.hlDanger]}>
-            <Ionicons name="arrow-up-circle" size={18} color="#fb7185" />
+            <Ionicons name="arrow-up-circle" size={18} color="#f43f5e" />
             <Text style={styles.hlLabel}>Most expensive</Text>
             <Text style={styles.hlName}>{mostExpensive.name}</Text>
-            <Text style={[styles.hlAmt, { color: '#fb7185' }]}>
+            <Text style={[styles.hlAmt, { color: '#f43f5e' }]}>
               {formatCurrency(monthlyEquivalent(mostExpensive.cost, mostExpensive.billing_cycle, mostExpensive.interval_days))}/mo
             </Text>
           </View>
           {cheapest && cheapest.id !== mostExpensive.id && (
             <View style={[styles.highlightCard, styles.hlGreen]}>
-              <Ionicons name="arrow-down-circle" size={18} color="#34d399" />
+              <Ionicons name="arrow-down-circle" size={18} color="#10b981" />
               <Text style={[styles.hlLabel, styles.hlLabelGreen]}>Cheapest</Text>
               <Text style={styles.hlName}>{cheapest.name}</Text>
-              <Text style={[styles.hlAmt, { color: '#34d399' }]}>
+              <Text style={[styles.hlAmt, { color: '#10b981' }]}>
                 {formatCurrency(monthlyEquivalent(cheapest.cost, cheapest.billing_cycle, cheapest.interval_days))}/mo
               </Text>
             </View>
@@ -245,14 +245,14 @@ export default function AnalyticsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090f' },
+  container: { flex: 1, backgroundColor: '#f5f4fb' },
   content: { padding: 16, paddingBottom: 60 },
 
   // KPI grid
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   metricCard: {
     width: (SCREEN_WIDTH - 52) / 2,
-    backgroundColor: '#0e0e1f',
+    backgroundColor: '#ffffff',
     borderRadius: 20, padding: 18,
     borderWidth: 1,
     overflow: 'hidden',
@@ -264,8 +264,8 @@ const styles = StyleSheet.create({
     width: 100, height: 100, borderRadius: 50,
   },
   metricValue: { fontSize: 24, fontWeight: '900', marginBottom: 4, letterSpacing: -0.5 },
-  metricLabel: { color: '#6b7280', fontSize: 12, fontWeight: '600' },
-  metricSub: { color: '#374151', fontSize: 11, marginTop: 4 },
+  metricLabel: { color: '#787591', fontSize: 12, fontWeight: '600' },
+  metricSub: { color: '#b6b2c6', fontSize: 11, marginTop: 4 },
 
   // Section header
   sectionHeader: {
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
     gap: 7, marginBottom: 12, marginTop: 6,
   },
   sectionTitle: {
-    color: '#6b7280', fontSize: 11, fontWeight: '800', letterSpacing: 1.5,
+    color: '#787591', fontSize: 11, fontWeight: '800', letterSpacing: 1.5,
   },
 
   // Highlight cards
@@ -281,20 +281,20 @@ const styles = StyleSheet.create({
   highlightCard: {
     flex: 1, borderRadius: 20, padding: 18, borderWidth: 1, overflow: 'hidden',
   },
-  hlDanger: { backgroundColor: '#fb718510', borderColor: '#fb718530' },
-  hlGreen: { backgroundColor: '#34d39910', borderColor: '#34d39930' },
-  hlLabel: { color: '#fb7185', fontSize: 11, fontWeight: '700', marginTop: 6 },
-  hlLabelGreen: { color: '#34d399' },
-  hlName: { color: '#f1f5f9', fontSize: 15, fontWeight: '800', marginTop: 4 },
+  hlDanger: { backgroundColor: '#f43f5e10', borderColor: '#f43f5e30' },
+  hlGreen: { backgroundColor: '#10b98110', borderColor: '#10b98130' },
+  hlLabel: { color: '#f43f5e', fontSize: 11, fontWeight: '700', marginTop: 6 },
+  hlLabelGreen: { color: '#10b981' },
+  hlName: { color: '#1b1830', fontSize: 15, fontWeight: '800', marginTop: 4 },
   hlAmt: { fontSize: 13, fontWeight: '700', marginTop: 2 },
 
   // Generic card
   card: {
-    backgroundColor: '#0e0e1f', borderRadius: 18, padding: 16,
+    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
     marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
   },
   chartCard: {
-    backgroundColor: '#0e0e1f', borderRadius: 18, padding: 14,
+    backgroundColor: '#ffffff', borderRadius: 18, padding: 14,
     marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
     alignItems: 'center',
   },
@@ -302,7 +302,7 @@ const styles = StyleSheet.create({
   // Category rows
   catRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
   catDot: { width: 8, height: 8, borderRadius: 4 },
-  catName: { color: '#94a3b8', fontSize: 13, width: 80 },
+  catName: { color: '#6a6782', fontSize: 13, width: 80 },
   catTrack: {
     flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.06)',
     borderRadius: 3, overflow: 'hidden',
@@ -317,12 +317,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
   },
   upcomingDot: { width: 8, height: 8, borderRadius: 4 },
-  upcomingName: { flex: 1, color: '#e2e8f0', fontSize: 14, fontWeight: '600' },
+  upcomingName: { flex: 1, color: '#2b2842', fontSize: 14, fontWeight: '600' },
   upcomingDays: { fontSize: 13, fontWeight: '800', width: 40, textAlign: 'center' },
-  upcomingAmt: { color: '#6b7280', fontSize: 13, width: 70, textAlign: 'right' },
+  upcomingAmt: { color: '#787591', fontSize: 13, width: 70, textAlign: 'right' },
 
   // Empty state
-  emptyContainer: { flex: 1, backgroundColor: '#09090f', justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyText: { color: '#6b7280', fontSize: 16, fontWeight: '600' },
-  emptySubText: { color: '#374151', fontSize: 13 },
+  emptyContainer: { flex: 1, backgroundColor: '#f5f4fb', justifyContent: 'center', alignItems: 'center', gap: 12 },
+  emptyText: { color: '#787591', fontSize: 16, fontWeight: '600' },
+  emptySubText: { color: '#b6b2c6', fontSize: 13 },
 });

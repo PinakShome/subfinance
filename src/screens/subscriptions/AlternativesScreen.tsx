@@ -109,22 +109,22 @@ export default function AlternativesScreen({ route }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
-  headerBox: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#1e293b' },
-  headerTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '800' },
-  headerSub: { color: '#64748b', fontSize: 13, marginTop: 4 },
+  container: { flex: 1, backgroundColor: '#ffffff' },
+  headerBox: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#f1eff9' },
+  headerTitle: { color: '#1b1830', fontSize: 20, fontWeight: '800' },
+  headerSub: { color: '#787591', fontSize: 13, marginTop: 4 },
   list: { padding: 16 },
   card: {
-    backgroundColor: '#1e293b', borderRadius: 14, padding: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: '#334155',
+    backgroundColor: '#f1eff9', borderRadius: 14, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: '#e5e3ef',
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 },
-  altName: { color: '#f8fafc', fontSize: 16, fontWeight: '700' },
+  altName: { color: '#1b1830', fontSize: 16, fontWeight: '700' },
   altPrice: { color: '#10b981', fontSize: 15, fontWeight: '700' },
-  altDesc: { color: '#94a3b8', fontSize: 13, lineHeight: 20 },
+  altDesc: { color: '#6a6782', fontSize: 13, lineHeight: 20 },
   websiteBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 10,
   },
   websiteBtnText: { color: '#6366f1', fontSize: 13, fontWeight: '600' },
-  error: { color: '#f87171', textAlign: 'center', marginTop: 40, padding: 20 },
+  error: { color: '#ef4444', textAlign: 'center', marginTop: 40, padding: 20 },
 });

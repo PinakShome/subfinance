@@ -68,9 +68,9 @@ function AppContent() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
       <NavigationContainer>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <AppContent />
       </NavigationContainer>
     </View>

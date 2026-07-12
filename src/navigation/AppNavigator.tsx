@@ -16,8 +16,8 @@ const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
 const NAV_OPTS = {
-  headerStyle: { backgroundColor: '#0f172a' },
-  headerTintColor: '#f8fafc',
+  headerStyle: { backgroundColor: '#ffffff' },
+  headerTintColor: '#1b1830',
   headerTitleStyle: { fontWeight: '700' as const },
 };
 
@@ -46,9 +46,9 @@ export default function AppNavigator() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarStyle: { backgroundColor: '#0f172a', borderTopColor: '#1e293b' },
+        tabBarStyle: { backgroundColor: '#ffffff', borderTopColor: '#f1eff9' },
         tabBarActiveTintColor: '#6366f1',
-        tabBarInactiveTintColor: '#475569',
+        tabBarInactiveTintColor: '#8a8698',
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {

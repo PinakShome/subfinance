@@ -15,8 +15,8 @@ type Props = {
 
 const FEATURES = [
   { icon: 'wallet-outline', text: 'Track every subscription in one place', color: '#8b5cf6', bg: '#8b5cf615', border: '#8b5cf630' },
-  { icon: 'trending-down-outline', text: 'AI-powered savings & alternatives', color: '#22d3ee', bg: '#22d3ee15', border: '#22d3ee30' },
-  { icon: 'bar-chart-outline', text: 'Real-time spending analytics', color: '#34d399', bg: '#34d39915', border: '#34d39930' },
+  { icon: 'trending-down-outline', text: 'AI-powered savings & alternatives', color: '#06b6d4', bg: '#06b6d415', border: '#06b6d430' },
+  { icon: 'bar-chart-outline', text: 'Real-time spending analytics', color: '#10b981', bg: '#10b98115', border: '#10b98130' },
 ];
 
 export default function LoginScreen({ navigation }: Props) {
@@ -51,7 +51,7 @@ export default function LoginScreen({ navigation }: Props) {
         {/* Logo */}
         <View style={styles.logoOuter}>
           <View style={styles.logoInner}>
-            <Ionicons name="layers" size={30} color="#f1f5f9" />
+            <Ionicons name="layers" size={30} color="#1b1830" />
           </View>
         </View>
 
@@ -81,11 +81,11 @@ export default function LoginScreen({ navigation }: Props) {
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>EMAIL</Text>
           <View style={styles.fieldWrap}>
-            <Ionicons name="mail-outline" size={16} color="#4b5563" style={{ marginRight: 10 }} />
+            <Ionicons name="mail-outline" size={16} color="#8a8698" style={{ marginRight: 10 }} />
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
-              placeholderTextColor="#374151"
+              placeholderTextColor="#b6b2c6"
               autoCapitalize="none"
               keyboardType="email-address"
               value={email}
@@ -98,17 +98,17 @@ export default function LoginScreen({ navigation }: Props) {
         <View style={styles.fieldGroup}>
           <Text style={styles.fieldLabel}>PASSWORD</Text>
           <View style={styles.fieldWrap}>
-            <Ionicons name="lock-closed-outline" size={16} color="#4b5563" style={{ marginRight: 10 }} />
+            <Ionicons name="lock-closed-outline" size={16} color="#8a8698" style={{ marginRight: 10 }} />
             <TextInput
               style={styles.input}
               placeholder="••••••••"
-              placeholderTextColor="#374151"
+              placeholderTextColor="#b6b2c6"
               secureTextEntry={!showPass}
               value={password}
               onChangeText={setPassword}
             />
             <TouchableOpacity onPress={() => setShowPass(!showPass)} style={{ padding: 4 }}>
-              <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={16} color="#4b5563" />
+              <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={16} color="#8a8698" />
             </TouchableOpacity>
           </View>
         </View>
@@ -163,7 +163,7 @@ export default function LoginScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#09090f',
+    backgroundColor: '#f5f4fb',
     justifyContent: 'center',
     padding: 20,
     overflow: 'hidden',
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     width: 260,
     height: 260,
     borderRadius: 130,
-    backgroundColor: '#22d3ee10',
+    backgroundColor: '#06b6d410',
   },
 
   // Branding
@@ -212,14 +212,14 @@ const styles = StyleSheet.create({
   },
 
   appName: {
-    color: '#f1f5f9',
+    color: '#1b1830',
     fontSize: 36,
     fontWeight: '900',
     letterSpacing: -0.8,
     marginBottom: 6,
   },
   tagline: {
-    color: '#6b7280',
+    color: '#787591',
     fontSize: 14,
     marginBottom: 22,
     letterSpacing: 0.2,
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
 
   // Form card
   card: {
-    backgroundColor: '#0e0e1f',
+    backgroundColor: '#ffffff',
     borderRadius: 28,
     padding: 26,
     borderWidth: 1,
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#8b5cf610',
   },
 
-  cardTitle: { color: '#f1f5f9', fontSize: 22, fontWeight: '800', marginBottom: 4 },
-  cardSub: { color: '#6b7280', fontSize: 14, marginBottom: 24 },
+  cardTitle: { color: '#1b1830', fontSize: 22, fontWeight: '800', marginBottom: 4 },
+  cardSub: { color: '#787591', fontSize: 14, marginBottom: 24 },
 
   // Fields
   fieldGroup: { marginBottom: 16 },
   fieldLabel: {
-    color: '#4b5563',
+    color: '#8a8698',
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1.5,
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   fieldWrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#13132a',
+    backgroundColor: '#ffffff',
     borderRadius: 14,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.07)',
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    color: '#f1f5f9',
+    color: '#1b1830',
     fontSize: 15,
     paddingVertical: 14,
   },
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   divLine: { flex: 1, height: 1, backgroundColor: 'rgba(255,255,255,0.06)' },
-  divText: { color: '#374151', fontSize: 13 },
+  divText: { color: '#b6b2c6', fontSize: 13 },
 
   // Create account
   createBtn: {
@@ -329,5 +329,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.03)',
   },
-  createText: { color: '#94a3b8', fontSize: 15, fontWeight: '600' },
+  createText: { color: '#6a6782', fontSize: 15, fontWeight: '600' },
 });
