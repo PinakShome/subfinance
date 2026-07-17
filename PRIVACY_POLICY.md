@@ -1,6 +1,6 @@
 # Privacy Policy for SubFinance
 
-**Last Updated:** June 3, 2026
+**Last Updated:** July 16, 2026
 
 ## 1. Introduction
 
@@ -13,7 +13,6 @@ Please read this Privacy Policy carefully. If you do not agree with our policies
 ### 2.1 Information You Directly Provide
 - **Account Information:** Email address, password, profile name
 - **Subscription Data:** Names, costs, billing cycles, renewal dates, and notes about your subscriptions
-- **Payment Information:** Through Stripe or your payment processor (we do not store full card details)
 
 ### 2.2 Information Collected Automatically
 - **Device Information:** Device type, operating system, app version, unique identifiers
@@ -55,7 +54,6 @@ We share limited information with trusted third parties:
 | Google OAuth | Gmail integration | Email authorization only |
 | Anthropic | AI alternative recommendations | Subscription names and costs |
 | Sentry | Error tracking | Crash logs, app diagnostics |
-| Stripe | Payments | Transaction data (processed securely) |
 
 **We do NOT sell or rent your personal information to third parties.**
 
