@@ -8,6 +8,7 @@ import { useSubscriptionStore } from './src/store/subscriptionStore';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useNotifications } from './src/hooks/useNotifications';
+import { ErrorBoundary } from './src/components/ErrorBoundary';
 
 // ─── Demo mode ───────────────────────────────────────────────────────────────
 // Set EXPO_PUBLIC_DEMO_MODE=true in .env to bypass Supabase auth for testing.
@@ -68,11 +69,13 @@ function AppContent() {
 
 export default function App() {
   return (
-    <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
-      <NavigationContainer>
-        <StatusBar style="dark" />
-        <AppContent />
-      </NavigationContainer>
-    </View>
+    <ErrorBoundary>
+      <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
+        <NavigationContainer>
+          <StatusBar style="dark" />
+          <AppContent />
+        </NavigationContainer>
+      </View>
+    </ErrorBoundary>
   );
 }

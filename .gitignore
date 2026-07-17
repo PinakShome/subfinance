@@ -45,3 +45,4 @@ server/.env.*
 /ios
 /android
 .vercel
+.claude/
