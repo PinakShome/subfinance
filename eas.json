@@ -8,7 +8,11 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://nbyromyypuvowkthheza.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ieXJvbXl5cHV2b3drdGhoZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzg2OTgsImV4cCI6MjA5MjgxNDY5OH0.YU8NbBcgwmc48mCLQ61FxS3uJxHQY_g7GwL_Uvx3vz8",
+        "EXPO_PUBLIC_API_URL": "https://jubilant-consideration-production-d28a.up.railway.app",
+        "EXPO_PUBLIC_DEMO_MODE": "false"
       }
     },
     "preview": {
@@ -17,7 +21,11 @@
         "simulator": false
       },
       "env": {
-        "APP_ENV": "preview"
+        "APP_ENV": "preview",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://nbyromyypuvowkthheza.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ieXJvbXl5cHV2b3drdGhoZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzg2OTgsImV4cCI6MjA5MjgxNDY5OH0.YU8NbBcgwmc48mCLQ61FxS3uJxHQY_g7GwL_Uvx3vz8",
+        "EXPO_PUBLIC_API_URL": "https://jubilant-consideration-production-d28a.up.railway.app",
+        "EXPO_PUBLIC_DEMO_MODE": "false"
       }
     },
     "ios-simulator": {
@@ -27,13 +35,21 @@
         "simulator": true
       },
       "env": {
-        "APP_ENV": "development"
+        "APP_ENV": "development",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://nbyromyypuvowkthheza.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ieXJvbXl5cHV2b3drdGhoZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzg2OTgsImV4cCI6MjA5MjgxNDY5OH0.YU8NbBcgwmc48mCLQ61FxS3uJxHQY_g7GwL_Uvx3vz8",
+        "EXPO_PUBLIC_API_URL": "https://jubilant-consideration-production-d28a.up.railway.app",
+        "EXPO_PUBLIC_DEMO_MODE": "false"
       }
     },
     "production": {
       "autoIncrement": true,
       "env": {
-        "APP_ENV": "production"
+        "APP_ENV": "production",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://nbyromyypuvowkthheza.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ieXJvbXl5cHV2b3drdGhoZXphIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMzg2OTgsImV4cCI6MjA5MjgxNDY5OH0.YU8NbBcgwmc48mCLQ61FxS3uJxHQY_g7GwL_Uvx3vz8",
+        "EXPO_PUBLIC_API_URL": "https://jubilant-consideration-production-d28a.up.railway.app",
+        "EXPO_PUBLIC_DEMO_MODE": "false"
       }
     }
   },
