@@ -25,7 +25,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     }
     setBusy(true);
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-      redirectTo: `${process.env.EXPO_PUBLIC_SITE_URL ?? 'https://subfinance.vercel.app'}/reset-password`,
+      redirectTo: `${process.env.EXPO_PUBLIC_SITE_URL ?? 'https://subscription-tracker-gilt.vercel.app'}/reset-password.html`,
     });
     setBusy(false);
     if (error) {
