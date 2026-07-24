@@ -19,6 +19,7 @@ import cron from 'node-cron';
 import plaidRouter from './routes/plaid';
 import gmailRouter from './routes/gmail';
 import alternativesRouter from './routes/alternatives';
+import accountRouter from './routes/account';
 import { sendTrialExpiryNotifications } from './cron/trialNotifications';
 
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api', apiLimiter);
 app.use('/api/plaid', plaidRouter);
 app.use('/api/gmail', gmailRouter);
 app.use('/api/alternatives', aiLimiter, alternativesRouter);
+app.use('/api/account', accountRouter);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 

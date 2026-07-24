@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
 import { totalMonthlySpend } from '../lib/subscriptionUtils';
 import { getNotificationsEnabled, setNotificationsEnabled } from '../lib/notifications';
+import { apiFetch } from '../lib/api';
 import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
 
@@ -111,6 +112,28 @@ export default function SettingsScreen({ navigation }: Props) {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },
     ]);
+  };
+
+  const handleDeleteAccount = () => {
+    showAlert(
+      'Delete Account',
+      'This permanently deletes your account and all your subscriptions. This cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await apiFetch('/api/account', { method: 'DELETE' });
+              await signOut();
+            } catch (e: any) {
+              showAlert('Could not delete account', e?.message ?? 'Please try again later.');
+            }
+          },
+        },
+      ],
+    );
   };
 
   // Avatar initials from email
@@ -223,6 +246,14 @@ export default function SettingsScreen({ navigation }: Props) {
           color="#f43f5e"
           danger
           onPress={handleSignOut}
+        />
+        <SettingsRow
+          icon="trash-outline"
+          label="Delete Account"
+          description="Permanently delete your account and data"
+          color="#ef4444"
+          danger
+          onPress={handleDeleteAccount}
         />
       </View>
 

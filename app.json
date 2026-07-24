@@ -17,8 +17,6 @@
       "bundleIdentifier": "com.subfinance.app",
       "buildNumber": "1",
       "infoPlist": {
-        "NSFaceIDUsageDescription": "Used for secure authentication",
-        "NSCameraUsageDescription": "Used to scan receipts",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
