@@ -1,4 +1,4 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "mkdir -p dist && cp public/*.html dist/",
   "outputDirectory": "dist"
 }

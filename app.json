@@ -22,28 +22,6 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#f5f4fb"
-      },
-      "package": "com.subfinance.app",
-      "versionCode": 1,
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "NOTIFICATIONS",
-        "VIBRATE"
-      ]
-    },
-    "web": {
-      "favicon": "./assets/favicon.png",
-      "name": "SubFinance",
-      "shortName": "SubFinance",
-      "description": "Smart subscription intelligence. Track, analyze, and optimize all your subscriptions.",
-      "themeColor": "#6366f1",
-      "backgroundColor": "#f5f4fb"
-    },
     "plugins": [
       "expo-secure-store",
       [
