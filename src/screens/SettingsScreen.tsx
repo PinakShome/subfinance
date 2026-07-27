@@ -215,11 +215,11 @@ export default function SettingsScreen({ navigation }: Props) {
           onPress={() => showAlert('Currency', 'Currency settings coming soon.')}
         />
         <SettingsRow
-          icon="moon-outline"
+          icon="sunny-outline"
           label="Appearance"
-          description="Dark mode (default)"
+          description="Light"
           color="#6a6782"
-          onPress={() => showAlert('Appearance', 'Theme settings coming soon.')}
+          onPress={() => showAlert('Appearance', 'More themes coming soon.')}
         />
       </View>
 

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
+  StyleSheet, KeyboardAvoidingView, Platform, Alert, ActivityIndicator, ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -24,6 +25,7 @@ export default function LoginScreen({ navigation }: Props) {
   const [password, setPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [busy, setBusy] = useState(false);
+  const insets = useSafeAreaInsets();
   const signInWithEmail = useAuthStore((s) => s.signInWithEmail);
 
   const handleLogin = async () => {
@@ -39,13 +41,21 @@ export default function LoginScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Background glow blobs */}
-      <View style={styles.glowTop} />
-      <View style={styles.glowBottom} />
+      <View style={styles.glowTop} pointerEvents="none" />
+      <View style={styles.glowBottom} pointerEvents="none" />
 
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       {/* ─── Branding ─── */}
       <View style={styles.brandArea}>
         {/* Logo */}
@@ -156,17 +166,23 @@ export default function LoginScreen({ navigation }: Props) {
           <Text style={styles.createText}>Create a new account</Text>
         </TouchableOpacity>
       </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  flex: {
     flex: 1,
     backgroundColor: '#f5f4fb',
+    overflow: 'hidden',
+  },
+  // Centers the form when there's room, but scrolls instead of clipping under
+  // the Dynamic Island on shorter devices.
+  scrollContent: {
+    flexGrow: 1,
     justifyContent: 'center',
     padding: 20,
-    overflow: 'hidden',
   },
 
   // Ambient glow blobs

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert,
+  StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
@@ -17,6 +18,7 @@ export default function SignUpScreen({ navigation }: Props) {
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
+  const insets = useSafeAreaInsets();
   const signUpWithEmail = useAuthStore((s) => s.signUpWithEmail);
 
   const handleSignUp = async () => {
@@ -33,9 +35,17 @@ export default function SignUpScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       <Text style={styles.title}>SubFinance</Text>
       <Text style={styles.subtitle}>Create your account</Text>
 
@@ -76,12 +86,14 @@ export default function SignUpScreen({ navigation }: Props) {
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.link}>Already have an account? <Text style={styles.linkBold}>Sign In</Text></Text>
       </TouchableOpacity>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff', justifyContent: 'center', padding: 24 },
+  flex: { flex: 1, backgroundColor: '#ffffff' },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24 },
   title: { fontSize: 32, fontWeight: '800', color: '#6366f1', textAlign: 'center', marginBottom: 4 },
   subtitle: { fontSize: 16, color: '#6a6782', textAlign: 'center', marginBottom: 32 },
   input: {

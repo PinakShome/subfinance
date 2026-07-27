@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/authStore';
@@ -70,12 +71,14 @@ function AppContent() {
 export default function App() {
   return (
     <ErrorBoundary>
-      <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
-        <NavigationContainer>
-          <StatusBar style="dark" />
-          <AppContent />
-        </NavigationContainer>
-      </View>
+      <SafeAreaProvider>
+        <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
+          <NavigationContainer>
+            <StatusBar style="dark" />
+            <AppContent />
+          </NavigationContainer>
+        </View>
+      </SafeAreaProvider>
     </ErrorBoundary>
   );
 }

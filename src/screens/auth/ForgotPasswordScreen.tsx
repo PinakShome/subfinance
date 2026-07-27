@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform,
+  StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -17,6 +18,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
+  const insets = useSafeAreaInsets();
 
   const handleReset = async () => {
     if (!email.trim()) {
@@ -37,12 +39,20 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {/* Glow */}
-      <View style={styles.glow} />
+      <View style={styles.glow} pointerEvents="none" />
 
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 },
+        ]}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
       {/* Back button */}
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={20} color="#6a6782" />
@@ -103,14 +113,15 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
           </>
         )}
       </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1, backgroundColor: '#f5f4fb',
-    justifyContent: 'center', padding: 20,
+  flex: { flex: 1, backgroundColor: '#f5f4fb' },
+  scrollContent: {
+    flexGrow: 1, justifyContent: 'center', padding: 20,
   },
   glow: {
     position: 'absolute', top: -100, alignSelf: 'center',
