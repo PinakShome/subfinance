@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { cancelAllReminders } from '../lib/notifications';
+import { useSubscriptionStore } from './subscriptionStore';
 
 interface AuthState {
   session: Session | null;
@@ -31,6 +33,11 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   signOut: async () => {
+    // Drop this user's pending reminders and cached rows before clearing the
+    // session: otherwise their subscription names/costs keep surfacing in
+    // notifications after sign-out, and briefly flash to the next user.
+    await cancelAllReminders();
+    useSubscriptionStore.getState().clear();
     await supabase.auth.signOut();
     set({ session: null, user: null });
   },

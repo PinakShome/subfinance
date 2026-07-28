@@ -99,16 +99,31 @@ export async function setNotificationsEnabled(enabled: boolean): Promise<boolean
   return true;
 }
 
-/** Persist the push token so the backend can target this user. */
+/**
+ * Persist the push token so the backend can target this user. Deliberately
+ * preserves the existing `enabled` preference — writing `true` here would
+ * silently re-enable notifications for someone who turned them off.
+ */
 export async function savePushToken(token: string): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+  const { data: existing } = await supabase
+    .from('notification_prefs')
+    .select('enabled')
+    .eq('user_id', user.id)
+    .maybeSingle();
   await supabase
     .from('notification_prefs')
     .upsert(
-      { user_id: user.id, push_token: token, enabled: true },
+      { user_id: user.id, push_token: token, enabled: existing?.enabled ?? false },
       { onConflict: 'user_id' },
     );
+}
+
+/** Clear every pending local reminder (used on sign-out and when opting out). */
+export async function cancelAllReminders(): Promise<void> {
+  if (Platform.OS === 'web') return;
+  await Notifications.cancelAllScheduledNotificationsAsync().catch(() => {});
 }
 
 /**
@@ -123,7 +138,17 @@ export async function scheduleRenewalReminders(subscriptions: Subscription[]): P
   await Notifications.cancelAllScheduledNotificationsAsync();
 
   const REMIND_DAYS = [3, 1];
-  for (const sub of subscriptions) {
+  // iOS keeps at most 64 pending local notifications and silently drops the
+  // rest, so schedule the soonest renewals first and stay under the cap.
+  const MAX_SCHEDULED = 60;
+  let scheduled = 0;
+
+  const upcomingFirst = [...subscriptions].sort((a, b) =>
+    (a.next_renewal ?? '').localeCompare(b.next_renewal ?? ''),
+  );
+
+  for (const sub of upcomingFirst) {
+    if (scheduled >= MAX_SCHEDULED) break;
     if (!sub.is_active || !sub.next_renewal) continue;
 
     // Fire at 9am local, N days before the renewal date.
@@ -131,6 +156,7 @@ export async function scheduleRenewalReminders(subscriptions: Subscription[]): P
     if (isNaN(renewal.getTime())) continue;
 
     for (const days of REMIND_DAYS) {
+      if (scheduled >= MAX_SCHEDULED) break;
       const fireAt = new Date(renewal);
       fireAt.setDate(fireAt.getDate() - days);
       if (fireAt.getTime() <= Date.now()) continue;
@@ -147,6 +173,7 @@ export async function scheduleRenewalReminders(subscriptions: Subscription[]): P
           date: fireAt,
         },
       });
+      scheduled += 1;
     }
   }
 }

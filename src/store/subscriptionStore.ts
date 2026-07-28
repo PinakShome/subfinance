@@ -11,6 +11,7 @@ interface SubscriptionState {
   categories: Category[];
   loading: boolean;
   error: string | null;
+  clear: () => void;
   fetchAll: () => Promise<void>;
   fetchCategories: () => Promise<void>;
   add: (data: SubscriptionInsert) => Promise<string | null>;
@@ -24,6 +25,9 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+
+  /** Wipe cached rows so one user's data never shows up under another. */
+  clear: () => set({ subscriptions: [], error: null, loading: false }),
 
   fetchCategories: async () => {
     const { data } = await supabase.from('categories').select('*').order('name');
