@@ -34,6 +34,20 @@ function toISODate(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+/**
+ * True only for a real calendar date in YYYY-MM-DD form. A format-only regex
+ * accepts impossible dates like 2026-13-45, so round-trip through Date and
+ * confirm the parts survive.
+ */
+export function isRealDate(iso: string): boolean {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso.trim());
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  if (mo < 1 || mo > 12 || d < 1) return false;
+  const dt = new Date(y, mo - 1, d);
+  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === d;
+}
+
 /** Add months, clamping to the end of the target month (Jan 31 + 1mo -> Feb 28). */
 function addMonthsClamped(date: Date, months: number): Date {
   const day = date.getDate();

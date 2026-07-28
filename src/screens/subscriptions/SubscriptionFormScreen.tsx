@@ -7,6 +7,7 @@ import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
+import { isRealDate } from '../../lib/subscriptionUtils';
 import { BillingCycle, SubscriptionInsert } from '../../types/database';
 import { HomeStackParamList } from '../../navigation/types';
 
@@ -51,8 +52,9 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
     if (!name.trim()) { showAlert('Name is required'); return; }
     const costNum = parseFloat(cost);
     if (isNaN(costNum) || costNum < 0) { showAlert('Enter a valid cost'); return; }
-    if (!nextRenewal.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      showAlert('Enter renewal date as YYYY-MM-DD'); return;
+    if (!isRealDate(nextRenewal)) {
+      showAlert('Enter a valid renewal date', 'Use the format YYYY-MM-DD, for example 2026-08-15.');
+      return;
     }
 
     const payload: SubscriptionInsert = {
