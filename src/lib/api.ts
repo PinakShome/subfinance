@@ -7,7 +7,6 @@ async function getHeaders(extra: Record<string, string> = {}): Promise<Record<st
   return {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${session?.access_token ?? ''}`,
-    'bypass-tunnel-reminder': 'true',   // localtunnel bypass
     ...extra,
   };
 }
@@ -31,15 +30,20 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     try {
       json = JSON.parse(text);
     } catch {
-      throw new Error(`Server returned non-JSON response. Make sure the server is running.\n\n${text.slice(0, 200)}`);
+      console.warn('[api] non-JSON response', resp.status, text.slice(0, 200));
+      throw new Error('Something went wrong on our end. Please try again in a moment.');
     }
 
-    if (!resp.ok) throw new Error(json?.error ?? `Server error ${resp.status}`);
+    if (!resp.ok) throw new Error(json?.error ?? 'Something went wrong. Please try again.');
     return json;
   } catch (e: any) {
     clearTimeout(timeout);
     if (e.name === 'AbortError') {
-      throw new Error('Request timed out. Check that the server is running and reachable.');
+      throw new Error('This is taking longer than usual. Check your connection and try again.');
+    }
+    if (e instanceof TypeError) {
+      // fetch() rejects with a TypeError when the network is unreachable.
+      throw new Error("Can't reach the server. Check your internet connection and try again.");
     }
     throw e;
   }

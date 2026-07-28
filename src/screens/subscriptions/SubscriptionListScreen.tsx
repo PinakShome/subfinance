@@ -125,7 +125,7 @@ function FilterChip({ label, active, onPress, filterType }: {
 }
 
 export default function SubscriptionListScreen({ navigation }: Props) {
-  const { subscriptions, loading, fetchAll } = useSubscriptionStore();
+  const { subscriptions, loading, error, fetchAll } = useSubscriptionStore();
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
 
@@ -227,13 +227,17 @@ export default function SubscriptionListScreen({ navigation }: Props) {
           !loading ? (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Ionicons name="receipt-outline" size={36} color="#8b5cf6" />
+                <Ionicons
+                  name={error ? 'cloud-offline-outline' : 'receipt-outline'}
+                  size={36}
+                  color={error ? '#ef4444' : '#8b5cf6'}
+                />
               </View>
               <Text style={styles.emptyTitle}>
-                {search ? 'No results found' : 'No subscriptions yet'}
+                {error ? "Couldn't load subscriptions" : search ? 'No results found' : 'No subscriptions yet'}
               </Text>
               <Text style={styles.emptySub}>
-                {search ? 'Try a different search term' : 'Tap + to add your first one'}
+                {error ? error : search ? 'Try a different search term' : 'Tap + to add your first one'}
               </Text>
             </View>
           ) : null

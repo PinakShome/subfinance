@@ -31,7 +31,7 @@ const allowedOrigins = [
   'https://subscription-tracker-pinak-shome-s-projects.vercel.app',
   'http://localhost:8081',
   'http://localhost:19006',
-  ...(process.env.CORS_ORIGINS?.split(',').map((s) => s.trim()).filter(Boolean) ?? []),
+  ...(process.env.CORS_ORIGINS?.split(',').map((s: string) => s.trim()).filter(Boolean) ?? []),
 ];
 app.use(cors({
   origin: (origin, cb) => {

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
+import { advanceRenewal } from '../lib/subscriptionUtils';
 import { Subscription, SubscriptionInsert, SubscriptionUpdate, Category, PriceHistoryEntry } from '../types/database';
 
 // Check if demo mode is enabled
@@ -9,6 +10,7 @@ interface SubscriptionState {
   subscriptions: Subscription[];
   categories: Category[];
   loading: boolean;
+  error: string | null;
   fetchAll: () => Promise<void>;
   fetchCategories: () => Promise<void>;
   add: (data: SubscriptionInsert) => Promise<string | null>;
@@ -21,6 +23,7 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   subscriptions: [],
   categories: [],
   loading: false,
+  error: null,
 
   fetchCategories: async () => {
     const { data } = await supabase.from('categories').select('*').order('name');
@@ -37,8 +40,34 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
       .select('*, category:categories(*)')
       .eq('is_active', true)
       .order('next_renewal', { ascending: true });
-    set({ loading: false });
-    if (!error && data) set({ subscriptions: data as Subscription[] });
+
+    if (error || !data) {
+      set({ loading: false, error: 'Could not load your subscriptions. Pull down to try again.' });
+      return;
+    }
+
+    // Roll any past-due renewal dates forward to the next billing period, so
+    // subscriptions don't sit permanently "overdue" and reminders keep firing.
+    const rolled = (data as Subscription[]).map((sub) => {
+      const next = advanceRenewal(sub.next_renewal, sub.billing_cycle, sub.interval_days);
+      return next === sub.next_renewal ? sub : { ...sub, next_renewal: next };
+    });
+
+    const changed = rolled.filter((sub, i) => sub.next_renewal !== (data as Subscription[])[i].next_renewal);
+    set({
+      subscriptions: rolled.sort((a, b) => a.next_renewal.localeCompare(b.next_renewal)),
+      loading: false,
+      error: null,
+    });
+
+    // Persist the advanced dates (best-effort; UI already reflects them).
+    if (changed.length) {
+      await Promise.all(
+        changed.map((sub) =>
+          supabase.from('subscriptions').update({ next_renewal: sub.next_renewal }).eq('id', sub.id),
+        ),
+      );
+    }
   },
 
   add: async (payload) => {
