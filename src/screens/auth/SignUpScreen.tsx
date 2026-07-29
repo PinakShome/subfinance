@@ -24,7 +24,14 @@ export default function SignUpScreen({ navigation }: Props) {
   const handleSignUp = async () => {
     if (!email || !password) return;
     if (password !== confirm) { showAlert('Passwords do not match'); return; }
-    if (password.length < 6) { showAlert('Password must be at least 6 characters'); return; }
+    if (password.length < 8) {
+      showAlert('Choose a stronger password', 'Use at least 8 characters.');
+      return;
+    }
+    if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
+      showAlert('Choose a stronger password', 'Include at least one letter and one number.');
+      return;
+    }
     setBusy(true);
     const err = await signUpWithEmail(email.trim(), password);
     setBusy(false);

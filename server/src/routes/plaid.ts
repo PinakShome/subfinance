@@ -33,7 +33,7 @@ router.post('/link-token', requireAuth, async (req, res) => {
     res.json({ link_token: response.data.link_token });
   } catch (err: any) {
     console.error('Link token error:', err.response?.data ?? err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: 'Could not start the bank connection. Please try again.' });
   }
 });
 
@@ -281,7 +281,8 @@ if ((process.env.PLAID_ENV?.trim() ?? 'sandbox') !== 'production') {
       });
       res.json({ public_token: response.data.public_token });
     } catch (err: any) {
-      res.status(500).json({ error: err.message });
+      console.error('[plaid] sandbox token error:', err.response?.data ?? err.message);
+      res.status(500).json({ error: 'Could not create a sandbox token.' });
     }
   });
 }

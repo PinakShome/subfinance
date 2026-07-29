@@ -14,6 +14,7 @@ if (process.env.SENTRY_DSN) {
 
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cron from 'node-cron';
 import plaidRouter from './routes/plaid';
@@ -33,6 +34,8 @@ const allowedOrigins = [
   'http://localhost:19006',
   ...(process.env.CORS_ORIGINS?.split(',').map((s: string) => s.trim()).filter(Boolean) ?? []),
 ];
+// Baseline security headers (HSTS, nosniff, frameguard, referrer policy, …).
+app.use(helmet());
 app.use(cors({
   origin: (origin, cb) => {
     // Allow (no header withheld) for our origins or non-browser callers.
@@ -69,7 +72,11 @@ const aiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 app.use('/api/plaid', plaidRouter);
-app.use('/api/gmail', gmailRouter);
+// Gmail import is not shipped yet. Only expose its routes (which include an
+// unauthenticated OAuth callback) once Google credentials are configured.
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+  app.use('/api/gmail', gmailRouter);
+}
 app.use('/api/alternatives', aiLimiter, alternativesRouter);
 app.use('/api/account', accountRouter);
 

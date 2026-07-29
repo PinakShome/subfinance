@@ -23,6 +23,14 @@ type Props = {
   route: RouteProp<HomeStackParamList, 'Alternatives'>;
 };
 
+/**
+ * Alternatives come from an LLM, so treat every URL as untrusted: only open
+ * plain https:// links (never javascript:, data:, or app deep-link schemes).
+ */
+function isSafeWebUrl(url?: string | null): boolean {
+  return typeof url === 'string' && /^https:\/\/[^\s]+$/i.test(url.trim());
+}
+
 export default function AlternativesScreen({ route }: Props) {
   const { id, name } = route.params;
   const { subscriptions } = useSubscriptionStore();
@@ -92,7 +100,7 @@ export default function AlternativesScreen({ route }: Props) {
               </Text>
             </View>
             <Text style={styles.altDesc}>{item.description}</Text>
-            {item.website ? (
+            {isSafeWebUrl(item.website) ? (
               <TouchableOpacity
                 style={styles.websiteBtn}
                 onPress={() => Linking.openURL(item.website)}
