@@ -36,3 +36,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     detectSessionInUrl: false,
   },
 });
+
+// On native, Supabase's refresh timer does not survive backgrounding: without
+// this the access token can silently expire while the app is away, so requests
+// start failing and the user appears randomly signed out.
+if (!isWeb) {
+  const { AppState } = require('react-native');
+  AppState.addEventListener('change', (state: string) => {
+    if (state === 'active') supabase.auth.startAutoRefresh();
+    else supabase.auth.stopAutoRefresh();
+  });
+}

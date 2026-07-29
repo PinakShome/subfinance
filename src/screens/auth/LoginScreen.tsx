@@ -117,7 +117,12 @@ export default function LoginScreen({ navigation }: Props) {
               value={password}
               onChangeText={setPassword}
             />
-            <TouchableOpacity onPress={() => setShowPass(!showPass)} style={{ padding: 4 }}>
+            <TouchableOpacity
+              onPress={() => setShowPass(!showPass)}
+              style={{ padding: 12, margin: -8 }}
+              accessibilityRole="button"
+              accessibilityLabel={showPass ? 'Hide password' : 'Show password'}
+            >
               <Ionicons name={showPass ? 'eye-off-outline' : 'eye-outline'} size={16} color="#8a8698" />
             </TouchableOpacity>
           </View>
@@ -137,6 +142,9 @@ export default function LoginScreen({ navigation }: Props) {
           onPress={handleLogin}
           disabled={busy}
           activeOpacity={0.85}
+          accessibilityRole="button"
+          accessibilityLabel="Sign in"
+          accessibilityState={{ disabled: busy, busy }}
         >
           <View style={styles.signInBtnInner}>
             {busy ? (

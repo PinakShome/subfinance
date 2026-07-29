@@ -63,6 +63,9 @@ function SubscriptionCard({ item, onPress }: { item: Subscription; onPress: () =
       style={[styles.card, { backgroundColor: color + '12', borderColor: color + '35' }]}
       onPress={onPress}
       activeOpacity={0.75}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.name}, ${formatCurrency(monthly, item.currency)} per month, ${badge.label}`}
+      accessibilityHint="Opens subscription details"
     >
       {/* Coloured initials circle */}
       <View style={[styles.cardAvatar, { backgroundColor: color + '25', borderColor: color + '50' }]}>
@@ -73,7 +76,7 @@ function SubscriptionCard({ item, onPress }: { item: Subscription; onPress: () =
         <View style={styles.cardRow1}>
           <Text style={styles.cardName} numberOfLines={1}>{item.name}</Text>
           <Text style={[styles.cardCost, { color }]}>
-            {formatCurrency(monthly)}<Text style={styles.cardCostUnit}>/mo</Text>
+            {formatCurrency(monthly, item.currency)}<Text style={styles.cardCostUnit}>/mo</Text>
           </Text>
         </View>
         <View style={styles.cardRow2}>
@@ -246,6 +249,8 @@ export default function SubscriptionListScreen({ navigation }: Props) {
 
       {/* ─── FAB ─── */}
       <TouchableOpacity
+        accessibilityRole="button"
+        accessibilityLabel="Add subscription"
         style={styles.fab}
         onPress={() => navigation.navigate('AddSubscription')}
         activeOpacity={0.85}

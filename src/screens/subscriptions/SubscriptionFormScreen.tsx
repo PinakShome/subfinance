@@ -51,18 +51,39 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   const handleSave = async () => {
     if (!name.trim()) { showAlert('Name is required'); return; }
     const costNum = parseFloat(cost);
-    if (isNaN(costNum) || costNum < 0) { showAlert('Enter a valid cost'); return; }
+    // Upper bound matches the DB column (numeric(10,2)); without it the insert
+    // fails with a raw database error.
+    if (isNaN(costNum) || costNum < 0 || costNum > 99999999.99) {
+      showAlert('Enter a valid cost', 'Use an amount between 0 and 99,999,999.99.');
+      return;
+    }
+    if (!/^[A-Za-z]{3}$/.test(currency.trim())) {
+      showAlert('Enter a valid currency', 'Use a 3-letter code such as USD, EUR or GBP.');
+      return;
+    }
+    let interval: number | null = null;
+    if (cycle === 'custom') {
+      interval = parseInt(intervalDays, 10);
+      if (!Number.isFinite(interval) || interval < 1 || interval > 3650) {
+        showAlert('Enter a valid interval', 'Use a number of days between 1 and 3650.');
+        return;
+      }
+    }
     if (!isRealDate(nextRenewal)) {
       showAlert('Enter a valid renewal date', 'Use the format YYYY-MM-DD, for example 2026-08-15.');
       return;
     }
+    if (isTrial && trialEndsOn && !isRealDate(trialEndsOn)) {
+      showAlert('Enter a valid trial end date', 'Use the format YYYY-MM-DD, for example 2026-08-15.');
+      return;
+    }
 
     const payload: SubscriptionInsert = {
-      name: name.trim(),
+      name: name.trim().slice(0, 100),
       cost: costNum,
-      currency,
+      currency: currency.trim().toUpperCase(),
       billing_cycle: cycle,
-      interval_days: cycle === 'custom' ? parseInt(intervalDays) || null : null,
+      interval_days: interval,
       next_renewal: nextRenewal,
       category_id: categoryId || null,
       notes: notes.trim() || null,
@@ -83,7 +104,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>Name</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" />
+      <TextInput style={styles.input} value={name} onChangeText={setName} maxLength={100} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" />
 
       <Text style={styles.sectionLabel}>Cost</Text>
       <View style={styles.row}>
@@ -162,6 +183,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
         style={[styles.input, { height: 80 }]}
         value={notes}
         onChangeText={setNotes}
+        maxLength={500}
         multiline
         placeholder="Any extra info…"
         placeholderTextColor="#8a8698"

@@ -1,12 +1,19 @@
 import { Subscription, BillingCycle } from '../types/database';
 
 export function monthlyEquivalent(cost: number, cycle: BillingCycle, intervalDays?: number | null): number {
+  const amount = Number.isFinite(cost) && cost > 0 ? cost : 0;
   switch (cycle) {
-    case 'monthly':   return cost;
-    case 'quarterly': return cost / 3;
-    case 'annual':    return cost / 12;
-    case 'custom':    return intervalDays ? cost / (intervalDays / 30.44) : cost;
-    default:          return cost;
+    case 'monthly':   return amount;
+    case 'quarterly': return amount / 3;
+    case 'annual':    return amount / 12;
+    // Guard the interval: a zero/negative/absurd value would otherwise produce
+    // negative or wildly inflated "monthly" spend and corrupt every total.
+    case 'custom': {
+      const days = intervalDays ?? 0;
+      if (!Number.isFinite(days) || days < 1) return amount;
+      return amount / (days / 30.44);
+    }
+    default:          return amount;
   }
 }
 
@@ -106,10 +113,23 @@ export function totalMonthlySpend(subscriptions: Subscription[]): number {
     .reduce((sum, s) => sum + monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), 0);
 }
 
+/**
+ * Format money for display. `currency` originates from user input, and
+ * Intl.NumberFormat throws a RangeError on anything that isn't a valid ISO
+ * 4217 code — which would take down the whole screen — so fall back instead.
+ */
 export function formatCurrency(amount: number, currency = 'USD'): string {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  const safeAmount = Number.isFinite(amount) ? amount : 0;
+  const code = (currency ?? 'USD').toUpperCase();
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(safeAmount);
+  } catch {
+    return `${/^[A-Z]{3}$/.test(code) ? code : 'USD'} ${safeAmount.toFixed(2)}`;
+  }
 }
 
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '—';
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }

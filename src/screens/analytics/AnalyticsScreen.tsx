@@ -164,7 +164,7 @@ export default function AnalyticsScreen() {
             <Text style={styles.hlLabel}>Most expensive</Text>
             <Text style={styles.hlName}>{mostExpensive.name}</Text>
             <Text style={[styles.hlAmt, { color: '#f43f5e' }]}>
-              {formatCurrency(monthlyEquivalent(mostExpensive.cost, mostExpensive.billing_cycle, mostExpensive.interval_days))}/mo
+              {formatCurrency(monthlyEquivalent(mostExpensive.cost, mostExpensive.billing_cycle, mostExpensive.interval_days), mostExpensive.currency)}/mo
             </Text>
           </View>
           {cheapest && cheapest.id !== mostExpensive.id && (
@@ -173,7 +173,7 @@ export default function AnalyticsScreen() {
               <Text style={[styles.hlLabel, styles.hlLabelGreen]}>Cheapest</Text>
               <Text style={styles.hlName}>{cheapest.name}</Text>
               <Text style={[styles.hlAmt, { color: '#10b981' }]}>
-                {formatCurrency(monthlyEquivalent(cheapest.cost, cheapest.billing_cycle, cheapest.interval_days))}/mo
+                {formatCurrency(monthlyEquivalent(cheapest.cost, cheapest.billing_cycle, cheapest.interval_days), cheapest.currency)}/mo
               </Text>
             </View>
           )}

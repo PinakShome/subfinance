@@ -75,7 +75,7 @@ We share limited information with trusted third parties:
 ## 7. Your Rights and Choices
 
 You have the right to:
-- **Access:** Request a copy of your personal data
+- **Access / Export:** Export your subscriptions as CSV any time from Settings → Export My Data, or request a copy of your personal data
 - **Correct:** Update or correct inaccurate information
 - **Delete:** Request deletion of your account and data
 - **Opt-out:** Disable analytics, crash reporting, or email notifications
