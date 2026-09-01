@@ -17,8 +17,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import cron from 'node-cron';
-import plaidRouter from './routes/plaid';
-import gmailRouter from './routes/gmail';
 import alternativesRouter from './routes/alternatives';
 import accountRouter from './routes/account';
 import { sendTrialExpiryNotifications } from './cron/trialNotifications';
@@ -71,52 +69,10 @@ const aiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
-app.use('/api/plaid', plaidRouter);
-// Gmail import is not shipped yet. Only expose its routes (which include an
-// unauthenticated OAuth callback) once Google credentials are configured.
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-  app.use('/api/gmail', gmailRouter);
-}
 app.use('/api/alternatives', aiLimiter, alternativesRouter);
 app.use('/api/account', accountRouter);
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
-
-// Serve Plaid Link as a real HTML page (avoids WebView CSP issues)
-app.get('/plaid/link', (req, res) => {
-  const token = req.query.token as string;
-  if (!token) { res.status(400).send('Missing token'); return; }
-  res.setHeader('Content-Type', 'text/html');
-  res.send(`<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { margin: 0; background: #0f172a; display: flex; align-items: center; justify-content: center; height: 100vh; }
-    p { color: #94a3b8; font-family: sans-serif; }
-  </style>
-</head>
-<body>
-  <p>Opening bank connection...</p>
-  <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
-  <script>
-    const handler = Plaid.create({
-      token: '${token}',
-      onSuccess: function(public_token, metadata) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'success', public_token: public_token }));
-      },
-      onExit: function(err, metadata) {
-        window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'exit' }));
-      },
-      onLoad: function() {
-        handler.open();
-      },
-    });
-    handler.open();
-  </script>
-</body>
-</html>`);
-});
 
 // Sentry error handler — must come after routes, before other error middleware.
 if (process.env.SENTRY_DSN) {

@@ -9,7 +9,6 @@ import SubscriptionFormScreen from '../screens/subscriptions/SubscriptionFormScr
 import AlternativesScreen from '../screens/subscriptions/AlternativesScreen';
 import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import BankImportScreen from '../screens/import/BankImportScreen';
 
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
@@ -37,7 +36,6 @@ function SettingsStackNavigator() {
   return (
     <SettingsStack.Navigator screenOptions={NAV_OPTS}>
       <SettingsStack.Screen name="SettingsHome" component={SettingsScreen} options={{ title: 'Settings' }} />
-      <SettingsStack.Screen name="BankImport" component={BankImportScreen} options={{ title: 'Import from Bank' }} />
     </SettingsStack.Navigator>
   );
 }

@@ -9,8 +9,6 @@ A premium subscription tracker built with React Native (Expo) for **iOS**, plus 
 - **App:** React Native + Expo 54 (iOS)
 - **Backend:** Node + Express (`server/`)
 - **Auth & DB:** Supabase (Postgres + RLS)
-- **Bank import:** Plaid (Transactions)
-- **AI suggestions:** Anthropic API
 - **Error monitoring:** Sentry (backend)
 - **Builds:** EAS · **API hosting:** Railway
 - **Static pages:** Vercel serves the privacy policy + password-reset page (`public/`)
@@ -20,7 +18,7 @@ A premium subscription tracker built with React Native (Expo) for **iOS**, plus 
 ```
 .            Expo iOS app (App.tsx, src/, app.json, eas.json)
 public/      Static web pages: privacy-policy.html, reset-password.html
-server/      Express API (Plaid, Gmail, AI alternatives, cron)
+server/      Express API (account deletion, trial-reminder cron)
 supabase/    SQL migrations (schema + RLS policies)
 ```
 
@@ -42,7 +40,7 @@ npm run dev            # http://localhost:3001
 
 - App config lives in `eas.json` build profiles (`EXPO_PUBLIC_*`) and `.env` for local Metro.
 - API config: copy `server/.env.example` → `server/.env` (Supabase service role,
-  Plaid, Anthropic, optional Sentry DSN, optional CORS origins).
+  Anthropic, optional Sentry DSN, optional CORS origins).
 
 `.env` files are gitignored — never commit secrets.
 

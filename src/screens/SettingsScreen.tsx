@@ -198,27 +198,6 @@ export default function SettingsScreen({ navigation }: Props) {
         </View>
       </View>
 
-      {/* ─── Import Section ─── */}
-      <SectionHeader title="IMPORT" />
-      <View style={styles.section}>
-        <SettingsRow
-          icon="business-outline"
-          label="Import from Bank"
-          description="Auto-detect subscriptions from your bank via Plaid"
-          color="#6366f1"
-          badge="Soon"
-          onPress={() => showAlert('Coming soon', 'Bank import is being polished and will be fully available shortly.')}
-        />
-        <SettingsRow
-          icon="mail-outline"
-          label="Import from Email"
-          description="Find subscriptions from receipts in your inbox"
-          color="#06b6d4"
-          badge="Soon"
-          onPress={() => showAlert('Coming soon', 'Email import is being polished and will be fully available shortly.')}
-        />
-      </View>
-
       {/* ─── Preferences Section ─── */}
       <SectionHeader title="PREFERENCES" />
       <View style={styles.section}>

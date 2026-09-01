@@ -19,20 +19,6 @@ Please read this Privacy Policy carefully. If you do not agree with our policies
 - **Usage Data:** Features used, time spent in app, navigation patterns
 - **Crash Reports:** Error logs and diagnostic information (via Sentry)
 
-### 2.3 Bank Connection Data (via Plaid)
-When you connect your bank account through Plaid:
-- We receive read-only access to transaction data
-- **We do not store your bank password**
-- Plaid is a third-party service; their privacy policy applies to how they handle your data
-- You can disconnect your bank at any time in Settings
-
-### 2.4 Email Integration (via Gmail)
-When you connect Gmail to scan subscription receipts:
-- We access your email subject lines and sender addresses only
-- **We do not read email body content**
-- We do not store your email password
-- This is handled by Google's OAuth service
-
 ## 3. How We Use Your Information
 
 We use the collected information for:
@@ -50,9 +36,6 @@ We share limited information with trusted third parties:
 | Service | Purpose | Data Shared |
 |---------|---------|------------|
 | Supabase | Database & authentication | Email, encrypted password, subscription data |
-| Plaid | Bank data connection | Bank connection token (no credentials) |
-| Google OAuth | Gmail integration | Email authorization only |
-| Anthropic | AI alternative recommendations | Subscription names and costs |
 | Sentry | Error tracking | Crash logs, app diagnostics |
 
 **We do NOT sell or rent your personal information to third parties.**
@@ -62,7 +45,6 @@ We share limited information with trusted third parties:
 - All data is transmitted over encrypted HTTPS connections
 - Passwords are securely hashed using industry-standard algorithms
 - Sensitive data at rest is encrypted
-- Bank connection is handled only through Plaid's secure OAuth
 - Access to data is restricted to authorized personnel only
 
 ## 6. Data Retention

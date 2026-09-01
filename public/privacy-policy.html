@@ -92,24 +92,6 @@
             <li><strong>Crash Reports:</strong> Error logs and diagnostic information (via Sentry)</li>
         </ul>
 
-        <h3>2.3 Bank Connection Data (via Plaid)</h3>
-        <p>When you connect your bank account through Plaid:</p>
-        <ul>
-            <li>We receive read-only access to transaction data</li>
-            <li><strong>We do not store your bank password</strong></li>
-            <li>Plaid is a third-party service; their privacy policy applies to how they handle your data</li>
-            <li>You can disconnect your bank at any time in Settings</li>
-        </ul>
-
-        <h3>2.4 Email Integration (via Gmail)</h3>
-        <p>When you connect Gmail to scan subscription receipts:</p>
-        <ul>
-            <li>We access your email subject lines and sender addresses only</li>
-            <li><strong>We do not read email body content</strong></li>
-            <li>We do not store your email password</li>
-            <li>This is handled by Google's OAuth service</li>
-        </ul>
-
         <h2>3. How We Use Your Information</h2>
         <p>We use the collected information for:</p>
         <ul>
@@ -135,21 +117,6 @@
                 <td>Email, encrypted password, subscription data</td>
             </tr>
             <tr>
-                <td>Plaid</td>
-                <td>Bank data connection</td>
-                <td>Bank connection token (no credentials)</td>
-            </tr>
-            <tr>
-                <td>Google OAuth</td>
-                <td>Gmail integration</td>
-                <td>Email authorization only</td>
-            </tr>
-            <tr>
-                <td>Anthropic</td>
-                <td>AI alternative recommendations</td>
-                <td>Subscription names and costs</td>
-            </tr>
-            <tr>
                 <td>Sentry</td>
                 <td>Error tracking</td>
                 <td>Crash logs, app diagnostics</td>
@@ -162,7 +129,6 @@
             <li>All data is transmitted over encrypted HTTPS connections</li>
             <li>Passwords are securely hashed using industry-standard algorithms</li>
             <li>Sensitive data at rest is encrypted</li>
-            <li>Bank connection is handled only through Plaid's secure OAuth</li>
             <li>Access to data is restricted to authorized personnel only</li>
         </ul>
 

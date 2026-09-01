@@ -20,5 +20,4 @@ export type HomeStackParamList = {
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
-  BankImport: undefined;
 };
