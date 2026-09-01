@@ -20,4 +20,5 @@ export type HomeStackParamList = {
 
 export type SettingsStackParamList = {
   SettingsHome: undefined;
+  DefaultCurrency: undefined;
 };

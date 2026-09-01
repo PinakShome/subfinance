@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Share } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Share, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
 import { totalMonthlySpend } from '../lib/subscriptionUtils';
 import { getNotificationsEnabled, setNotificationsEnabled } from '../lib/notifications';
+import { getDefaultCurrency } from '../lib/prefs';
 import { apiFetch } from '../lib/api';
 import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
+
+const PRIVACY_POLICY_URL = 'https://subscription-tracker-gilt.vercel.app/privacy-policy.html';
+const SUPPORT_EMAIL = 'support@subfinance.app';
 
 type Props = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'SettingsHome'>;
@@ -92,10 +96,30 @@ export default function SettingsScreen({ navigation }: Props) {
 
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [notifBusy, setNotifBusy] = useState(false);
+  const [defaultCurrency, setDefaultCurrencyState] = useState('USD');
 
   useEffect(() => {
     getNotificationsEnabled().then(setNotifEnabled).catch(() => {});
   }, [user?.id]);
+
+  // Refresh the currency badge each time this screen regains focus (e.g. after
+  // returning from the currency picker).
+  useEffect(() => {
+    const unsub = navigation.addListener('focus', () => {
+      getDefaultCurrency().then(setDefaultCurrencyState).catch(() => {});
+    });
+    return unsub;
+  }, [navigation]);
+
+  const openURL = async (url: string, failMsg: string) => {
+    try {
+      const ok = await Linking.canOpenURL(url);
+      if (!ok) throw new Error('cannot open');
+      await Linking.openURL(url);
+    } catch {
+      showAlert('Unavailable', failMsg);
+    }
+  };
 
   const handleToggleNotifications = async (next: boolean) => {
     setNotifBusy(true);
@@ -215,15 +239,8 @@ export default function SettingsScreen({ navigation }: Props) {
           label="Default Currency"
           description="Used for new subscriptions"
           color="#10b981"
-          badge="USD"
-          onPress={() => showAlert('Currency', 'Currency settings coming soon.')}
-        />
-        <SettingsRow
-          icon="sunny-outline"
-          label="Appearance"
-          description="Light"
-          color="#6a6782"
-          onPress={() => showAlert('Appearance', 'More themes coming soon.')}
+          badge={defaultCurrency}
+          onPress={() => navigation.navigate('DefaultCurrency')}
         />
       </View>
 
@@ -232,17 +249,17 @@ export default function SettingsScreen({ navigation }: Props) {
       <View style={styles.section}>
         <SettingsRow
           icon="shield-checkmark-outline"
-          label="Privacy & Security"
-          description="Manage your data and permissions"
+          label="Privacy Policy"
+          description="How we handle and protect your data"
           color="#06b6d4"
-          onPress={() => showAlert('Privacy', 'Your data is encrypted and never sold.')}
+          onPress={() => openURL(PRIVACY_POLICY_URL, 'Could not open the privacy policy. Please try again.')}
         />
         <SettingsRow
           icon="help-circle-outline"
           label="Help & Support"
-          description="FAQs, contact and feedback"
+          description={`Email us at ${SUPPORT_EMAIL}`}
           color="#6a6782"
-          onPress={() => showAlert('Support', 'Contact support@subtracker.app')}
+          onPress={() => openURL(`mailto:${SUPPORT_EMAIL}?subject=SubFinance%20Support`, `Email us at ${SUPPORT_EMAIL}`)}
         />
         <SettingsRow
           icon="log-out-outline"

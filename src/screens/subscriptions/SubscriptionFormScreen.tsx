@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { isRealDate } from '../../lib/subscriptionUtils';
+import { getDefaultCurrency } from '../../lib/prefs';
 import { BillingCycle, SubscriptionInsert } from '../../types/database';
 import { HomeStackParamList } from '../../navigation/types';
 
@@ -47,6 +48,11 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   const [busy, setBusy] = useState(false);
 
   useEffect(() => { fetchCategories(); }, []);
+
+  // For new subscriptions, pre-fill the user's chosen default currency.
+  useEffect(() => {
+    if (!existing) getDefaultCurrency().then(setCurrency).catch(() => {});
+  }, [existing]);
 
   const handleSave = async () => {
     if (!name.trim()) { showAlert('Name is required'); return; }
