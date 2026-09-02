@@ -1,0 +1,82 @@
+{
+  "_README": "HUMAN-VERIFIED GROUND TRUTH. These prices/alternatives are a STARTER set and WILL go stale — verify and maintain them yourself; that is what makes this eval meaningful. current_price = a typical current monthly price; expected_alternatives = well-known cheaper/free options a careful human would list. Run: npm run eval:alternatives (from server/).",
+  "services": [
+    {
+      "name": "Netflix", "category": "Streaming", "current_price": 15.49,
+      "expected_alternatives": [
+        { "name": "Hulu", "approx_price": 9.99 },
+        { "name": "Peacock", "approx_price": 7.99 },
+        { "name": "Paramount+", "approx_price": 7.99 }
+      ]
+    },
+    {
+      "name": "Spotify", "category": "Music", "current_price": 11.99,
+      "expected_alternatives": [
+        { "name": "YouTube Music", "approx_price": 10.99 },
+        { "name": "Amazon Music", "approx_price": 9.99 },
+        { "name": "Deezer", "approx_price": 11.99 }
+      ]
+    },
+    {
+      "name": "Adobe Creative Cloud", "category": "Software", "current_price": 59.99,
+      "expected_alternatives": [
+        { "name": "Affinity", "approx_price": 0 },
+        { "name": "Canva", "approx_price": 12.99 },
+        { "name": "Photopea", "approx_price": 0 },
+        { "name": "GIMP", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "ChatGPT Plus", "category": "Software", "current_price": 20,
+      "expected_alternatives": [
+        { "name": "Google Gemini", "approx_price": 0 },
+        { "name": "Claude", "approx_price": 0 },
+        { "name": "Perplexity", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "Notion", "category": "Software", "current_price": 10,
+      "expected_alternatives": [
+        { "name": "Obsidian", "approx_price": 0 },
+        { "name": "Google Keep", "approx_price": 0 },
+        { "name": "Trello", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "Dropbox", "category": "Cloud", "current_price": 11.99,
+      "expected_alternatives": [
+        { "name": "Google Drive", "approx_price": 1.99 },
+        { "name": "iCloud", "approx_price": 0.99 },
+        { "name": "MEGA", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "Microsoft 365", "category": "Software", "current_price": 6.99,
+      "expected_alternatives": [
+        { "name": "Google Workspace", "approx_price": 0 },
+        { "name": "LibreOffice", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "Audible", "category": "News", "current_price": 14.95,
+      "expected_alternatives": [
+        { "name": "Libby", "approx_price": 0 },
+        { "name": "Everand", "approx_price": 11.99 }
+      ]
+    },
+    {
+      "name": "Grammarly", "category": "Software", "current_price": 12,
+      "expected_alternatives": [
+        { "name": "LanguageTool", "approx_price": 4.99 },
+        { "name": "Hemingway", "approx_price": 0 }
+      ]
+    },
+    {
+      "name": "Peloton", "category": "Fitness", "current_price": 12.99,
+      "expected_alternatives": [
+        { "name": "Nike Training Club", "approx_price": 0 },
+        { "name": "Apple Fitness", "approx_price": 9.99 }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { RouteProp } from '@react-navigation/native';
 import { HomeStackParamList } from '../../navigation/types';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
+import { useAuthStore } from '../../store/authStore';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency, monthlyEquivalent } from '../../lib/subscriptionUtils';
 
@@ -37,9 +38,23 @@ export default function AlternativesScreen({ route }: Props) {
   const sub = subscriptions.find((s) => s.id === id);
   const currentMonthly = sub ? monthlyEquivalent(sub.cost, sub.billing_cycle, sub.interval_days) : undefined;
 
+  const userId = useAuthStore((s) => s.session?.user?.id);
   const [alternatives, setAlternatives] = useState<Alternative[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, 'up' | 'down'>>({});
+
+  const sendFeedback = async (altName: string, helpful: boolean) => {
+    setFeedback((prev) => ({ ...prev, [altName]: helpful ? 'up' : 'down' })); // optimistic
+    if (!userId) return;
+    try {
+      await supabase.from('alternative_feedback').insert({
+        user_id: userId, service_name: name, alternative_name: altName, helpful,
+      });
+    } catch {
+      /* non-fatal: the UI already thanked the user */
+    }
+  };
 
   useEffect(() => { fetchAlternatives(); }, []);
 
@@ -145,17 +160,43 @@ export default function AlternativesScreen({ route }: Props) {
                   </View>
                 )}
                 <Text style={styles.altDesc}>{item.description}</Text>
-                {isSafeWebUrl(item.website) ? (
-                  <TouchableOpacity
-                    style={styles.websiteBtn}
-                    onPress={() => Linking.openURL(item.website!)}
-                    accessibilityRole="button"
-                    accessibilityLabel={`Visit ${item.name} website`}
-                  >
-                    <Ionicons name="open-outline" size={14} color="#8b5cf6" />
-                    <Text style={styles.websiteBtnText}>Visit website</Text>
-                  </TouchableOpacity>
-                ) : null}
+                <View style={styles.cardFooter}>
+                  {isSafeWebUrl(item.website) ? (
+                    <TouchableOpacity
+                      style={styles.websiteBtn}
+                      onPress={() => Linking.openURL(item.website!)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Visit ${item.name} website`}
+                    >
+                      <Ionicons name="open-outline" size={14} color="#8b5cf6" />
+                      <Text style={styles.websiteBtnText}>Visit website</Text>
+                    </TouchableOpacity>
+                  ) : <View />}
+
+                  {feedback[item.name] ? (
+                    <Text style={styles.thanks}>Thanks!</Text>
+                  ) : (
+                    <View style={styles.fbRow}>
+                      <Text style={styles.fbLabel}>Helpful?</Text>
+                      <TouchableOpacity
+                        onPress={() => sendFeedback(item.name, true)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Mark ${item.name} helpful`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons name="thumbs-up-outline" size={18} color="#10b981" />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => sendFeedback(item.name, false)}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Mark ${item.name} not helpful`}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                      >
+                        <Ionicons name="thumbs-down-outline" size={18} color="#a5a1b8" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </View>
             );
           }}
@@ -193,8 +234,15 @@ const styles = StyleSheet.create({
   },
   savingText: { color: '#10b981', fontSize: 12, fontWeight: '700' },
   altDesc: { color: '#6a6782', fontSize: 13, lineHeight: 20, marginTop: 8 },
-  websiteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 12 },
+  cardFooter: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    marginTop: 12, minHeight: 22,
+  },
+  websiteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   websiteBtnText: { color: '#8b5cf6', fontSize: 13, fontWeight: '600' },
+  fbRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+  fbLabel: { color: '#a5a1b8', fontSize: 12 },
+  thanks: { color: '#10b981', fontSize: 12, fontWeight: '600' },
 
   disclaimer: { color: '#a5a1b8', fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 8, paddingHorizontal: 12 },
 });
