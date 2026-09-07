@@ -20,6 +20,7 @@ import cron from 'node-cron';
 import alternativesRouter from './routes/alternatives';
 import accountRouter from './routes/account';
 import { sendTrialExpiryNotifications } from './cron/trialNotifications';
+import { runRefinementCycle } from './lib/refine';
 
 const app = express();
 
@@ -85,6 +86,14 @@ cron.schedule('0 9 * * *', () => {
     Sentry.captureException(err);
     console.error(err);
   });
+});
+
+// Nightly alternatives flywheel: re-rank from feedback + owner overrides (free),
+// then a capped, grounded regen of stale/thin entries. Runs at 3am.
+cron.schedule('0 3 * * *', () => {
+  runRefinementCycle()
+    .then((r) => console.log('[refine] reranked', r.reranked, 'regenerated', r.regenerated))
+    .catch((err) => { Sentry.captureException(err); console.error(err); });
 });
 
 const PORT = process.env.PORT ?? 3001;

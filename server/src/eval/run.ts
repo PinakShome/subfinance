@@ -9,7 +9,7 @@
 import 'dotenv/config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { generateAlternatives } from '../routes/alternatives';
+import { generateAlternatives } from '../lib/alternatives-gen';
 
 interface Expected { name: string; approx_price: number; }
 interface GoldenEntry { name: string; category: string; current_price: number; expected_alternatives: Expected[]; }

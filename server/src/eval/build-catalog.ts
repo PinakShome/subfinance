@@ -1,7 +1,7 @@
 /**
  * Build the alternatives catalog WITHOUT manual research.
  *
- * The "catalog" is just the alternatives_cache table pre-filled with
+ * The "catalog" is just the alternatives_catalogue table pre-filled with
  * high-quality, judged results for the services people actually track. Sources,
  * in priority order:
  *   1. Real usage — the most common subscription names in your own DB.
@@ -16,6 +16,7 @@
 import 'dotenv/config';
 import { supabase } from '../lib/supabase';
 import { generateJudgedAlternatives } from '../lib/judge';
+import { normalizeKey, reresolve } from '../lib/catalogue';
 
 interface Svc { name: string; category: string; cost: number | null; source: string; }
 
@@ -75,11 +76,15 @@ async function main() {
   for (const svc of services) {
     try {
       const { alts, score, rounds } = await generateJudgedAlternatives(svc.name, svc.category, svc.cost);
-      const cacheKey = `${svc.name.toLowerCase()}|${svc.category.toLowerCase()}`;
-      await supabase.from('alternatives_cache').upsert(
-        { cache_key: cacheKey, payload: alts, refreshed_at: new Date().toISOString() },
-        { onConflict: 'cache_key' },
-      );
+      const key = normalizeKey(svc.name, svc.category);
+      await supabase.from('alternatives_catalogue').upsert({
+        service_key: key, service_name: svc.name, category: svc.category,
+        raw_payload: alts, payload: alts, quality_score: score,
+        refreshed_at: new Date().toISOString(), resolved_at: new Date().toISOString(),
+        status: alts.length < 2 ? 'needs_review' : 'active',
+      }, { onConflict: 'service_key' });
+      // Bake in any existing feedback/owner overrides for this service.
+      await reresolve(key, svc.name, alts);
       score >= 80 ? ok++ : weak++;
       console.log(`${svc.name.padEnd(24)} score ${String(score).padStart(3)}  alts ${alts.length}  rounds ${rounds}  [${svc.source}] cached`);
     } catch (e: any) {
