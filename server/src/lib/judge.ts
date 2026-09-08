@@ -54,7 +54,7 @@ export async function judgeAlternatives(
   const system = `You are a strict QA reviewer for a subscription app's "cheaper alternatives" feature. Use web search to verify each suggested alternative on five criteria: (1) it is a real, currently-available service; (2) it serves the SAME core purpose as the original; (3) it is genuinely cheaper than what the user pays (free counts); (4) the quoted price is within ~20% of its current official price; (5) the URL is its real homepage. Respond with ONLY JSON (no prose, no code fences): {"score": <0-100 overall quality of the list>, "issues": [<short problem descriptions>], "drop": [<exact names of alternatives that fail a criterion and should be removed>]}.`;
   const user = `Original service: ${service}${category ? ` (${category})` : ''}. ${costNote}\n\nSuggested alternatives:\n${list}\n\nReview them and return the JSON verdict.`;
 
-  const text = await groundedText(system, user, 3);
+  const text = await groundedText(system, user, 2);
   try {
     const m = text.match(/\{[\s\S]*\}/);
     if (m) {

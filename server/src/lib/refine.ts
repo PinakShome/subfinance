@@ -1,10 +1,9 @@
 import { supabase } from './supabase';
-import { Alt } from './alternatives-gen';
+import { Alt, generateAlternatives } from './alternatives-gen';
 import { getGlobalBlocklist, reresolve } from './catalogue';
-import { generateJudgedAlternatives } from './judge';
 
 // Hard cap on grounded regenerations per cycle — bounds API cost predictably.
-const MAX_REGEN = Number(process.env.CATALOGUE_MAX_REGEN ?? 15);
+const MAX_REGEN = Number(process.env.CATALOGUE_MAX_REGEN ?? 5);
 const DAY = 86_400_000;
 
 /** Confident entries refresh rarely; shaky ones more often. */
@@ -20,8 +19,10 @@ function adaptiveTtlMs(score: number | null): number {
  *        global blocklist — this is where "refine per cycle from feedback"
  *        happens, for free.
  *   C.   Only for entries that are stale (adaptive TTL), thin, or flagged
- *        needs_review, run the grounded generate→judge→refine loop — capped
- *        and demand-prioritized so cost stays bounded.
+ *        needs_review, run a single grounded regeneration — capped and
+ *        demand-prioritized so cost stays bounded. The expensive generate→judge
+ *        →refine loop is deliberately NOT used here; it's reserved for the manual
+ *        `build:catalog --judge` quality pass. Nightly just refreshes prices/URLs.
  * Wire this to a nightly cron.
  */
 export async function runRefinementCycle(): Promise<{ reranked: number; regenerated: number; considered: number }> {
@@ -50,9 +51,14 @@ export async function runRefinementCycle(): Promise<{ reranked: number; regenera
   let regenerated = 0;
   for (const r of needy) {
     try {
-      const { alts, score } = await generateJudgedAlternatives(r.service_name, r.category, null);
+      const alts = await generateAlternatives(r.service_name, r.category);
+      // Don't let a transient empty result wipe a previously-good entry — skip
+      // and let the next cycle retry it.
+      if (alts.length === 0) continue;
+      // Keep the existing quality_score — it reflects the last judged pass; a
+      // plain refresh shouldn't claim a score it didn't earn.
       await supabase.from('alternatives_catalogue').update({
-        raw_payload: alts, quality_score: score, refreshed_at: new Date().toISOString(),
+        raw_payload: alts, refreshed_at: new Date().toISOString(),
       }).eq('service_key', r.service_key);
       await reresolve(r.service_key, r.service_name, alts, globalBlock);
       regenerated++;

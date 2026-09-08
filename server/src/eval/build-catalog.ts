@@ -7,15 +7,19 @@
  *   1. Real usage — the most common subscription names in your own DB.
  *   2. A small seed list, so a brand-new app still ships a useful catalog.
  *
- * For each service it runs the grounded generate -> judge -> refine loop and
- * upserts the winner into the cache the live API reads. Re-run periodically to
+ * For each service it makes ONE grounded call by default (cheap) and upserts the
+ * result into the cache the live API reads. Pass --judge for the thorough
+ * generate -> judge -> refine loop (higher quality, several × the cost) — worth
+ * it for your top services, overkill for a full seed. Re-run periodically to
  * refresh prices and pick up newly popular services (see the flywheel notes).
  *
  * Run from server/:  railway run --service jubilant-consideration npm run build:catalog
+ *   thorough pass:   railway run --service jubilant-consideration npm run build:catalog -- --judge
  */
 import 'dotenv/config';
 import { supabase } from '../lib/supabase';
 import { generateJudgedAlternatives } from '../lib/judge';
+import { generateAlternatives, Alt } from '../lib/alternatives-gen';
 import { normalizeKey, reresolve } from '../lib/catalogue';
 
 interface Svc { name: string; category: string; cost: number | null; source: string; }
@@ -72,10 +76,28 @@ async function main() {
   const services = [...merged.values()];
   console.log(`Building catalog for ${services.length} services (${fromDB.length} from usage, ${SEED.length} seed)…\n`);
 
-  let ok = 0, weak = 0;
+  const useJudge = process.argv.includes('--judge');
+  console.log(useJudge
+    ? 'Mode: --judge (generate→judge→refine — higher quality, higher cost)\n'
+    : 'Mode: plain generate (1 grounded call each; cheap). Add "-- --judge" for a quality pass.\n');
+
+  let done = 0, strong = 0, empty = 0;
   for (const svc of services) {
     try {
-      const { alts, score, rounds } = await generateJudgedAlternatives(svc.name, svc.category, svc.cost);
+      let alts: Alt[], score: number | null = null, rounds = 0;
+      if (useJudge) {
+        const r = await generateJudgedAlternatives(svc.name, svc.category, svc.cost);
+        alts = r.alts; score = r.score; rounds = r.rounds;
+      } else {
+        alts = await generateAlternatives(svc.name, svc.category);
+      }
+      // Never cache an empty generation — a transient miss would poison this
+      // service until the nightly job. Skip and let a re-run pick it up.
+      if (alts.length === 0) {
+        empty++;
+        console.log(`${svc.name.padEnd(24)} EMPTY — skipped (not cached) [${svc.source}]`);
+        continue;
+      }
       const key = normalizeKey(svc.name, svc.category);
       await supabase.from('alternatives_catalogue').upsert({
         service_key: key, service_name: svc.name, category: svc.category,
@@ -85,14 +107,16 @@ async function main() {
       }, { onConflict: 'service_key' });
       // Bake in any existing feedback/owner overrides for this service.
       await reresolve(key, svc.name, alts);
-      score >= 80 ? ok++ : weak++;
-      console.log(`${svc.name.padEnd(24)} score ${String(score).padStart(3)}  alts ${alts.length}  rounds ${rounds}  [${svc.source}] cached`);
+      done++;
+      if (score != null && score >= 80) strong++;
+      const scoreStr = score == null ? '  -' : String(score).padStart(3);
+      console.log(`${svc.name.padEnd(24)} score ${scoreStr}  alts ${alts.length}  rounds ${rounds}  [${svc.source}] cached`);
     } catch (e: any) {
       console.log(`${svc.name.padEnd(24)} ERROR: ${e.message}`);
     }
   }
 
-  console.log(`\nDone. ${ok} strong (score>=80), ${weak} weak. Weak ones are worth a look — improve the prompt or exclude the service.`);
+  console.log(`\nDone. ${done} cached${useJudge ? `, ${strong} strong (score>=80)` : ''}${empty ? `, ${empty} empty/skipped` : ''}.`);
 }
 
 main();

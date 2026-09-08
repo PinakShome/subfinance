@@ -145,6 +145,10 @@ export async function getAlternativesForService(
 
   // First-time miss: generate (grounded), resolve with any existing overrides, store.
   const raw = await generateAlternatives(name, category);
+  // Never cache an empty generation — a transient miss (e.g. a search turn that
+  // ran long) would otherwise poison this service until the nightly job. Return
+  // nothing this time; the next tap retries generation.
+  if (raw.length === 0) return [];
   const overrides = await getOverrides(key);
   const payload = resolve(raw, new Map(), overrides, new Set());
   await supabase.from('alternatives_catalogue').upsert({
