@@ -9,9 +9,38 @@ export const STALE_MS = 30 * 24 * 60 * 60 * 1000;
 export interface Override { alternative_name: string; action: 'pin' | 'block' | 'edit'; patch: Partial<Alt>; }
 export interface FeedbackStat { up: number; down: number; }
 
-/** Canonical key so "Netflix", "netflix ", "NETFLIX" collapse to one entry. */
-export function normalizeKey(name: string, category: string): string {
-  return `${name.trim().toLowerCase()}|${(category ?? '').trim().toLowerCase()}`;
+// Light canonicalization for common name variants, so a user's "Adobe CC" and
+// the seeded "Adobe Creative Cloud" resolve to the same catalogue entry.
+const NAME_ALIASES: Record<string, string> = {
+  'adobe cc': 'adobe creative cloud',
+  'adobe': 'adobe creative cloud',
+  'chatgpt': 'chatgpt plus',
+  'chat gpt': 'chatgpt plus',
+  'openai': 'chatgpt plus',
+  'disney': 'disney+',
+  'disney plus': 'disney+',
+  'prime': 'amazon prime',
+  'prime video': 'amazon prime',
+  'amazon prime video': 'amazon prime',
+  'youtube': 'youtube premium',
+  'icloud': 'icloud+',
+  'office 365': 'microsoft 365',
+  'ms 365': 'microsoft 365',
+  'microsoft office': 'microsoft 365',
+  'amazon web services': 'aws',
+  'gh copilot': 'github copilot',
+};
+
+/**
+ * Canonical key for one service. Keyed on NAME ONLY (not name+category):
+ * subscription names are effectively unique brands, and category is inconsistent
+ * in the wild (a "Netflix" row may have no category or "Streaming"), so folding
+ * category into the key fragments one service across multiple rows. Category is
+ * still stored as a column. Aliases collapse common variants to one entry.
+ */
+export function normalizeKey(name: string, _category?: string): string {
+  const n = name.trim().toLowerCase().replace(/\s+/g, ' ');
+  return NAME_ALIASES[n] ?? n;
 }
 
 /** Aggregate per-alternative 👍/👎 for one service (keyed by lowercased name). */

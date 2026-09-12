@@ -1,46 +1,30 @@
 /**
- * Build the alternatives catalog WITHOUT manual research.
+ * Build the alternatives catalogue WITHOUT manual research.
  *
- * The "catalog" is just the alternatives_catalogue table pre-filled with
- * high-quality, judged results for the services people actually track. Sources,
- * in priority order:
- *   1. Real usage — the most common subscription names in your own DB.
- *   2. A small seed list, so a brand-new app still ships a useful catalog.
+ * The service universe is the reference catalogue (server/src/eval/reference-
+ * catalog.ts) — an exhaustive, web-surveyed list of categories → services —
+ * merged with the most-tracked services in your own DB (real demand ranks first).
  *
- * For each service it makes ONE grounded call by default (cheap) and upserts the
- * result into the cache the live API reads. Pass --judge for the thorough
- * generate -> judge -> refine loop (higher quality, several × the cost) — worth
- * it for your top services, overkill for a full seed. Re-run periodically to
- * refresh prices and pick up newly popular services (see the flywheel notes).
+ * For each service it generates cheaper-alternative suggestions and upserts them
+ * into alternatives_catalogue (what the live API reads). By default it uses a
+ * single grounded generation per service (cheap). Pass --judge to run the
+ * generate→judge→refine loop instead (higher quality, several API calls each —
+ * reserve it for a curated pass over your top services).
  *
- * Run from server/:  railway run --service jubilant-consideration npm run build:catalog
- *   thorough pass:   railway run --service jubilant-consideration npm run build:catalog -- --judge
+ *   railway run --service jubilant-consideration npm run build:catalog
+ *   railway run --service jubilant-consideration npm run build:catalog -- --judge
+ *   ... -- --limit 30      (cap how many services to process this run)
  */
 import 'dotenv/config';
 import { supabase } from '../lib/supabase';
 import { generateJudgedAlternatives } from '../lib/judge';
-import { generateAlternatives, Alt } from '../lib/alternatives-gen';
+import { Alt, generateAlternatives } from '../lib/alternatives-gen';
 import { normalizeKey, reresolve } from '../lib/catalogue';
+import { REFERENCE_SERVICES } from './reference-catalog';
 
 interface Svc { name: string; category: string; cost: number | null; source: string; }
 
-// Seed list — popular services so the catalog is useful before you have usage.
-const SEED: { name: string; category: string; cost: number }[] = [
-  { name: 'Netflix', category: 'Streaming', cost: 15.49 },
-  { name: 'Disney+', category: 'Streaming', cost: 13.99 },
-  { name: 'Spotify', category: 'Music', cost: 11.99 },
-  { name: 'YouTube Premium', category: 'Streaming', cost: 13.99 },
-  { name: 'Adobe Creative Cloud', category: 'Software', cost: 59.99 },
-  { name: 'ChatGPT Plus', category: 'Software', cost: 20 },
-  { name: 'Notion', category: 'Software', cost: 10 },
-  { name: 'Dropbox', category: 'Cloud', cost: 11.99 },
-  { name: 'Microsoft 365', category: 'Software', cost: 6.99 },
-  { name: 'Audible', category: 'News', cost: 14.95 },
-  { name: 'Grammarly', category: 'Software', cost: 12 },
-  { name: 'Peloton', category: 'Fitness', cost: 12.99 },
-];
-
-/** Most-tracked services across all users (real demand). */
+/** Most-tracked services across all users (real demand), keyed by canonical name. */
 async function popularFromDB(limit: number): Promise<Svc[]> {
   const { data, error } = await supabase
     .from('subscriptions')
@@ -53,7 +37,7 @@ async function popularFromDB(limit: number): Promise<Svc[]> {
     const cat = Array.isArray(s.category) ? s.category[0]?.name : s.category?.name;
     const name = String(s.name ?? '').trim();
     if (!name) continue;
-    const key = `${name.toLowerCase()}|${(cat ?? '').toLowerCase()}`;
+    const key = normalizeKey(name, cat ?? '');
     const e = map.get(key) ?? { name, category: cat ?? '', cost: s.cost ?? null, count: 0, source: 'usage' };
     e.count++;
     map.set(key, e);
@@ -61,27 +45,37 @@ async function popularFromDB(limit: number): Promise<Svc[]> {
   return [...map.values()].sort((a, b) => b.count - a.count).slice(0, limit);
 }
 
+function argValue(flag: string): string | undefined {
+  const i = process.argv.indexOf(flag);
+  return i >= 0 ? process.argv[i + 1] : undefined;
+}
+
 async function main() {
   if (!process.env.ANTHROPIC_API_KEY) {
     console.error('ANTHROPIC_API_KEY not set. Try: railway run --service jubilant-consideration npm run build:catalog');
     process.exit(1);
   }
+  const useJudge = process.argv.includes('--judge');
+  const limit = Number(argValue('--limit') ?? Infinity);
 
   const fromDB = await popularFromDB(40);
+  const reference: Svc[] = REFERENCE_SERVICES.map((s) => ({
+    name: s.name, category: s.category, cost: s.approx_monthly ?? null, source: 'reference',
+  }));
+
+  // Merge, DB demand first, deduped by canonical (name-based) key.
   const merged = new Map<string, Svc>();
-  for (const s of [...fromDB, ...SEED.map((s) => ({ ...s, source: 'seed' as const }))]) {
-    const key = `${s.name.toLowerCase()}|${s.category.toLowerCase()}`;
+  for (const s of [...fromDB, ...reference]) {
+    const key = normalizeKey(s.name, s.category);
     if (!merged.has(key)) merged.set(key, s);
   }
-  const services = [...merged.values()];
-  console.log(`Building catalog for ${services.length} services (${fromDB.length} from usage, ${SEED.length} seed)…\n`);
+  const services = [...merged.values()].slice(0, limit);
+  console.log(
+    `Building catalogue for ${services.length} services ` +
+    `(${fromDB.length} from usage, ${reference.length} reference) · mode=${useJudge ? 'judge' : 'generate'}\n`,
+  );
 
-  const useJudge = process.argv.includes('--judge');
-  console.log(useJudge
-    ? 'Mode: --judge (generate→judge→refine — higher quality, higher cost)\n'
-    : 'Mode: plain generate (1 grounded call each; cheap). Add "-- --judge" for a quality pass.\n');
-
-  let done = 0, strong = 0, empty = 0;
+  let ok = 0, weak = 0, empty = 0;
   for (const svc of services) {
     try {
       let alts: Alt[], score: number | null = null, rounds = 0;
@@ -91,13 +85,9 @@ async function main() {
       } else {
         alts = await generateAlternatives(svc.name, svc.category);
       }
-      // Never cache an empty generation — a transient miss would poison this
-      // service until the nightly job. Skip and let a re-run pick it up.
-      if (alts.length === 0) {
-        empty++;
-        console.log(`${svc.name.padEnd(24)} EMPTY — skipped (not cached) [${svc.source}]`);
-        continue;
-      }
+      // Never cache an empty generation — leave it for the next run to retry.
+      if (alts.length === 0) { empty++; console.log(`${svc.name.padEnd(26)} 0 alts — skipped`); continue; }
+
       const key = normalizeKey(svc.name, svc.category);
       await supabase.from('alternatives_catalogue').upsert({
         service_key: key, service_name: svc.name, category: svc.category,
@@ -105,18 +95,16 @@ async function main() {
         refreshed_at: new Date().toISOString(), resolved_at: new Date().toISOString(),
         status: alts.length < 2 ? 'needs_review' : 'active',
       }, { onConflict: 'service_key' });
-      // Bake in any existing feedback/owner overrides for this service.
       await reresolve(key, svc.name, alts);
-      done++;
-      if (score != null && score >= 80) strong++;
-      const scoreStr = score == null ? '  -' : String(score).padStart(3);
-      console.log(`${svc.name.padEnd(24)} score ${scoreStr}  alts ${alts.length}  rounds ${rounds}  [${svc.source}] cached`);
+
+      (score == null || score >= 80) ? ok++ : weak++;
+      console.log(`${svc.name.padEnd(26)} score ${String(score ?? '-').padStart(3)}  alts ${alts.length}  rounds ${rounds}  [${svc.source}]`);
     } catch (e: any) {
-      console.log(`${svc.name.padEnd(24)} ERROR: ${e.message}`);
+      console.log(`${svc.name.padEnd(26)} ERROR: ${e.message}`);
     }
   }
 
-  console.log(`\nDone. ${done} cached${useJudge ? `, ${strong} strong (score>=80)` : ''}${empty ? `, ${empty} empty/skipped` : ''}.`);
+  console.log(`\nDone. ${ok} ok, ${weak} weak (judged <80), ${empty} empty/skipped.`);
 }
 
 main();
