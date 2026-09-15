@@ -141,11 +141,15 @@ export async function reresolve(serviceKey: string, serviceName: string, raw: Al
   return payload;
 }
 
-/** Cheaper-than-current filter + savings ranking (depends on the caller's cost). */
+/**
+ * Cheaper-than-current filter, preserving the ranked order from resolve() (owner
+ * pins first, then net feedback). Price is only a filter here — NOT a re-sort —
+ * so community ranking and owner curation actually determine what surfaces and in
+ * what order, instead of being flattened to cheapest-first.
+ */
 function applyCostFilter(list: Alt[], costNum: number | null): Alt[] {
   return list
     .filter((a) => costNum === null || a.monthly_price === null || a.monthly_price < costNum)
-    .sort((x, y) => (x.monthly_price ?? 0) - (y.monthly_price ?? 0))
     .slice(0, 6);
 }
 
