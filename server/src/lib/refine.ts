@@ -1,71 +1,83 @@
 import { supabase } from './supabase';
-import { Alt, generateAlternatives } from './alternatives-gen';
-import { getGlobalBlocklist, reresolve } from './catalogue';
+import { Alt, generateAlternatives, verifyLiveWebsites } from './alternatives-gen';
+import { getGlobalBlocklist, getGlobalPromotions, reresolve } from './catalogue';
 
 // Hard cap on grounded regenerations per cycle — bounds API cost predictably.
 const MAX_REGEN = Number(process.env.CATALOGUE_MAX_REGEN ?? 5);
+// Cap on URL liveness checks per cycle (free, but bounds outbound HTTP + runtime).
+// Over successive nights the whole catalogue gets covered, demand-first.
+const MAX_LIVENESS = Number(process.env.CATALOGUE_MAX_LIVENESS ?? 120);
 const DAY = 86_400_000;
-
-/** Confident entries refresh rarely; shaky ones more often. */
-function adaptiveTtlMs(score: number | null): number {
-  if (score != null && score >= 90) return 90 * DAY;
-  if (score != null && score < 70) return 14 * DAY;
-  return 30 * DAY;
-}
+// Reactive-first: regen is triggered by SIGNALS (dead links, needs_review), not a
+// clock. This long TTL is only a last-resort safety net so nothing goes stale
+// forever even with no signal.
+const SAFETY_TTL_MS = 180 * DAY;
 
 /**
- * The background flywheel. Most of the work is pure logic (no API calls):
- *   A/B. Re-rank every entry from the latest feedback + owner overrides +
- *        global blocklist — this is where "refine per cycle from feedback"
- *        happens, for free.
- *   C.   Only for entries that are stale (adaptive TTL), thin, or flagged
- *        needs_review, run a single grounded regeneration — capped and
- *        demand-prioritized so cost stays bounded. The expensive generate→judge
- *        →refine loop is deliberately NOT used here; it's reserved for the manual
- *        `build:catalog --judge` quality pass. Nightly just refreshes prices/URLs.
+ * The background flywheel. Almost all of it is free (no API calls):
+ *   A/B. Re-rank every entry from the latest feedback + owner overrides + global
+ *        blocklist + global promotions.
+ *   L.   Liveness: HEAD-check each alternative's URL and prune dead links —
+ *        free, and it's what actually catches rot. Pruning can push an entry
+ *        below the minimum, which then makes it a regen candidate.
+ *   C.   Reactive regen (the only paid phase): the grounded generator runs ONLY
+ *        for entries that are thin (dead-link pruning left <2), flagged
+ *        needs_review, or long past the safety TTL — capped and demand-first.
  * Wire this to a nightly cron.
  */
-export async function runRefinementCycle(): Promise<{ reranked: number; regenerated: number; considered: number }> {
-  const globalBlock = await getGlobalBlocklist();
+export async function runRefinementCycle(): Promise<{ reranked: number; pruned: number; regenerated: number; considered: number }> {
+  const [globalBlock, globalPromote] = await Promise.all([getGlobalBlocklist(), getGlobalPromotions()]);
 
   const { data: rows } = await supabase
     .from('alternatives_catalogue')
-    .select('service_key, service_name, category, raw_payload, quality_score, request_count, refreshed_at');
+    .select('service_key, service_name, category, raw_payload, quality_score, request_count, refreshed_at, status');
   const all = (rows ?? []) as any[];
 
-  // Phase A/B — feedback re-ranking + overrides + global blocklist. Zero API.
+  // Phase A/B — feedback re-rank + overrides + global block/promote. Zero API.
   let reranked = 0;
   for (const r of all) {
-    await reresolve(r.service_key, r.service_name, (r.raw_payload ?? []) as Alt[], globalBlock);
+    await reresolve(r.service_key, r.service_name, (r.raw_payload ?? []) as Alt[], globalBlock, globalPromote);
     reranked++;
   }
 
-  // Phase C — capped, grounded regen for entries that genuinely need fresh data.
+  // Phase L — liveness: prune dead links (free HEAD checks). Demand-first, capped.
+  const byDemand = [...all].sort((a, b) => (b.request_count ?? 0) - (a.request_count ?? 0));
+  let pruned = 0;
+  for (const r of byDemand.slice(0, MAX_LIVENESS)) {
+    const raw = (r.raw_payload ?? []) as Alt[];
+    if (!raw.length) continue;
+    const live = await verifyLiveWebsites(raw);
+    if (live.length < raw.length) {
+      await supabase.from('alternatives_catalogue').update({ raw_payload: live }).eq('service_key', r.service_key);
+      await reresolve(r.service_key, r.service_name, live, globalBlock, globalPromote);
+      r.raw_payload = live; // reflect for the thinness check below
+      pruned++;
+    }
+  }
+
+  // Phase C — REACTIVE regen (LLM), capped. Triggered by signals, not a clock.
   const needy = all
     .filter((r) =>
-      Date.now() - new Date(r.refreshed_at).getTime() > adaptiveTtlMs(r.quality_score) ||
-      (r.raw_payload?.length ?? 0) < 2)
-    .sort((a, b) => (b.request_count ?? 0) - (a.request_count ?? 0)) // demand first
+      (r.raw_payload?.length ?? 0) < 2 ||
+      r.status === 'needs_review' ||
+      Date.now() - new Date(r.refreshed_at).getTime() > SAFETY_TTL_MS)
+    .sort((a, b) => (b.request_count ?? 0) - (a.request_count ?? 0))
     .slice(0, MAX_REGEN);
 
   let regenerated = 0;
   for (const r of needy) {
     try {
       const alts = await generateAlternatives(r.service_name, r.category);
-      // Don't let a transient empty result wipe a previously-good entry — skip
-      // and let the next cycle retry it.
-      if (alts.length === 0) continue;
-      // Keep the existing quality_score — it reflects the last judged pass; a
-      // plain refresh shouldn't claim a score it didn't earn.
+      if (alts.length === 0) continue; // don't wipe a good entry on a transient empty
       await supabase.from('alternatives_catalogue').update({
-        raw_payload: alts, refreshed_at: new Date().toISOString(),
+        raw_payload: alts, refreshed_at: new Date().toISOString(), status: 'active',
       }).eq('service_key', r.service_key);
-      await reresolve(r.service_key, r.service_name, alts, globalBlock);
+      await reresolve(r.service_key, r.service_name, alts, globalBlock, globalPromote);
       regenerated++;
     } catch {
       /* skip; picked up again next cycle */
     }
   }
 
-  return { reranked, regenerated, considered: needy.length };
+  return { reranked, pruned, regenerated, considered: needy.length };
 }

@@ -19,7 +19,8 @@ async function groundedText(system: string, userContent: string, maxUses: number
     const resp = await anthropic.messages.create({
       model: 'claude-sonnet-5',
       max_tokens: 1536,
-      system,
+      // Cache the static rubric so it isn't re-billed across pause_turn continuations.
+      system: [{ type: 'text', text: system, cache_control: { type: 'ephemeral' } }] as any,
       tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: maxUses } as any],
       messages,
     });
