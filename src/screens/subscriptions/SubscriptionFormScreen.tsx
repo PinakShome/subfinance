@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Switch,
+  StyleSheet, Alert, Switch, Modal, FlatList,
 } from 'react-native';
 import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -46,6 +46,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   const [trialEndsOn, setTrialEndsOn] = useState(existing?.trial_ends_on ?? '');
   const [websiteUrl, setWebsiteUrl] = useState(existing?.website_url ?? '');
   const [busy, setBusy] = useState(false);
+  const [catModalOpen, setCatModalOpen] = useState(false);
 
   useEffect(() => { fetchCategories(); }, []);
 
@@ -107,6 +108,9 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
     navigation.goBack();
   };
 
+  const selectedCat = categories.find((c) => c.id === categoryId);
+  const sortedCategories = [...categories].sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>Name</Text>
@@ -158,17 +162,44 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
       <TextInput style={styles.input} value={nextRenewal} onChangeText={setNextRenewal} placeholder="2025-01-01" placeholderTextColor="#8a8698" />
 
       <Text style={styles.sectionLabel}>Category</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 16 }}>
-        {categories.map((cat) => (
-          <TouchableOpacity
-            key={cat.id}
-            style={[styles.chip, categoryId === cat.id && { backgroundColor: cat.color, borderColor: cat.color }]}
-            onPress={() => setCategoryId(cat.id)}
-          >
-            <Text style={[styles.chipText, categoryId === cat.id && styles.chipTextActive]}>{cat.name}</Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <TouchableOpacity
+        style={styles.dropdown}
+        onPress={() => setCatModalOpen(true)}
+        accessibilityRole="button"
+        accessibilityLabel={selectedCat ? `Category: ${selectedCat.name}` : 'Select a category'}
+      >
+        <Text style={[styles.dropdownText, !selectedCat && styles.dropdownPlaceholder]}>
+          {selectedCat ? selectedCat.name : 'Select a category'}
+        </Text>
+        <Text style={styles.dropdownCaret}>▾</Text>
+      </TouchableOpacity>
+
+      <Modal
+        visible={catModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCatModalOpen(false)}
+      >
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCatModalOpen(false)}>
+          <View style={styles.modalSheet} onStartShouldSetResponder={() => true}>
+            <Text style={styles.modalTitle}>Choose a category</Text>
+            <FlatList
+              data={sortedCategories}
+              keyExtractor={(c) => c.id}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.modalRow}
+                  onPress={() => { setCategoryId(item.id); setCatModalOpen(false); }}
+                >
+                  <Text style={[styles.modalRowText, categoryId === item.id && styles.modalRowTextActive]}>{item.name}</Text>
+                  {categoryId === item.id && <Text style={styles.modalCheck}>✓</Text>}
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <Text style={styles.sectionLabel}>Website URL (optional)</Text>
       <TextInput style={styles.input} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." placeholderTextColor="#8a8698" autoCapitalize="none" keyboardType="url" />
@@ -218,6 +249,27 @@ const styles = StyleSheet.create({
   chipActive: { backgroundColor: '#6366f1', borderColor: '#6366f1' },
   chipText: { color: '#6a6782', fontSize: 13, fontWeight: '600' },
   chipTextActive: { color: '#fff' },
+  dropdown: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    backgroundColor: '#f1eff9', borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: '#e5e3ef',
+  },
+  dropdownText: { color: '#1b1830', fontSize: 15 },
+  dropdownPlaceholder: { color: '#8a8698' },
+  dropdownCaret: { color: '#6a6782', fontSize: 14, marginLeft: 8 },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  modalSheet: {
+    backgroundColor: '#ffffff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    paddingTop: 14, paddingHorizontal: 20, paddingBottom: 30, maxHeight: '70%',
+  },
+  modalTitle: { color: '#1b1830', fontSize: 16, fontWeight: '700', marginBottom: 8 },
+  modalRow: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+    paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f1eff9',
+  },
+  modalRowText: { color: '#1b1830', fontSize: 15 },
+  modalRowTextActive: { color: '#6366f1', fontWeight: '700' },
+  modalCheck: { color: '#6366f1', fontSize: 16, fontWeight: '700' },
   button: {
     backgroundColor: '#6366f1', borderRadius: 12, padding: 16,
     alignItems: 'center', marginTop: 32,
