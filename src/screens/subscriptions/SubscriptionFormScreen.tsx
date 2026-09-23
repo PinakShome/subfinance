@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, Alert, Switch, Modal, FlatList,
+  StyleSheet, Alert, Switch, Modal, FlatList, Pressable, Dimensions,
 } from 'react-native';
 import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -180,13 +180,15 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
         animationType="slide"
         onRequestClose={() => setCatModalOpen(false)}
       >
-        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setCatModalOpen(false)}>
-          <View style={styles.modalSheet} onStartShouldSetResponder={() => true}>
+        <View style={styles.modalOverlay}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setCatModalOpen(false)} />
+          <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>Choose a category</Text>
             <FlatList
               data={sortedCategories}
               keyExtractor={(c) => c.id}
               keyboardShouldPersistTaps="handled"
+              style={{ maxHeight: Dimensions.get('window').height * 0.55 }}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.modalRow}
@@ -198,7 +200,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
               )}
             />
           </View>
-        </TouchableOpacity>
+        </View>
       </Modal>
 
       <Text style={styles.sectionLabel}>Website URL (optional)</Text>
