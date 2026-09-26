@@ -8,6 +8,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { Subscription } from '../../types/database';
 import { daysUntilRenewal, formatCurrency, monthlyEquivalent, totalMonthlySpend } from '../../lib/subscriptionUtils';
+import { convert } from '../../lib/currency';
 import { HomeStackParamList } from '../../navigation/types';
 
 type Props = {
@@ -132,20 +133,22 @@ function FilterChip({ label, active, onPress, filterType, icon, prominent }: {
 }
 
 export default function SubscriptionListScreen({ navigation }: Props) {
-  const { subscriptions, loading, error, fetchAll } = useSubscriptionStore();
+  const { subscriptions, loading, error, fetchAll, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); loadDefaultCurrency(); }, []);
   const onRefresh = useCallback(() => { fetchAll(); }, []);
 
-  const totalMonthly = totalMonthlySpend(subscriptions);
+  // All totals are converted into the user's display currency so a mix of per-sub
+  // currencies sums correctly and every surface shows the same currency.
+  const totalMonthly = totalMonthlySpend(subscriptions, defaultCurrency);
   const annualTotal = totalMonthly * 12;
   // Actual charges due in the next 30 days — a metric users can act on, unlike a
   // total/count average which mixes billing cycles and means little.
   const due30 = subscriptions
     .filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
-    .reduce((sum, s) => sum + s.cost, 0);
+    .reduce((sum, s) => sum + convert(s.cost, s.currency, defaultCurrency), 0);
   const overdueCount = subscriptions.filter(s => daysUntilRenewal(s.next_renewal) < 0).length;
   const dueSoonCount = subscriptions.filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 7; }).length;
   const trialCount = subscriptions.filter(s => s.is_trial).length;
@@ -172,7 +175,7 @@ export default function SubscriptionListScreen({ navigation }: Props) {
         <View style={styles.heroTop}>
           <View>
             <Text style={styles.heroLabel}>TOTAL MONTHLY</Text>
-            <Text style={styles.heroAmount}>${totalMonthly.toFixed(2)}</Text>
+            <Text style={styles.heroAmount}>{formatCurrency(totalMonthly, defaultCurrency)}</Text>
           </View>
           <View style={styles.heroBadge}>
             <Text style={styles.heroBadgeText}>{subscriptions.length} active</Text>
@@ -180,12 +183,12 @@ export default function SubscriptionListScreen({ navigation }: Props) {
         </View>
         <View style={styles.heroStats}>
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: '#06b6d4' }]}>${annualTotal.toFixed(0)}</Text>
+            <Text style={[styles.heroStatVal, { color: '#06b6d4' }]}>{formatCurrency(annualTotal, defaultCurrency, 0)}</Text>
             <Text style={styles.heroStatLbl}>per year</Text>
           </View>
           <View style={styles.heroStatDiv} />
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: '#10b981' }]}>${due30.toFixed(0)}</Text>
+            <Text style={[styles.heroStatVal, { color: '#10b981' }]}>{formatCurrency(due30, defaultCurrency, 0)}</Text>
             <Text style={styles.heroStatLbl}>due in 30d</Text>
           </View>
           <View style={styles.heroStatDiv} />

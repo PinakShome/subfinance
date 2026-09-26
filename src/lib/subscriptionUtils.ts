@@ -1,4 +1,5 @@
 import { Subscription, BillingCycle } from '../types/database';
+import { convert } from './currency';
 
 export function monthlyEquivalent(cost: number, cycle: BillingCycle, intervalDays?: number | null): number {
   const amount = Number.isFinite(cost) && cost > 0 ? cost : 0;
@@ -107,10 +108,14 @@ export function advanceRenewal(
   return toISODate(next);
 }
 
-export function totalMonthlySpend(subscriptions: Subscription[]): number {
+/**
+ * Total monthly spend, converted into `target` currency so a mix of per-sub
+ * currencies sums correctly instead of adding raw numbers of different units.
+ */
+export function totalMonthlySpend(subscriptions: Subscription[], target = 'USD'): number {
   return subscriptions
     .filter((s) => s.is_active)
-    .reduce((sum, s) => sum + monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), 0);
+    .reduce((sum, s) => sum + convert(monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), s.currency, target), 0);
 }
 
 /**
@@ -118,13 +123,18 @@ export function totalMonthlySpend(subscriptions: Subscription[]): number {
  * Intl.NumberFormat throws a RangeError on anything that isn't a valid ISO
  * 4217 code — which would take down the whole screen — so fall back instead.
  */
-export function formatCurrency(amount: number, currency = 'USD'): string {
+export function formatCurrency(amount: number, currency = 'USD', fractionDigits?: number): string {
   const safeAmount = Number.isFinite(amount) ? amount : 0;
   const code = (currency ?? 'USD').toUpperCase();
+  const opts: Intl.NumberFormatOptions = { style: 'currency', currency: code };
+  if (fractionDigits !== undefined) {
+    opts.minimumFractionDigits = fractionDigits;
+    opts.maximumFractionDigits = fractionDigits;
+  }
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency: code }).format(safeAmount);
+    return new Intl.NumberFormat(undefined, opts).format(safeAmount);
   } catch {
-    return `${/^[A-Z]{3}$/.test(code) ? code : 'USD'} ${safeAmount.toFixed(2)}`;
+    return `${/^[A-Z]{3}$/.test(code) ? code : 'USD'} ${safeAmount.toFixed(fractionDigits ?? 2)}`;
   }
 }
 

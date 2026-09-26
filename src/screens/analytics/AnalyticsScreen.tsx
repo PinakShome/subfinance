@@ -1,9 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet, Dimensions } from 'react-native';
 import { BarChart, PieChart } from 'react-native-chart-kit';
 import { Ionicons } from '@expo/vector-icons';
 import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { formatCurrency, monthlyEquivalent, daysUntilRenewal } from '../../lib/subscriptionUtils';
+import { convert } from '../../lib/currency';
+import { CURRENCIES } from '../../lib/prefs';
 import { Subscription } from '../../types/database';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -55,12 +57,12 @@ function UpcomingRow({ sub }: { sub: Subscription }) {
       <View style={[styles.upcomingDot, { backgroundColor: dotColor }]} />
       <Text style={styles.upcomingName} numberOfLines={1}>{sub.name}</Text>
       <Text style={[styles.upcomingDays, { color: dotColor }]}>{days === 0 ? 'Today' : `${days}d`}</Text>
-      <Text style={styles.upcomingAmt}>{formatCurrency(monthly)}/mo</Text>
+      <Text style={styles.upcomingAmt}>{formatCurrency(monthly, sub.currency)}/mo</Text>
     </View>
   );
 }
 
-function CategoryBar({ name, amount, total, color }: { name: string; amount: number; total: number; color: string }) {
+function CategoryBar({ name, amount, total, color, currency }: { name: string; amount: number; total: number; color: string; currency: string }) {
   const pct = total > 0 ? (amount / total) * 100 : 0;
   return (
     <View style={styles.catRow}>
@@ -69,37 +71,41 @@ function CategoryBar({ name, amount, total, color }: { name: string; amount: num
       <View style={styles.catTrack}>
         <View style={[styles.catFill, { width: `${pct}%` as any, backgroundColor: color }]} />
       </View>
-      <Text style={[styles.catAmt, { color }]}>{formatCurrency(amount)}</Text>
+      <Text style={[styles.catAmt, { color }]}>{formatCurrency(amount, currency, 0)}</Text>
     </View>
   );
 }
 
 export default function AnalyticsScreen() {
-  const { subscriptions } = useSubscriptionStore();
+  const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
+  useEffect(() => { loadDefaultCurrency(); }, []);
   const active = subscriptions.filter((s) => s.is_active);
 
+  // A sub's monthly cost, converted into the display currency (so totals and
+  // comparisons across mixed currencies are apples-to-apples).
+  const conv = (s: Subscription) => convert(monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), s.currency, defaultCurrency);
+  const currencySymbol = CURRENCIES.find((c) => c.code === defaultCurrency)?.symbol ?? '$';
+
   const monthly = useMemo(
-    () => active.reduce((sum, s) => sum + monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), 0),
-    [active],
+    () => active.reduce((sum, s) => sum + conv(s), 0),
+    [active, defaultCurrency],
   );
 
-  // Real cash leaving the account in the next 30 days (actual charge amounts, not
-  // a monthly-normalized average) — the metric a user can actually act on.
+  // Real cash leaving the account in the next 30 days (actual charge amounts,
+  // converted to the display currency) — the metric a user can actually act on.
   const due30 = useMemo(
     () => active
       .filter((s) => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
-      .reduce((sum, s) => sum + s.cost, 0),
-    [active],
+      .reduce((sum, s) => sum + convert(s.cost, s.currency, defaultCurrency), 0),
+    [active, defaultCurrency],
   );
 
   const mostExpensive = active.reduce<Subscription | null>(
-    (max, s) => !max || monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days) >
-      monthlyEquivalent(max.cost, max.billing_cycle, max.interval_days) ? s : max, null,
+    (max, s) => !max || conv(s) > conv(max) ? s : max, null,
   );
 
   const cheapest = active.reduce<Subscription | null>(
-    (min, s) => !min || monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days) <
-      monthlyEquivalent(min.cost, min.billing_cycle, min.interval_days) ? s : min, null,
+    (min, s) => !min || conv(s) < conv(min) ? s : min, null,
   );
 
   // Upcoming renewals in next 30 days
@@ -118,10 +124,10 @@ export default function AnalyticsScreen() {
       const key = s.category?.name ?? 'Other';
       const color = s.category?.color ?? PIE_COLORS[i % PIE_COLORS.length];
       if (!map[key]) map[key] = { amount: 0, color };
-      map[key].amount += monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days);
+      map[key].amount += conv(s);
     });
     return Object.entries(map).sort((a, b) => b[1].amount - a[1].amount);
-  }, [active]);
+  }, [active, defaultCurrency]);
 
   const pieData = categoryData.map(([name, { amount, color }], i) => ({
     name: name.length > 10 ? name.slice(0, 10) : name,
@@ -132,14 +138,12 @@ export default function AnalyticsScreen() {
   }));
 
   const barData = useMemo(() => {
-    const top = [...active]
-      .sort((a, b) => monthlyEquivalent(b.cost, b.billing_cycle, b.interval_days) - monthlyEquivalent(a.cost, a.billing_cycle, a.interval_days))
-      .slice(0, 5);
+    const top = [...active].sort((a, b) => conv(b) - conv(a)).slice(0, 5);
     return {
       labels: top.map(s => s.name.length > 7 ? s.name.slice(0, 7) + '…' : s.name),
-      datasets: [{ data: top.map(s => Math.round(monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days) * 100) / 100) }],
+      datasets: [{ data: top.map(s => Math.round(conv(s) * 100) / 100) }],
     };
-  }, [active]);
+  }, [active, defaultCurrency]);
 
   if (active.length === 0) {
     return (
@@ -156,10 +160,10 @@ export default function AnalyticsScreen() {
 
       {/* ─── KPI Grid ─── */}
       <View style={styles.kpiGrid}>
-        <MetricCard label="Monthly" value={formatCurrency(monthly)} icon="trending-up-outline" accentColor="#8b5cf6" />
-        <MetricCard label="Annual" value={formatCurrency(monthly * 12)} icon="calendar-outline" accentColor="#06b6d4" />
-        <MetricCard label="Due in 30 days" value={formatCurrency(due30)} icon="wallet-outline" accentColor="#10b981" />
-        <MetricCard label="Top category" value={formatCurrency(categoryData[0]?.[1].amount ?? 0)} sub={categoryData[0]?.[0]} icon="pie-chart-outline" accentColor="#f59e0b" />
+        <MetricCard label="Monthly" value={formatCurrency(monthly, defaultCurrency)} icon="trending-up-outline" accentColor="#8b5cf6" />
+        <MetricCard label="Annual" value={formatCurrency(monthly * 12, defaultCurrency, 0)} icon="calendar-outline" accentColor="#06b6d4" />
+        <MetricCard label="Due in 30 days" value={formatCurrency(due30, defaultCurrency, 0)} icon="wallet-outline" accentColor="#10b981" />
+        <MetricCard label="Top category" value={formatCurrency(categoryData[0]?.[1].amount ?? 0, defaultCurrency, 0)} sub={categoryData[0]?.[0]} icon="pie-chart-outline" accentColor="#f59e0b" />
       </View>
 
       {/* ─── Highlight Cards ─── */}
@@ -192,7 +196,7 @@ export default function AnalyticsScreen() {
           <SectionHeader title="SPEND BY CATEGORY" icon="pie-chart-outline" />
           <View style={styles.card}>
             {categoryData.map(([name, { amount, color }], i) => (
-              <CategoryBar key={name} name={name} amount={amount} total={monthly} color={color ?? PIE_COLORS[i % PIE_COLORS.length]} />
+              <CategoryBar key={name} name={name} amount={amount} total={monthly} color={color ?? PIE_COLORS[i % PIE_COLORS.length]} currency={defaultCurrency} />
             ))}
           </View>
         </>
@@ -227,7 +231,7 @@ export default function AnalyticsScreen() {
               width={CHART_WIDTH}
               height={210}
               chartConfig={CHART_CONFIG}
-              yAxisLabel="$"
+              yAxisLabel={currencySymbol}
               yAxisSuffix=""
               showValuesOnTopOfBars
               fromZero

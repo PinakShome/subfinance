@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
 import { advanceRenewal } from '../lib/subscriptionUtils';
+import { getDefaultCurrency as getDefaultCurrencyPref, setDefaultCurrency as setDefaultCurrencyPref } from '../lib/prefs';
 import { Subscription, SubscriptionInsert, SubscriptionUpdate, Category, PriceHistoryEntry } from '../types/database';
 
 // Check if demo mode is enabled
@@ -11,6 +12,10 @@ interface SubscriptionState {
   categories: Category[];
   loading: boolean;
   error: string | null;
+  // Display currency: all totals are converted into this so every surface agrees.
+  defaultCurrency: string;
+  loadDefaultCurrency: () => Promise<void>;
+  setDefaultCurrency: (code: string) => Promise<void>;
   clear: () => void;
   fetchAll: () => Promise<void>;
   fetchCategories: () => Promise<void>;
@@ -25,6 +30,18 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
   categories: [],
   loading: false,
   error: null,
+  defaultCurrency: 'USD',
+
+  loadDefaultCurrency: async () => {
+    const code = await getDefaultCurrencyPref();
+    set({ defaultCurrency: code });
+  },
+
+  /** Persist the display currency AND update the store so all surfaces re-render. */
+  setDefaultCurrency: async (code: string) => {
+    await setDefaultCurrencyPref(code);
+    set({ defaultCurrency: code });
+  },
 
   /** Wipe cached rows so one user's data never shows up under another. */
   clear: () => set({ subscriptions: [], error: null, loading: false }),

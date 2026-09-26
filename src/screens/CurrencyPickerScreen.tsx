@@ -3,26 +3,29 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-nati
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { SettingsStackParamList } from '../navigation/types';
-import { CURRENCIES, getDefaultCurrency, setDefaultCurrency } from '../lib/prefs';
+import { CURRENCIES } from '../lib/prefs';
+import { useSubscriptionStore } from '../store/subscriptionStore';
 
 type Props = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'DefaultCurrency'>;
 };
 
 export default function CurrencyPickerScreen({ navigation }: Props) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const { defaultCurrency, setDefaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
+  const [selected, setSelected] = useState<string | null>(defaultCurrency);
 
-  useEffect(() => { getDefaultCurrency().then(setSelected); }, []);
+  useEffect(() => { loadDefaultCurrency(); }, []);
+  useEffect(() => { setSelected(defaultCurrency); }, [defaultCurrency]);
 
   const choose = async (code: string) => {
     setSelected(code);
-    await setDefaultCurrency(code);
+    await setDefaultCurrency(code); // persists + updates the store so all surfaces re-render
     navigation.goBack();
   };
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.hint}>New subscriptions will use this currency by default.</Text>
+      <Text style={styles.hint}>All totals across the app are shown in this currency, and new subscriptions default to it.</Text>
       <View style={styles.section}>
         {CURRENCIES.map((c, i) => {
           const active = c.code === selected;

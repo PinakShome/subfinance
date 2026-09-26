@@ -4,9 +4,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
-import { totalMonthlySpend } from '../lib/subscriptionUtils';
+import { totalMonthlySpend, formatCurrency } from '../lib/subscriptionUtils';
 import { getNotificationsEnabled, setNotificationsEnabled } from '../lib/notifications';
-import { getDefaultCurrency } from '../lib/prefs';
 import { apiFetch } from '../lib/api';
 import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
@@ -84,9 +83,9 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function SettingsScreen({ navigation }: Props) {
   const { user, signOut } = useAuthStore();
-  const { subscriptions } = useSubscriptionStore();
+  const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
 
-  const totalMonthly = totalMonthlySpend(subscriptions);
+  const totalMonthly = totalMonthlySpend(subscriptions, defaultCurrency);
   const activeCount = subscriptions.filter(s => s.is_active).length;
   const overdueCount = subscriptions.filter(s => {
     const d = new Date(s.next_renewal).getTime() - Date.now();
@@ -96,18 +95,16 @@ export default function SettingsScreen({ navigation }: Props) {
 
   const [notifEnabled, setNotifEnabled] = useState(false);
   const [notifBusy, setNotifBusy] = useState(false);
-  const [defaultCurrency, setDefaultCurrencyState] = useState('USD');
 
   useEffect(() => {
     getNotificationsEnabled().then(setNotifEnabled).catch(() => {});
   }, [user?.id]);
 
-  // Refresh the currency badge each time this screen regains focus (e.g. after
-  // returning from the currency picker).
+  // Keep the display currency current — on mount and each time this screen
+  // regains focus (e.g. after returning from the currency picker).
   useEffect(() => {
-    const unsub = navigation.addListener('focus', () => {
-      getDefaultCurrency().then(setDefaultCurrencyState).catch(() => {});
-    });
+    loadDefaultCurrency();
+    const unsub = navigation.addListener('focus', () => { loadDefaultCurrency(); });
     return unsub;
   }, [navigation]);
 
@@ -191,7 +188,7 @@ export default function SettingsScreen({ navigation }: Props) {
           </View>
           <View style={styles.statDiv} />
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: '#06b6d4' }]}>${totalMonthly.toFixed(0)}</Text>
+            <Text style={[styles.statVal, { color: '#06b6d4' }]}>{formatCurrency(totalMonthly, defaultCurrency, 0)}</Text>
             <Text style={styles.statLbl}>monthly</Text>
           </View>
           <View style={styles.statDiv} />
