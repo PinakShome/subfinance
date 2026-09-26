@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Share, Linking } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
@@ -143,26 +143,6 @@ export default function SettingsScreen({ navigation }: Props) {
     ]);
   };
 
-  const handleExportData = async () => {
-    if (!subscriptions.length) {
-      showAlert('Nothing to export', 'Add a subscription first.');
-      return;
-    }
-    const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const header = 'Name,Cost,Currency,Billing Cycle,Interval Days,Next Renewal,Category,Free Trial,Trial Ends,Notes';
-    const rows = subscriptions.map((s) => [
-      esc(s.name), s.cost, esc(s.currency), esc(s.billing_cycle), s.interval_days ?? '',
-      esc(s.next_renewal), esc(s.category?.name ?? ''), s.is_trial ? 'yes' : 'no',
-      esc(s.trial_ends_on ?? ''), esc(s.notes ?? ''),
-    ].join(','));
-    const csv = [header, ...rows].join('\n');
-    try {
-      await Share.share({ message: csv, title: 'SubFinance subscriptions (CSV)' });
-    } catch {
-      showAlert('Could not export', 'Something went wrong preparing your data. Please try again.');
-    }
-  };
-
   const handleDeleteAccount = () => {
     showAlert(
       'Delete Account',
@@ -267,13 +247,6 @@ export default function SettingsScreen({ navigation }: Props) {
           color="#f43f5e"
           danger
           onPress={handleSignOut}
-        />
-        <SettingsRow
-          icon="download-outline"
-          label="Export My Data"
-          description="Download your subscriptions as CSV"
-          color="#06b6d4"
-          onPress={handleExportData}
         />
         <SettingsRow
           icon="trash-outline"

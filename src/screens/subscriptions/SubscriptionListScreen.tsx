@@ -102,27 +102,31 @@ const FILTER_CHIP_STYLES: Record<FilterType, { bg: string; border: string; text:
   trial:  { bg: '#06b6d420', border: '#06b6d450', text: '#06b6d4' },
 };
 
-function FilterChip({ label, active, onPress, filterType }: {
+function FilterChip({ label, active, onPress, filterType, icon, prominent }: {
   label: string; active: boolean; onPress: () => void; filterType: FilterType;
+  icon?: string; prominent?: boolean;
 }) {
   const activeStyle = FILTER_CHIP_STYLES[filterType];
+  // "prominent" gives a filled, call-to-action look even when unselected — used
+  // for Trials when any exist, so users clearly see it's a tappable view.
+  const filled = prominent && !active;
+  const containerStyle = filled
+    ? { backgroundColor: activeStyle.text, borderColor: activeStyle.text }
+    : active
+      ? { backgroundColor: activeStyle.bg, borderColor: activeStyle.border }
+      : { backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' };
+  const contentColor = filled ? '#ffffff' : active ? activeStyle.text : '#787591';
   return (
     <TouchableOpacity
-      style={[
-        styles.filterChip,
-        active
-          ? { backgroundColor: activeStyle.bg, borderColor: activeStyle.border }
-          : { backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' },
-      ]}
+      style={[styles.filterChip, styles.filterChipRow, containerStyle]}
       onPress={onPress}
       activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
     >
-      <Text style={[
-        styles.filterChipText,
-        { color: active ? activeStyle.text : '#787591' },
-      ]}>
-        {label}
-      </Text>
+      {icon && <Ionicons name={icon as any} size={13} color={contentColor} />}
+      <Text style={[styles.filterChipText, { color: contentColor }]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -137,7 +141,11 @@ export default function SubscriptionListScreen({ navigation }: Props) {
 
   const totalMonthly = totalMonthlySpend(subscriptions);
   const annualTotal = totalMonthly * 12;
-  const avgPerSub = subscriptions.length > 0 ? totalMonthly / subscriptions.length : 0;
+  // Actual charges due in the next 30 days — a metric users can act on, unlike a
+  // total/count average which mixes billing cycles and means little.
+  const due30 = subscriptions
+    .filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
+    .reduce((sum, s) => sum + s.cost, 0);
   const overdueCount = subscriptions.filter(s => daysUntilRenewal(s.next_renewal) < 0).length;
   const dueSoonCount = subscriptions.filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 7; }).length;
   const trialCount = subscriptions.filter(s => s.is_trial).length;
@@ -177,8 +185,8 @@ export default function SubscriptionListScreen({ navigation }: Props) {
           </View>
           <View style={styles.heroStatDiv} />
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: '#10b981' }]}>${avgPerSub.toFixed(0)}</Text>
-            <Text style={styles.heroStatLbl}>avg / sub</Text>
+            <Text style={[styles.heroStatVal, { color: '#10b981' }]}>${due30.toFixed(0)}</Text>
+            <Text style={styles.heroStatLbl}>due in 30d</Text>
           </View>
           <View style={styles.heroStatDiv} />
           <View style={styles.heroStat}>
@@ -211,7 +219,7 @@ export default function SubscriptionListScreen({ navigation }: Props) {
         <FilterChip label={`Overdue${overdueCount > 0 ? ` (${overdueCount})` : ''}`} active={filter === 'overdue'} filterType="overdue" onPress={() => setFilter('overdue')} />
         <FilterChip label={`Due Soon${dueSoonCount > 0 ? ` (${dueSoonCount})` : ''}`} active={filter === 'soon'} filterType="soon" onPress={() => setFilter('soon')} />
         <FilterChip label="Active" active={filter === 'active'} filterType="active" onPress={() => setFilter('active')} />
-        <FilterChip label={`Trials${trialCount > 0 ? ` (${trialCount})` : ''}`} active={filter === 'trial'} filterType="trial" onPress={() => setFilter('trial')} />
+        <FilterChip label={`Trials${trialCount > 0 ? ` (${trialCount})` : ''}`} icon="flask-outline" prominent={trialCount > 0} active={filter === 'trial'} filterType="trial" onPress={() => setFilter('trial')} />
       </View>
 
       {/* ─── List ─── */}
@@ -308,6 +316,7 @@ const styles = StyleSheet.create({
   filterChip: {
     paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1,
   },
+  filterChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   filterChipText: { fontSize: 12, fontWeight: '600' },
 
   // Card

@@ -83,8 +83,14 @@ export default function AnalyticsScreen() {
     [active],
   );
 
-  const daily = monthly / 30;
-  const avgPerSub = active.length > 0 ? monthly / active.length : 0;
+  // Real cash leaving the account in the next 30 days (actual charge amounts, not
+  // a monthly-normalized average) — the metric a user can actually act on.
+  const due30 = useMemo(
+    () => active
+      .filter((s) => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
+      .reduce((sum, s) => sum + s.cost, 0),
+    [active],
+  );
 
   const mostExpensive = active.reduce<Subscription | null>(
     (max, s) => !max || monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days) >
@@ -152,8 +158,8 @@ export default function AnalyticsScreen() {
       <View style={styles.kpiGrid}>
         <MetricCard label="Monthly" value={formatCurrency(monthly)} icon="trending-up-outline" accentColor="#8b5cf6" />
         <MetricCard label="Annual" value={formatCurrency(monthly * 12)} icon="calendar-outline" accentColor="#06b6d4" />
-        <MetricCard label="Daily avg" value={formatCurrency(daily)} icon="sunny-outline" accentColor="#10b981" />
-        <MetricCard label="Per sub" value={formatCurrency(avgPerSub)} icon="layers-outline" accentColor="#f59e0b" />
+        <MetricCard label="Due in 30 days" value={formatCurrency(due30)} icon="wallet-outline" accentColor="#10b981" />
+        <MetricCard label="Top category" value={formatCurrency(categoryData[0]?.[1].amount ?? 0)} sub={categoryData[0]?.[0]} icon="pie-chart-outline" accentColor="#f59e0b" />
       </View>
 
       {/* ─── Highlight Cards ─── */}
@@ -161,7 +167,7 @@ export default function AnalyticsScreen() {
         <View style={styles.highlightRow}>
           <View style={[styles.highlightCard, styles.hlDanger]}>
             <Ionicons name="arrow-up-circle" size={18} color="#f43f5e" />
-            <Text style={styles.hlLabel}>Most expensive</Text>
+            <Text style={styles.hlLabel}>Highest cost</Text>
             <Text style={styles.hlName}>{mostExpensive.name}</Text>
             <Text style={[styles.hlAmt, { color: '#f43f5e' }]}>
               {formatCurrency(monthlyEquivalent(mostExpensive.cost, mostExpensive.billing_cycle, mostExpensive.interval_days), mostExpensive.currency)}/mo
@@ -170,7 +176,7 @@ export default function AnalyticsScreen() {
           {cheapest && cheapest.id !== mostExpensive.id && (
             <View style={[styles.highlightCard, styles.hlGreen]}>
               <Ionicons name="arrow-down-circle" size={18} color="#10b981" />
-              <Text style={[styles.hlLabel, styles.hlLabelGreen]}>Cheapest</Text>
+              <Text style={[styles.hlLabel, styles.hlLabelGreen]}>Lowest cost</Text>
               <Text style={styles.hlName}>{cheapest.name}</Text>
               <Text style={[styles.hlAmt, { color: '#10b981' }]}>
                 {formatCurrency(monthlyEquivalent(cheapest.cost, cheapest.billing_cycle, cheapest.interval_days), cheapest.currency)}/mo
