@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../store/authStore';
 import { useSubscriptionStore } from '../store/subscriptionStore';
@@ -11,7 +12,7 @@ import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
 
 const PRIVACY_POLICY_URL = 'https://subscription-tracker-gilt.vercel.app/privacy-policy.html';
-const SUPPORT_EMAIL = 'support@subfinance.app';
+const TERMS_URL = 'https://subscription-tracker-gilt.vercel.app/terms.html';
 
 type Props = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'SettingsHome'>;
@@ -225,6 +226,13 @@ export default function SettingsScreen({ navigation }: Props) {
       <SectionHeader title="ACCOUNT" />
       <View style={styles.section}>
         <SettingsRow
+          icon="help-circle-outline"
+          label="Help & Support"
+          description="FAQ, contact, and app info"
+          color="#8b5cf6"
+          onPress={() => navigation.navigate('HelpSupport')}
+        />
+        <SettingsRow
           icon="shield-checkmark-outline"
           label="Privacy Policy"
           description="How we handle and protect your data"
@@ -232,11 +240,11 @@ export default function SettingsScreen({ navigation }: Props) {
           onPress={() => openURL(PRIVACY_POLICY_URL, 'Could not open the privacy policy. Please try again.')}
         />
         <SettingsRow
-          icon="help-circle-outline"
-          label="Help & Support"
-          description={`Email us at ${SUPPORT_EMAIL}`}
+          icon="document-text-outline"
+          label="Terms of Use"
+          description="The terms you agree to when using SubFinance"
           color="#6a6782"
-          onPress={() => openURL(`mailto:${SUPPORT_EMAIL}?subject=SubFinance%20Support`, `Email us at ${SUPPORT_EMAIL}`)}
+          onPress={() => openURL(TERMS_URL, 'Could not open the terms. Please try again.')}
         />
         <SettingsRow
           icon="log-out-outline"
@@ -255,7 +263,7 @@ export default function SettingsScreen({ navigation }: Props) {
         />
       </View>
 
-      <Text style={styles.version}>SubFinance v1.0.0 · Built with ♥</Text>
+      <Text style={styles.version}>SubFinance v{Constants.expoConfig?.version ?? '1.0.0'} · Built with ♥</Text>
     </ScrollView>
   );
 }
@@ -298,7 +306,7 @@ const styles = StyleSheet.create({
   stat: { flex: 1, alignItems: 'center' },
   statVal: { fontSize: 22, fontWeight: '900' },
   statLbl: { color: '#8a8698', fontSize: 11, marginTop: 3 },
-  statDiv: { width: 1, height: 34, backgroundColor: 'rgba(255,255,255,0.07)' },
+  statDiv: { width: 1, height: 34, backgroundColor: 'rgba(0,0,0,0.06)' },
 
   // Section header
   sectionHdr: {
@@ -309,14 +317,14 @@ const styles = StyleSheet.create({
   // Section
   section: {
     backgroundColor: '#ffffff', borderRadius: 20,
-    marginBottom: 20, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    marginBottom: 20, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
     overflow: 'hidden',
   },
 
   // Row
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+    padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)',
   },
   rowDanger: { borderBottomWidth: 0 },
   rowIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
@@ -328,5 +336,5 @@ const styles = StyleSheet.create({
   },
   rowBadgeText: { fontSize: 11, fontWeight: '800' },
 
-  version: { color: '#f4f2fc', fontSize: 12, textAlign: 'center', marginTop: 8 },
+  version: { color: '#b6b2c6', fontSize: 12, textAlign: 'center', marginTop: 8 },
 });

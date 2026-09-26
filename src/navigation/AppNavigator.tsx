@@ -10,6 +10,7 @@ import AlternativesScreen from '../screens/subscriptions/AlternativesScreen';
 import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CurrencyPickerScreen from '../screens/CurrencyPickerScreen';
+import HelpSupportScreen from '../screens/HelpSupportScreen';
 
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
@@ -38,6 +39,7 @@ function SettingsStackNavigator() {
     <SettingsStack.Navigator screenOptions={NAV_OPTS}>
       <SettingsStack.Screen name="SettingsHome" component={SettingsScreen} options={{ title: 'Settings' }} />
       <SettingsStack.Screen name="DefaultCurrency" component={CurrencyPickerScreen} options={{ title: 'Default Currency' }} />
+      <SettingsStack.Screen name="HelpSupport" component={HelpSupportScreen} options={{ title: 'Help & Support' }} />
     </SettingsStack.Navigator>
   );
 }
