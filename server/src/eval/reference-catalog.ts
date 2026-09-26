@@ -217,6 +217,85 @@ export const REFERENCE_CATALOG: RefCategory[] = [
     { name: 'Dollar Shave Club', approx_monthly: 10 }, { name: 'Stitch Fix' },
     { name: 'Book of the Month', approx_monthly: 19.99 }, { name: 'KiwiCo', approx_monthly: 24.95 },
   ]},
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // EXPANSION (Sep 2026 web survey). Additions to existing categories reuse the
+  // exact category name — REFERENCE_SERVICES flattens, so grouping is cosmetic
+  // and keys stay name+category unique. Three new taxonomy categories at the end
+  // (Business & Accounting, Faith & Spirituality, Music Creation) are mirrored
+  // into public.categories by migration 008 so users can select them.
+  // ─────────────────────────────────────────────────────────────────────────
+  { category: 'AI Tools', services: [
+    { name: 'Cursor', approx_monthly: 20 }, { name: 'Poe', approx_monthly: 19.99 },
+    { name: 'DeepL Pro', approx_monthly: 8.74 }, { name: 'Descript', approx_monthly: 24 },
+    { name: 'Gamma', approx_monthly: 10 },
+  ]},
+  { category: 'Productivity & Office', services: [
+    { name: 'Obsidian', approx_monthly: 4 }, { name: 'Fantastical', approx_monthly: 4.75 },
+    { name: 'Superhuman', approx_monthly: 30 }, { name: 'TickTick', approx_monthly: 3.99 },
+    { name: 'Setapp', approx_monthly: 9.99 },
+  ]},
+  { category: 'Design & Creative', services: [
+    { name: 'Envato Elements', approx_monthly: 16.50 }, { name: 'Shutterstock', approx_monthly: 29 },
+    { name: 'Adobe Stock', approx_monthly: 29.99 }, { name: 'Storyblocks', approx_monthly: 21 },
+    { name: 'Epidemic Sound', approx_monthly: 9.99 }, { name: 'Pixlr', approx_monthly: 4.90 },
+  ]},
+  { category: 'Communication', services: [
+    { name: 'Proton Mail', approx_monthly: 4.99 }, { name: 'Fastmail', approx_monthly: 5 },
+    { name: 'HEY', approx_monthly: 8.25 },
+  ]},
+  { category: 'Website & eCommerce', services: [
+    { name: 'Mailchimp', approx_monthly: 13 }, { name: 'Kit', approx_monthly: 29 },
+    { name: 'MailerLite', approx_monthly: 15 }, { name: 'Constant Contact', approx_monthly: 12 },
+    { name: 'Hostinger', approx_monthly: 2.99 }, { name: 'Bluehost', approx_monthly: 11.99 },
+  ]},
+  { category: 'Education & Learning', services: [
+    { name: 'ABCmouse', approx_monthly: 14.99 }, { name: 'Epic!', approx_monthly: 13.99 },
+    { name: 'Khan Academy Kids', approx_monthly: 0 }, { name: 'IXL', approx_monthly: 19.95 },
+    { name: 'Outschool' }, { name: 'Homer', approx_monthly: 9.99 },
+  ]},
+  { category: 'Food & Meal Delivery', services: [
+    { name: 'NYT Cooking', approx_monthly: 4.99 }, { name: 'Mealime', approx_monthly: 5.99 },
+    { name: 'Yummly', approx_monthly: 4.99 },
+  ]},
+  { category: 'Writing & Utilities', services: [
+    { name: 'Carrot Weather', approx_monthly: 4.99 }, { name: 'Weather Underground', approx_monthly: 1.99 },
+    { name: 'AccuWeather', approx_monthly: 0 },
+  ]},
+  { category: 'Telecom & Mobile', services: [
+    { name: 'OpenPhone', approx_monthly: 15 }, { name: 'Grasshopper', approx_monthly: 28 },
+  ]},
+  { category: 'Fitness', services: [
+    { name: 'Planet Fitness', approx_monthly: 15 }, { name: 'Ladder', approx_monthly: 29 },
+    { name: 'Future', approx_monthly: 199 }, { name: 'Fitbod', approx_monthly: 12.99 },
+  ]},
+  { category: 'Health & Nutrition', services: [
+    { name: 'MacroFactor', approx_monthly: 11.99 }, { name: 'Lose It!', approx_monthly: 3.33 },
+  ]},
+  { category: 'Photography', services: [
+    { name: 'Darkroom', approx_monthly: 4.99 }, { name: 'Photoroom', approx_monthly: 9.99 },
+  ]},
+  { category: 'Developer & Cloud', services: [
+    { name: 'Replit', approx_monthly: 20 }, { name: 'Sentry', approx_monthly: 26 },
+  ]},
+
+  // ── New taxonomy categories ──
+  { category: 'Business & Accounting', services: [
+    { name: 'QuickBooks Online', approx_monthly: 38 }, { name: 'QuickBooks Solopreneur', approx_monthly: 20 },
+    { name: 'FreshBooks', approx_monthly: 23 }, { name: 'Xero', approx_monthly: 25 },
+    { name: 'Wave', approx_monthly: 0 }, { name: 'Zoho Books', approx_monthly: 15 },
+    { name: 'Bonsai', approx_monthly: 25 }, { name: 'HoneyBook', approx_monthly: 19 },
+  ]},
+  { category: 'Faith & Spirituality', services: [
+    { name: 'Hallow', approx_monthly: 10.99 }, { name: 'Pray.com', approx_monthly: 9.99 },
+    { name: 'Abide', approx_monthly: 9.99 }, { name: 'Glorify', approx_monthly: 9.99 },
+    { name: 'Dwell', approx_monthly: 8.99 }, { name: 'YouVersion Bible', approx_monthly: 0 },
+  ]},
+  { category: 'Music Creation', services: [
+    { name: 'Splice', approx_monthly: 19.99 }, { name: 'LANDR', approx_monthly: 20 },
+    { name: 'Output Arcade', approx_monthly: 10 }, { name: 'DistroKid', approx_monthly: 1.99 },
+    { name: 'Loopcloud', approx_monthly: 7.99 },
+  ]},
 ];
 
 /** Flat list with category attached — what the catalogue builders consume. */

@@ -356,6 +356,159 @@ const A = {
   chewy: a('Chewy / retail toys', 0, 'https://www.chewy.com', 'Buy pet toys/treats as needed, often cheaper.'),
   bookLibrary: a('Libby (library)', 0, 'https://libbyapp.com', 'Free ebooks and audiobooks with a library card.'),
   kiwicoFree: a('Library + free STEM kits', 0, 'https://www.sciencebuddies.org', 'Free STEM project guides and library programs.'),
+
+  // ── EXPANSION building blocks (Sep 2026) ──
+  // AI / assistants / translation / video-AI
+  aiChatGPT: a('ChatGPT (Free)', 0, 'https://chat.openai.com', 'Free tier with a capable default model.'),
+  aiGemini: a('Google Gemini (Free)', 0, 'https://gemini.google.com', 'Free tier from Google.'),
+  aiClaude: a('Claude (Free)', 0, 'https://claude.ai', 'Free tier from Anthropic.'),
+  aiPerplexity: a('Perplexity (Free)', 0, 'https://www.perplexity.ai', 'Free AI answers with citations.'),
+  ghCopilotAlt: a('GitHub Copilot', 10, 'https://github.com/features/copilot', 'Cheaper AI pair-programmer; free for students/OSS.'),
+  zedAI: a('Zed', 0, 'https://zed.dev', 'Fast native editor with free AI features.'),
+  googleTranslate: a('Google Translate', 0, 'https://translate.google.com', 'Free translation for text, docs and speech.'),
+  deeplFreeAlt: a('DeepL (Free)', 0, 'https://www.deepl.com/translator', 'High-quality free translation with limits.'),
+  appleTranslate: a('Apple Translate', 0, 'https://apps.apple.com/app/translate/id1514844618', 'Free, on-device translation on iPhone.'),
+  clipchamp: a('Microsoft Clipchamp', 0, 'https://clipchamp.com', 'Free browser video editor from Microsoft.'),
+  googleSlides: a('Google Slides', 0, 'https://slides.google.com', 'Free presentations in the browser.'),
+  pitchApp: a('Pitch', 0, 'https://pitch.com', 'Free collaborative presentation software.'),
+
+  // Productivity / notes / mail / tasks
+  obsidianFree: a('Obsidian', 0, 'https://obsidian.md', 'Free local-first notes; sync is optional.'),
+  appleCalendar: a('Apple Calendar', 0, 'https://www.icloud.com/calendar', 'Free calendar built into Apple devices.'),
+  googleCalendar: a('Google Calendar', 0, 'https://calendar.google.com', 'Free, cross-platform calendar.'),
+  notionCalendar: a('Notion Calendar', 0, 'https://www.notion.so/product/calendar', 'Free, polished calendar app (formerly Cron).'),
+  gmailFree: a('Gmail', 0, 'https://mail.google.com', 'Free email with 15 GB storage.'),
+  sparkMail: a('Spark', 0, 'https://sparkmailapp.com', 'Free, powerful email client.'),
+  shortwave: a('Shortwave', 0, 'https://www.shortwave.com', 'Fast, modern Gmail client; free tier.'),
+  googleTasks: a('Google Tasks', 0, 'https://tasks.google.com', 'Free tasks built into Gmail/Calendar.'),
+  appleReminders: a('Apple Reminders', 0, 'https://www.icloud.com/reminders', 'Free, capable reminders on Apple devices.'),
+  homebrewApps: a('Buy apps individually', 0, 'https://formulae.brew.sh', 'Pay once (or use free Homebrew apps) instead of a bundle.'),
+
+  // Stock media / free assets
+  pexels: a('Pexels', 0, 'https://www.pexels.com', 'Free stock photos and video, no attribution.'),
+  unsplash: a('Unsplash', 0, 'https://unsplash.com', 'Free high-resolution stock photos.'),
+  pixabay: a('Pixabay', 0, 'https://pixabay.com', 'Free photos, video, music and sound effects.'),
+  freepikFree: a('Freepik (Free)', 0, 'https://www.freepik.com', 'Free graphics and photos with attribution.'),
+  mixkit: a('Mixkit', 0, 'https://mixkit.co', 'Free stock video, music and templates.'),
+  coverr: a('Coverr', 0, 'https://coverr.co', 'Free stock video clips.'),
+  ytAudioLibrary: a('YouTube Audio Library', 0, 'https://studio.youtube.com', 'Free music and SFX for creators.'),
+  pixabayMusic: a('Pixabay Music', 0, 'https://pixabay.com/music', 'Free, royalty-free music tracks.'),
+  freeMusicArchive: a('Free Music Archive', 0, 'https://freemusicarchive.org', 'Free, curated music for creators.'),
+  uppbeat: a('Uppbeat', 0, 'https://uppbeat.io', 'Free music for creators; generous free tier.'),
+  envatoAlt: a('Envato Elements', 16.5, 'https://elements.envato.com', 'Unlimited downloads of assets for one low fee.'),
+  storyblocksAlt: a('Storyblocks', 21, 'https://www.storyblocks.com', 'Unlimited stock video/photo downloads.'),
+
+  // Email hosting (privacy)
+  outlookFree: a('Outlook.com', 0, 'https://outlook.com', 'Free Microsoft email with a custom-looking inbox.'),
+  tuta: a('Tuta Mail', 0, 'https://tuta.com', 'Free, encrypted, privacy-first email.'),
+  zohoMailFree: a('Zoho Mail (Free)', 0, 'https://www.zoho.com/mail', 'Free email, incl. custom domain for one user.'),
+  protonMailFree: a('Proton Mail (Free)', 0, 'https://proton.me/mail', 'Free encrypted email; 1 GB.'),
+
+  // Email marketing
+  kitFree: a('Kit (Free)', 0, 'https://kit.com', 'Free up to 10,000 subscribers.'),
+  mailerliteFree: a('MailerLite (Free)', 0, 'https://www.mailerlite.com', 'Free up to 1,000 subscribers.'),
+  brevoFree: a('Brevo (Free)', 0, 'https://www.brevo.com', 'Free plan; pay by emails sent, not contacts.'),
+  mailchimpFree: a('Mailchimp (Free)', 0, 'https://mailchimp.com', 'Free tier for a small list.'),
+
+  // Web hosting / deploy
+  cloudflarePages: a('Cloudflare Pages', 0, 'https://pages.cloudflare.com', 'Free static/site hosting with a global CDN.'),
+  netlifyFree: a('Netlify (Free)', 0, 'https://www.netlify.com', 'Free tier for static sites and functions.'),
+  githubPages: a('GitHub Pages', 0, 'https://pages.github.com', 'Free static site hosting from a repo.'),
+  vercelFree: a('Vercel (Hobby)', 0, 'https://vercel.com', 'Free hosting for personal projects.'),
+
+  // Kids education
+  khanKids: a('Khan Academy Kids', 0, 'https://learn.khanacademy.org/khan-academy-kids', 'Completely free, ad-free early learning.'),
+  duolingoABC: a('Duolingo ABC', 0, 'https://www.duolingo.com/abc', 'Free early-reading app.'),
+  pbsKids: a('PBS Kids Games', 0, 'https://pbskids.org/games', 'Free educational games and videos.'),
+  starfall: a('Starfall', 0, 'https://www.starfall.com', 'Free (mostly) phonics and early math.'),
+  prodigyFree: a('Prodigy (Free)', 0, 'https://www.prodigygame.com', 'Free curriculum-aligned math game.'),
+  storylineOnline: a('Storyline Online', 0, 'https://storylineonline.net', 'Free read-aloud picture books.'),
+  khanAcademyFree: a('Khan Academy', 0, 'https://www.khanacademy.org', 'Free lessons across every K-12 subject.'),
+  photomathFree: a('Photomath (Free)', 0, 'https://photomath.com', 'Free step-by-step math help.'),
+  ck12: a('CK-12', 0, 'https://www.ck12.org', 'Free interactive textbooks and practice.'),
+  gutenberg: a('Project Gutenberg', 0, 'https://www.gutenberg.org', 'Free classic books, many for kids.'),
+  youtubeEdu: a('YouTube (educational)', 0, 'https://www.youtube.com', 'Free lessons from great educators.'),
+  libraryProg: a('Local library programs', 0, 'https://www.usa.gov/libraries-and-archives', 'Free classes, reading and activities for kids.'),
+
+  // Recipes / cooking
+  paprika: a('Paprika Recipe Manager', null, 'https://www.paprikaapp.com', 'One-time ~$4.99 purchase; no subscription.'),
+  allrecipes: a('Allrecipes', 0, 'https://www.allrecipes.com', 'Free recipes with reviews and ratings.'),
+  samsungFood: a('Samsung Food', 0, 'https://samsungfood.com', 'Free recipe saving, planning and lists (was Whisk).'),
+  bbcGoodFood: a('BBC Good Food', 0, 'https://www.bbcgoodfood.com', 'Free, well-tested recipes.'),
+  mealimeFree: a('Mealime (Free)', 0, 'https://www.mealime.com', 'Free meal plans and grocery lists.'),
+  eatThisMuch: a('Eat This Much (Free)', 0, 'https://www.eatthismuch.com', 'Free automatic meal planner.'),
+  supercook: a('SuperCook', 0, 'https://www.supercook.com', 'Free recipes from ingredients you have.'),
+
+  // VoIP / business phone
+  googleVoice: a('Google Voice', 0, 'https://voice.google.com', 'Free US number for calls and texts.'),
+  textNow: a('TextNow', 0, 'https://www.textnow.com', 'Free number with calling and texting (ads).'),
+  dialpad: a('Dialpad', 15, 'https://www.dialpad.com', 'Cheaper AI business phone system.'),
+  zoomPhone: a('Zoom Phone', 10, 'https://www.zoom.com/en/products/voip-phone', 'Low-cost business calling add-on.'),
+  openphoneAlt: a('OpenPhone', 15, 'https://www.openphone.com', 'Cheaper business phone with a shared number.'),
+
+  // Weather
+  appleWeather: a('Apple Weather', 0, 'https://www.apple.com/ios/weather', 'Free, detailed weather built into iPhone.'),
+  googleWeather: a('Google Weather', 0, 'https://www.google.com/search?q=weather', 'Free hourly and 10-day forecasts.'),
+  windyFree: a('Windy.com', 0, 'https://www.windy.com', 'Free, powerful weather maps and radar.'),
+  weatherGov: a('Weather.gov (NWS)', 0, 'https://www.weather.gov', 'Free official US forecasts and alerts.'),
+  wUndergroundAlt: a('Weather Underground', 1.99, 'https://www.wunderground.com', 'Hyperlocal forecasts; cheap ad-free tier.'),
+  accuweatherFree: a('AccuWeather (Free)', 0, 'https://www.accuweather.com', 'Free forecasts with MinuteCast.'),
+
+  // Fitness / workouts
+  nikeTraining: a('Nike Training Club', 0, 'https://www.nike.com/ntc-app', 'Free guided workouts and plans.'),
+  fitbodAlt: a('Fitbod', 12.99, 'https://fitbod.me', 'Cheaper adaptive strength-training plans.'),
+  caliberFree: a('Caliber (Free)', 0, 'https://caliber.fitness', 'Free structured strength programs.'),
+  downDog: a('Down Dog', 0, 'https://www.downdogapp.com', 'Yoga/HIIT with a generous free tier.'),
+  youtubeWorkouts: a('YouTube workouts', 0, 'https://www.youtube.com', 'Free classes from top trainers.'),
+  recCenter: a('Local rec center / gym', 0, 'https://www.usa.gov', 'Community gyms are often far cheaper.'),
+
+  // Health / nutrition
+  myFitnessPalFree: a('MyFitnessPal (Free)', 0, 'https://www.myfitnesspal.com', 'Free calorie and macro tracking.'),
+  loseItFreeAlt: a('Lose It! (Free)', 0, 'https://www.loseit.com', 'Free calorie tracking with a food database.'),
+  fatSecret: a('FatSecret', 0, 'https://www.fatsecret.com', 'Free calorie counter and food diary.'),
+
+  // Photography
+  vscoFree: a('VSCO (Free)', 0, 'https://vsco.co', 'Free filters and basic editing.'),
+  lightroomMobileFree: a('Lightroom Mobile (Free)', 0, 'https://www.adobe.com/products/photoshop-lightroom.html', 'Free core editing on mobile.'),
+  removeBg: a('remove.bg', 0, 'https://www.remove.bg', 'Free automatic background removal.'),
+
+  // Developer / cloud
+  vscodeLocal: a('VS Code (local)', 0, 'https://code.visualstudio.com', 'Free editor; develop locally at no cost.'),
+  githubCodespaces: a('GitHub Codespaces (Free)', 0, 'https://github.com/features/codespaces', 'Free monthly cloud-dev hours.'),
+  gitpod: a('Gitpod', 0, 'https://www.gitpod.io', 'Cloud dev environments with a free tier.'),
+  stackblitz: a('StackBlitz', 0, 'https://stackblitz.com', 'Free instant in-browser dev environments.'),
+  glitchDev: a('Glitch', 0, 'https://glitch.com', 'Free app building and hosting.'),
+  sentryFree: a('Sentry (Free)', 0, 'https://sentry.io', 'Free developer tier for error tracking.'),
+  glitchtip: a('GlitchTip', 0, 'https://glitchtip.com', 'Open-source, self-hostable error tracking.'),
+
+  // Business & accounting
+  waveFree: a('Wave', 0, 'https://www.waveapps.com', 'Free invoicing and accounting for small business.'),
+  zohoBooksFree: a('Zoho Books (Free)', 0, 'https://www.zoho.com/books', 'Free plan for businesses under a revenue cap.'),
+  gnucash: a('GnuCash', 0, 'https://www.gnucash.org', 'Free, open-source double-entry accounting.'),
+  akaunting: a('Akaunting', 0, 'https://akaunting.com', 'Free, open-source online accounting.'),
+  invoiceNinja: a('Invoice Ninja (Free)', 0, 'https://www.invoiceninja.com', 'Free invoicing and payments.'),
+  zohoInvoice: a('Zoho Invoice', 0, 'https://www.zoho.com/invoice', '100% free invoicing.'),
+  freshbooksAlt: a('FreshBooks', 23, 'https://www.freshbooks.com', 'Cheaper, simple invoicing + accounting.'),
+
+  // Faith & spirituality
+  youversion: a('YouVersion Bible', 0, 'https://www.bible.com', 'Free Bible with plans, audio and devotionals.'),
+  praycomFree: a('Pray.com (Free)', 0, 'https://www.pray.com', 'Free daily prayers and Bible stories.'),
+  abideFree: a('Abide (Free)', 0, 'https://abide.com', 'Free Christian meditations and sleep stories.'),
+  insightTimerAlt: a('Insight Timer', 0, 'https://insighttimer.com', 'Huge free library of meditations and prayer.'),
+  bibleIs: a('Bible.is', 0, 'https://www.bible.is', 'Free audio Bible in many languages.'),
+  bibleGateway: a('Bible Gateway', 0, 'https://www.biblegateway.com', 'Free Bible reading in many translations.'),
+  hallowAlt: a('Hallow', 10.99, 'https://hallow.com', 'Cheaper annually; Catholic prayer & meditation.'),
+
+  // Music creation / distribution
+  bandlab: a('BandLab', 0, 'https://www.bandlab.com', 'Free DAW, samples and social for musicians.'),
+  garageband: a('GarageBand', 0, 'https://www.apple.com/mac/garageband', 'Free full-featured DAW on Apple devices.'),
+  looperman: a('Looperman', 0, 'https://www.looperman.com', 'Free loops, samples and acapellas.'),
+  cymaticsFree: a('Cymatics (Free packs)', 0, 'https://cymatics.fm/pages/free-download-vault', 'Free sample packs for producers.'),
+  vitalSynth: a('Vital', 0, 'https://vital.audio', 'Free, pro-grade wavetable synth.'),
+  freeVsts: a('Free VST plugins', 0, 'https://www.kvraudio.com', 'Thousands of free instruments and effects.'),
+  amuseFree: a('Amuse', 0, 'https://www.amuse.io', 'Free music distribution to all stores.'),
+  routenote: a('RouteNote (Free)', 0, 'https://www.routenote.com', 'Free distribution; keep 85% of royalties.'),
+  matchering: a('BandLab Mastering', 0, 'https://www.bandlab.com/mastering', 'Free, instant online mastering.'),
 };
 
 interface Seed { name: string; category: string; alts: Alt[]; }
@@ -694,6 +847,92 @@ const SEED: Seed[] = [
   { name: 'Dollar Shave Club', category: 'Subscription Boxes', alts: [A.harrys, A.retailRazors, A.subscribeSave] },
   { name: 'Stitch Fix', category: 'Subscription Boxes', alts: [a('Amazon Try Before You Buy', 0, 'https://www.amazon.com', 'Free try-on with Prime; no styling fee.'), a('Thrift / outlet shopping', 0, 'https://www.google.com', 'Far cheaper wardrobe refresh.')] },
   { name: 'Book of the Month', category: 'Subscription Boxes', alts: [A.bookLibrary, A.kindleUnlimited, A.hoopla] },
+
+  // ── EXPANSION (Sep 2026) ──
+  // AI Tools
+  { name: 'Cursor', category: 'AI Tools', alts: [A.windsurf, A.ghCopilotAlt, A.zedAI, A.continueDev, A.vscodeLocal] },
+  { name: 'Poe', category: 'AI Tools', alts: [A.aiChatGPT, A.aiGemini, A.aiClaude, A.aiPerplexity] },
+  { name: 'DeepL Pro', category: 'AI Tools', alts: [A.googleTranslate, A.deeplFreeAlt, A.appleTranslate] },
+  { name: 'Descript', category: 'AI Tools', alts: [A.capcutFree, A.davinci, A.clipchamp] },
+  { name: 'Gamma', category: 'AI Tools', alts: [A.canvaFree, A.googleSlides, A.pitchApp] },
+  // Productivity & Office
+  { name: 'Obsidian', category: 'Productivity & Office', alts: [A.obsidianFree, A.logseq, A.joplin, A.notionFree, A.appleNotes] },
+  { name: 'Fantastical', category: 'Productivity & Office', alts: [A.appleCalendar, A.googleCalendar, A.notionCalendar] },
+  { name: 'Superhuman', category: 'Productivity & Office', alts: [A.gmailFree, A.sparkMail, A.shortwave, A.protonMailFree] },
+  { name: 'TickTick', category: 'Productivity & Office', alts: [A.msToDo, A.googleTasks, A.appleReminders] },
+  { name: 'Setapp', category: 'Productivity & Office', alts: [A.homebrewApps, a('AlternativeTo (free apps)', 0, 'https://alternativeto.net', 'Find free/open-source replacements for paid apps.')] },
+  // Design & Creative
+  { name: 'Envato Elements', category: 'Design & Creative', alts: [A.pexels, A.unsplash, A.pixabay, A.freepikFree, A.mixkit] },
+  { name: 'Shutterstock', category: 'Design & Creative', alts: [A.pexels, A.unsplash, A.pixabay, A.envatoAlt, A.storyblocksAlt] },
+  { name: 'Adobe Stock', category: 'Design & Creative', alts: [A.pexels, A.unsplash, A.envatoAlt, A.storyblocksAlt] },
+  { name: 'Storyblocks', category: 'Design & Creative', alts: [A.mixkit, A.coverr, A.pixabay, A.pexels] },
+  { name: 'Epidemic Sound', category: 'Design & Creative', alts: [A.ytAudioLibrary, A.pixabayMusic, A.freeMusicArchive, A.uppbeat] },
+  { name: 'Pixlr', category: 'Design & Creative', alts: [A.photopea, A.gimp, A.canvaFree, A.krita] },
+  // Communication (email hosting)
+  { name: 'Proton Mail', category: 'Communication', alts: [A.gmailFree, A.protonMailFree, A.outlookFree, A.tuta, A.zohoMailFree] },
+  { name: 'Fastmail', category: 'Communication', alts: [A.gmailFree, A.protonMailFree, A.outlookFree, A.zohoMailFree] },
+  { name: 'HEY', category: 'Communication', alts: [A.gmailFree, A.protonMailFree, A.outlookFree] },
+  // Website & eCommerce (email marketing + hosting)
+  { name: 'Mailchimp', category: 'Website & eCommerce', alts: [A.kitFree, A.mailerliteFree, A.brevoFree, A.beehiiv] },
+  { name: 'Kit', category: 'Website & eCommerce', alts: [A.kitFree, A.mailerliteFree, A.beehiiv, A.substackFree] },
+  { name: 'MailerLite', category: 'Website & eCommerce', alts: [A.mailerliteFree, A.kitFree, A.brevoFree] },
+  { name: 'Constant Contact', category: 'Website & eCommerce', alts: [A.mailerliteFree, A.kitFree, A.brevoFree, A.mailchimpFree] },
+  { name: 'Hostinger', category: 'Website & eCommerce', alts: [A.cloudflarePages, A.netlifyFree, A.githubPages, A.vercelFree] },
+  { name: 'Bluehost', category: 'Website & eCommerce', alts: [A.cloudflarePages, A.netlifyFree, A.githubPages, A.vercelFree] },
+  // Education & Learning (kids)
+  { name: 'ABCmouse', category: 'Education & Learning', alts: [A.khanKids, A.duolingoABC, A.pbsKids, A.starfall, A.prodigyFree] },
+  { name: 'Epic!', category: 'Education & Learning', alts: [A.libby, A.khanKids, A.pbsKids, A.storylineOnline, A.gutenberg] },
+  { name: 'Khan Academy Kids', category: 'Education & Learning', alts: [A.pbsKids, A.starfall, A.duolingoABC] },
+  { name: 'IXL', category: 'Education & Learning', alts: [A.khanAcademyFree, A.prodigyFree, A.photomathFree, A.ck12] },
+  { name: 'Outschool', category: 'Education & Learning', alts: [A.khanAcademyFree, A.youtubeEdu, A.libraryProg, A.ck12] },
+  { name: 'Homer', category: 'Education & Learning', alts: [A.khanKids, A.duolingoABC, A.starfall, A.pbsKids] },
+  // Food & Meal Delivery (recipe / cooking)
+  { name: 'NYT Cooking', category: 'Food & Meal Delivery', alts: [A.paprika, A.allrecipes, A.samsungFood, A.bbcGoodFood, A.mealimeFree] },
+  { name: 'Mealime', category: 'Food & Meal Delivery', alts: [A.mealimeFree, A.samsungFood, A.eatThisMuch, A.paprika] },
+  { name: 'Yummly', category: 'Food & Meal Delivery', alts: [A.allrecipes, A.samsungFood, A.mealimeFree, A.supercook] },
+  // Writing & Utilities (weather)
+  { name: 'Carrot Weather', category: 'Writing & Utilities', alts: [A.appleWeather, A.windyFree, A.wUndergroundAlt, A.accuweatherFree, A.weatherGov] },
+  { name: 'Weather Underground', category: 'Writing & Utilities', alts: [A.appleWeather, A.windyFree, A.accuweatherFree, A.weatherGov] },
+  { name: 'AccuWeather', category: 'Writing & Utilities', alts: [A.appleWeather, A.weatherGov, A.windyFree] },
+  // Telecom & Mobile (VoIP / business phone)
+  { name: 'OpenPhone', category: 'Telecom & Mobile', alts: [A.googleVoice, A.textNow, A.dialpad, A.zoomPhone] },
+  { name: 'Grasshopper', category: 'Telecom & Mobile', alts: [A.googleVoice, A.openphoneAlt, A.dialpad, A.zoomPhone] },
+  // Fitness
+  { name: 'Planet Fitness', category: 'Fitness', alts: [A.nikeTraining, A.youtubeWorkouts, A.downDog, A.recCenter] },
+  { name: 'Ladder', category: 'Fitness', alts: [A.nikeTraining, A.fitbodAlt, A.caliberFree, A.youtubeWorkouts] },
+  { name: 'Future', category: 'Fitness', alts: [A.fitbodAlt, A.nikeTraining, A.caliberFree] },
+  { name: 'Fitbod', category: 'Fitness', alts: [A.nikeTraining, A.caliberFree, A.youtubeWorkouts, A.downDog] },
+  // Health & Nutrition
+  { name: 'MacroFactor', category: 'Health & Nutrition', alts: [A.myFitnessPalFree, A.cronometerFree, A.loseItFreeAlt, A.fatSecret] },
+  { name: 'Lose It!', category: 'Health & Nutrition', alts: [A.myFitnessPalFree, A.cronometerFree, A.fatSecret] },
+  // Photography
+  { name: 'Darkroom', category: 'Photography', alts: [A.snapseed, A.applePhotos, A.vscoFree, A.lightroomMobileFree] },
+  { name: 'Photoroom', category: 'Photography', alts: [A.removeBg, A.canvaFree, A.photopea, A.snapseed] },
+  // Developer & Cloud
+  { name: 'Replit', category: 'Developer & Cloud', alts: [A.vscodeLocal, A.githubCodespaces, A.gitpod, A.stackblitz, A.glitchDev] },
+  { name: 'Sentry', category: 'Developer & Cloud', alts: [A.sentryFree, A.glitchtip, a('Highlight.io', 0, 'https://www.highlight.io', 'Open-source monitoring with a free tier.')] },
+  // Business & Accounting (new category)
+  { name: 'QuickBooks Online', category: 'Business & Accounting', alts: [A.waveFree, A.zohoBooksFree, A.freshbooksAlt, A.gnucash, A.akaunting] },
+  { name: 'QuickBooks Solopreneur', category: 'Business & Accounting', alts: [A.waveFree, A.zohoBooksFree, A.zohoInvoice, A.gnucash] },
+  { name: 'FreshBooks', category: 'Business & Accounting', alts: [A.waveFree, A.zohoBooksFree, A.invoiceNinja, A.zohoInvoice] },
+  { name: 'Xero', category: 'Business & Accounting', alts: [A.waveFree, A.zohoBooksFree, A.gnucash, A.akaunting] },
+  { name: 'Wave', category: 'Business & Accounting', alts: [A.zohoBooksFree, A.gnucash, A.zohoInvoice] },
+  { name: 'Zoho Books', category: 'Business & Accounting', alts: [A.waveFree, A.gnucash, A.akaunting] },
+  { name: 'Bonsai', category: 'Business & Accounting', alts: [A.waveFree, A.zohoInvoice, A.invoiceNinja] },
+  { name: 'HoneyBook', category: 'Business & Accounting', alts: [A.waveFree, A.zohoInvoice, A.invoiceNinja, A.notionFree] },
+  // Faith & Spirituality (new category)
+  { name: 'Hallow', category: 'Faith & Spirituality', alts: [A.youversion, A.praycomFree, A.abideFree, A.insightTimerAlt, A.bibleIs] },
+  { name: 'Pray.com', category: 'Faith & Spirituality', alts: [A.youversion, A.praycomFree, A.abideFree, A.bibleGateway] },
+  { name: 'Abide', category: 'Faith & Spirituality', alts: [A.youversion, A.insightTimerAlt, A.abideFree, A.bibleIs] },
+  { name: 'Glorify', category: 'Faith & Spirituality', alts: [A.youversion, A.hallowAlt, A.abideFree, A.insightTimerAlt] },
+  { name: 'Dwell', category: 'Faith & Spirituality', alts: [A.youversion, A.bibleIs, A.bibleGateway] },
+  { name: 'YouVersion Bible', category: 'Faith & Spirituality', alts: [A.bibleIs, A.bibleGateway, A.praycomFree] },
+  // Music Creation (new category)
+  { name: 'Splice', category: 'Music Creation', alts: [A.bandlab, A.looperman, A.cymaticsFree, A.freeVsts, A.garageband] },
+  { name: 'LANDR', category: 'Music Creation', alts: [A.matchering, A.bandlab, A.garageband, A.freeVsts] },
+  { name: 'Output Arcade', category: 'Music Creation', alts: [A.bandlab, A.vitalSynth, A.freeVsts, A.looperman] },
+  { name: 'DistroKid', category: 'Music Creation', alts: [A.amuseFree, A.routenote] },
+  { name: 'Loopcloud', category: 'Music Creation', alts: [A.bandlab, A.looperman, A.cymaticsFree, A.freeVsts] },
   { name: 'KiwiCo', category: 'Subscription Boxes', alts: [A.kiwicoFree, a('Local library programs', 0, 'https://www.usa.gov/libraries-and-archives', 'Free kids’ STEM/maker activities.')] },
 ];
 
