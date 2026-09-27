@@ -296,6 +296,140 @@ export const REFERENCE_CATALOG: RefCategory[] = [
     { name: 'Output Arcade', approx_monthly: 10 }, { name: 'DistroKid', approx_monthly: 1.99 },
     { name: 'Loopcloud', approx_monthly: 7.99 },
   ]},
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // EXPANSION WAVE A (Sep 2026 web survey) — deepening toward ~750 services.
+  // Prices are approximate US USD/mo as of the survey; the flywheel re-verifies.
+  // ═══════════════════════════════════════════════════════════════════════════
+  { category: 'Streaming Video', services: [
+    { name: 'Acorn TV', approx_monthly: 9.99 }, { name: 'CuriosityStream', approx_monthly: 4.99 },
+    { name: 'Criterion Channel', approx_monthly: 10.99 }, { name: 'ALLBLK', approx_monthly: 6.99 },
+    { name: 'Hallmark+', approx_monthly: 7.99 }, { name: 'Nebula', approx_monthly: 6 },
+    { name: 'Dropout', approx_monthly: 6.99 }, { name: 'MHz Choice', approx_monthly: 7.99 },
+    { name: 'Sundance Now', approx_monthly: 6.99 }, { name: 'BET+', approx_monthly: 9.99 },
+    { name: 'Crackle', approx_monthly: 0 }, { name: 'Hi-YAH!', approx_monthly: 3.99 },
+    { name: 'Crave', approx_monthly: 9.99 }, { name: 'Stan', approx_monthly: 12 },
+    { name: 'BINGE', approx_monthly: 10 }, { name: 'Now TV', approx_monthly: 10 },
+    { name: 'ITVX Premium', approx_monthly: 5.99 }, { name: 'hayu', approx_monthly: 5.99 },
+    { name: 'iQIYI', approx_monthly: 6.99 }, { name: 'Viu', approx_monthly: 5.99 },
+    { name: 'JioHotstar', approx_monthly: 3 }, { name: 'ZEE5', approx_monthly: 5 },
+  ]},
+  { category: 'Sports Streaming', services: [
+    { name: 'FloSports', approx_monthly: 12.99 }, { name: 'beIN Sports Connect', approx_monthly: 7.99 },
+    { name: 'Willow TV', approx_monthly: 9.99 }, { name: 'Fanatiz', approx_monthly: 10 },
+  ]},
+  { category: 'Music Streaming', services: [
+    { name: 'Napster', approx_monthly: 10.99 }, { name: 'Audiomack', approx_monthly: 4.99 },
+    { name: 'LiveOne', approx_monthly: 8.99 },
+  ]},
+  { category: 'AI Tools', services: [
+    { name: 'Character.AI', approx_monthly: 9.99 }, { name: 'Jasper', approx_monthly: 49 },
+    { name: 'Copy.ai', approx_monthly: 49 }, { name: 'Writesonic', approx_monthly: 20 },
+    { name: 'Sudowrite', approx_monthly: 19 }, { name: 'Leonardo.Ai', approx_monthly: 12 },
+    { name: 'Ideogram', approx_monthly: 8 }, { name: 'HeyGen', approx_monthly: 24 },
+    { name: 'Synthesia', approx_monthly: 29 }, { name: 'Kagi', approx_monthly: 10 },
+    { name: 'Mistral Le Chat', approx_monthly: 15 }, { name: 'You.com', approx_monthly: 15 },
+    { name: 'NovelAI', approx_monthly: 10 }, { name: 'Luma Dream Machine', approx_monthly: 9.99 },
+    { name: 'Pika', approx_monthly: 10 }, { name: 'Krea', approx_monthly: 10 },
+  ]},
+  { category: 'Productivity & Office', services: [
+    { name: 'Craft', approx_monthly: 5 }, { name: 'Notability', approx_monthly: 1.25 },
+    { name: 'Miro', approx_monthly: 8 }, { name: 'Lucidchart', approx_monthly: 9 },
+    { name: 'Roam Research', approx_monthly: 15 }, { name: 'Basecamp', approx_monthly: 15 },
+    { name: 'Smartsheet', approx_monthly: 12 }, { name: 'Reclaim', approx_monthly: 8 },
+    { name: 'Sunsama', approx_monthly: 20 }, { name: 'Motion', approx_monthly: 19 },
+    { name: 'Milanote', approx_monthly: 12.50 }, { name: 'Whimsical', approx_monthly: 10 },
+    { name: 'Things', approx_monthly: 0 }, { name: 'GoodNotes', approx_monthly: 0 },
+  ]},
+  { category: 'Business & Accounting', services: [
+    { name: 'Gusto', approx_monthly: 60 }, { name: 'Rippling', approx_monthly: 8 },
+    { name: 'DocuSign', approx_monthly: 45 }, { name: 'PandaDoc', approx_monthly: 35 },
+    { name: 'Salesforce', approx_monthly: 25 }, { name: 'HubSpot', approx_monthly: 20 },
+    { name: 'Pipedrive', approx_monthly: 24 }, { name: 'Zoho CRM', approx_monthly: 20 },
+    { name: 'Bill.com', approx_monthly: 45 }, { name: 'Sage Accounting', approx_monthly: 10 },
+    { name: 'TurboTax' }, { name: 'H&R Block' },
+  ]},
+  { category: 'Finance & Investing', services: [
+    { name: 'PocketGuard', approx_monthly: 12.99 }, { name: 'Tiller', approx_monthly: 6.58 },
+    { name: 'Lunch Money', approx_monthly: 10 }, { name: 'Origin', approx_monthly: 12.99 },
+    { name: 'Kubera', approx_monthly: 15 },
+  ]},
+  { category: 'Health & Nutrition', services: [
+    { name: 'Ro', approx_monthly: 149 }, { name: 'YAZIO', approx_monthly: 6.99 },
+    { name: 'Lifesum', approx_monthly: 7.49 }, { name: 'Simple', approx_monthly: 15 },
+    { name: 'Fastic', approx_monthly: 9 }, { name: 'Flo', approx_monthly: 3.33 },
+    { name: 'Clue', approx_monthly: 9.99 }, { name: 'Natural Cycles', approx_monthly: 21.99 },
+  ]},
+  { category: 'Mental Health & Meditation', services: [
+    { name: 'Cerebral', approx_monthly: 99 }, { name: 'Sanvello', approx_monthly: 8.99 },
+    { name: 'Wysa', approx_monthly: 9.99 }, { name: 'Finch', approx_monthly: 9.99 },
+    { name: 'Rootd', approx_monthly: 6.99 }, { name: 'Waking Up', approx_monthly: 14.99 },
+    { name: 'Sleep Cycle', approx_monthly: 3.33 }, { name: 'BetterSleep', approx_monthly: 9.99 },
+  ]},
+  { category: 'Fitness', services: [
+    { name: 'Sweat', approx_monthly: 20 }, { name: 'Zwift', approx_monthly: 19.99 },
+    { name: 'TrainerRoad', approx_monthly: 21.99 }, { name: 'iFit', approx_monthly: 15 },
+    { name: 'Runna', approx_monthly: 18 }, { name: 'Hevy', approx_monthly: 4 },
+    { name: 'JEFIT', approx_monthly: 6.99 }, { name: 'Tonal', approx_monthly: 59.95 },
+  ]},
+  { category: 'Education & Learning', services: [
+    { name: 'Domestika', approx_monthly: 13.79 }, { name: 'CreativeLive', approx_monthly: 39 },
+    { name: 'edX', approx_monthly: 49 }, { name: 'Udacity', approx_monthly: 249 },
+    { name: 'Frontend Masters', approx_monthly: 39 }, { name: 'Chegg', approx_monthly: 15.95 },
+    { name: 'Course Hero', approx_monthly: 9.95 }, { name: 'Quizlet', approx_monthly: 7.99 },
+    { name: 'Treehouse', approx_monthly: 25 }, { name: 'Wondrium', approx_monthly: 20 },
+    { name: 'Magoosh', approx_monthly: 15 }, { name: 'Wolfram Alpha Pro', approx_monthly: 7.25 },
+    { name: 'Numerade', approx_monthly: 9.99 },
+  ]},
+  { category: 'Language Learning', services: [
+    { name: 'italki', approx_monthly: 5.99 }, { name: 'Mango Languages', approx_monthly: 7.99 },
+    { name: 'LingQ', approx_monthly: 12.99 }, { name: 'Drops', approx_monthly: 9.99 },
+    { name: 'Speak', approx_monthly: 20 }, { name: 'Preply' },
+  ]},
+  { category: 'Design & Creative', services: [
+    { name: 'Affinity', approx_monthly: 0 }, { name: 'Final Cut Pro', approx_monthly: 12.99 },
+    { name: 'Filmora', approx_monthly: 19.99 }, { name: 'Camtasia', approx_monthly: 15 },
+    { name: 'Artlist', approx_monthly: 9.99 }, { name: 'Motion Array', approx_monthly: 24.99 },
+    { name: 'Soundstripe', approx_monthly: 19.92 }, { name: 'Procreate', approx_monthly: 0 },
+  ]},
+  { category: 'Music Creation', services: [
+    { name: 'Soundtrap', approx_monthly: 9.99 }, { name: 'Serato', approx_monthly: 9.99 },
+    { name: 'rekordbox', approx_monthly: 9.99 }, { name: 'Ableton Live', approx_monthly: 0 },
+    { name: 'FL Studio', approx_monthly: 0 },
+  ]},
+  { category: 'Photography', services: [
+    { name: 'Afterlight', approx_monthly: 2.99 }, { name: 'Halide', approx_monthly: 2.99 },
+    { name: 'Photomator', approx_monthly: 4.99 }, { name: 'Lens Distortions', approx_monthly: 6.99 },
+    { name: 'ON1 Photo RAW', approx_monthly: 0 }, { name: 'Topaz Photo AI', approx_monthly: 0 },
+  ]},
+  { category: 'News & Magazines', services: [
+    { name: 'The Atlantic', approx_monthly: 7.5 }, { name: 'The New Yorker', approx_monthly: 8.33 },
+    { name: 'Wired', approx_monthly: 5 }, { name: 'National Geographic', approx_monthly: 3.33 },
+    { name: 'The Information', approx_monthly: 42.25 }, { name: 'Readwise Reader', approx_monthly: 9.99 },
+    { name: 'Feedly', approx_monthly: 6.99 }, { name: 'Inoreader', approx_monthly: 5 },
+    { name: 'Ground News', approx_monthly: 9.99 }, { name: 'Readly', approx_monthly: 12.99 },
+    { name: 'PressReader', approx_monthly: 29.99 }, { name: 'Shortform', approx_monthly: 12.99 },
+  ]},
+  { category: 'Security & Privacy', services: [
+    { name: 'CyberGhost', approx_monthly: 2.19 }, { name: 'Private Internet Access', approx_monthly: 2.19 },
+    { name: 'IPVanish', approx_monthly: 2.19 }, { name: 'Windscribe', approx_monthly: 5.75 },
+    { name: 'Keeper', approx_monthly: 2.92 }, { name: 'LastPass', approx_monthly: 3 },
+    { name: 'Bitdefender', approx_monthly: 5.42 }, { name: 'ESET', approx_monthly: 5 },
+    { name: 'Aura', approx_monthly: 12 }, { name: 'Incogni', approx_monthly: 7.99 },
+    { name: 'DeleteMe', approx_monthly: 10.75 }, { name: 'Kaspersky', approx_monthly: 4.99 },
+  ]},
+  { category: 'Travel & Loyalty', services: [
+    { name: 'CLEAR+', approx_monthly: 18.25 }, { name: 'Priority Pass', approx_monthly: 39 },
+    { name: 'TripIt Pro', approx_monthly: 4.08 }, { name: 'Going', approx_monthly: 4.08 },
+    { name: 'Airalo' }, { name: 'Dollar Flight Club', approx_monthly: 6.99 },
+    { name: 'Nomad eSIM' }, { name: 'AAA', approx_monthly: 5 },
+  ]},
+  { category: 'Pets', services: [
+    { name: 'Rover' }, { name: 'Tractive', approx_monthly: 5 },
+    { name: 'Fi', approx_monthly: 10 }, { name: 'Ollie', approx_monthly: 140 },
+    { name: "The Farmer's Dog", approx_monthly: 200 }, { name: 'Nom Nom', approx_monthly: 150 },
+    { name: 'Pawp', approx_monthly: 24 },
+  ]},
 ];
 
 /** Flat list with category attached — what the catalogue builders consume. */
