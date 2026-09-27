@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>SubFinance · Recommendation Admin</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Token gate -->
+  <div id="gate" class="gate" hidden>
+    <form id="gate-form" class="gate-card">
+      <h1>Recommendation Admin</h1>
+      <p class="muted">Enter the admin token to manage the cheaper-alternatives system.</p>
+      <input id="gate-token" type="password" placeholder="Admin token" autocomplete="off" />
+      <button type="submit">Unlock</button>
+      <p id="gate-error" class="error" hidden></p>
+    </form>
+  </div>
+
+  <!-- App -->
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand"><span class="dot"></span> SubFinance · Recommendation Admin</div>
+      <div class="topbar-actions">
+        <button id="refresh-btn" class="ghost">Refresh</button>
+        <button id="signout-btn" class="ghost">Sign out</button>
+      </div>
+    </header>
+
+    <section id="stats" class="stats"></section>
+
+    <section class="overview">
+      <div class="card">
+        <div class="card-title">Global signals <span class="muted">(from user feedback)</span></div>
+        <div class="signals">
+          <div><span class="sig-label promote">Promoted</span> <span id="sig-promote" class="chips"></span></div>
+          <div><span class="sig-label block">Blocklisted</span> <span id="sig-block" class="chips"></span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top categories</div>
+        <div id="cat-bars" class="cat-bars"></div>
+      </div>
+    </section>
+
+    <section class="main">
+      <div class="list-pane">
+        <div class="filters">
+          <input id="f-search" type="search" placeholder="Search service…" />
+          <select id="f-category"><option value="">All categories</option></select>
+          <select id="f-status">
+            <option value="">Any status</option>
+            <option value="active">active</option>
+            <option value="needs_review">needs_review</option>
+            <option value="disabled">disabled</option>
+          </select>
+          <select id="f-sort">
+            <option value="request_count">Most requested</option>
+            <option value="quality_score">Quality</option>
+            <option value="refreshed_at">Recently refreshed</option>
+            <option value="service_name">Name</option>
+          </select>
+        </div>
+        <div id="list-meta" class="list-meta muted"></div>
+        <div id="list" class="list"></div>
+        <div class="pager">
+          <button id="prev-btn" class="ghost">‹ Prev</button>
+          <span id="page-info" class="muted"></span>
+          <button id="next-btn" class="ghost">Next ›</button>
+        </div>
+      </div>
+
+      <div id="detail" class="detail-pane">
+        <div class="detail-empty muted">Select a service to inspect and edit its alternatives.</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

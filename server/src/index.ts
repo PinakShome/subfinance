@@ -12,6 +12,7 @@ if (process.env.SENTRY_DSN) {
   console.log('[sentry] error monitoring enabled');
 }
 
+import path from 'path';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -19,6 +20,7 @@ import rateLimit from 'express-rate-limit';
 import cron from 'node-cron';
 import alternativesRouter from './routes/alternatives';
 import accountRouter from './routes/account';
+import adminRouter from './routes/admin';
 import { sendTrialExpiryNotifications } from './cron/trialNotifications';
 import { runRefinementCycle } from './lib/refine';
 
@@ -72,6 +74,10 @@ app.use('/api', apiLimiter);
 
 app.use('/api/alternatives', aiLimiter, alternativesRouter);
 app.use('/api/account', accountRouter);
+// Recommendation-system admin dashboard: token-guarded JSON API (/api/admin/*)
+// plus its same-origin static UI at /admin (so fetch stays same-origin under CSP).
+app.use('/api/admin', adminRouter);
+app.use('/admin', express.static(path.join(process.cwd(), 'public/admin')));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
