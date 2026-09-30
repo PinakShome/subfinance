@@ -288,14 +288,17 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         borderColor="#8b5cf633"
         onPress={() => navigation.navigate('EditSubscription', { id: sub.id })}
       />
-      <ActionButton
-        icon="search-outline"
-        label="Find Cheaper Alternatives"
-        color="#10b981"
-        bg="#ecfdf5"
-        borderColor="#10b98133"
-        onPress={() => navigation.navigate('Alternatives', { id: sub.id, name: sub.name })}
-      />
+      {/* A free subscription has nothing cheaper to switch to — hide the CTA. */}
+      {sub.cost > 0 && (
+        <ActionButton
+          icon="search-outline"
+          label="Find Cheaper Alternatives"
+          color="#10b981"
+          bg="#ecfdf5"
+          borderColor="#10b98133"
+          onPress={() => navigation.navigate('Alternatives', { id: sub.id, name: sub.name })}
+        />
+      )}
       <ActionButton
         icon="trash-outline"
         label="Remove Subscription"
