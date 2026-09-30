@@ -20,8 +20,9 @@ const NAME_ALIASES: Record<string, string> = {
   'disney': 'disney+',
   'disney plus': 'disney+',
   'prime': 'amazon prime',
-  'prime video': 'amazon prime',
-  'amazon prime video': 'amazon prime',
+  // "Amazon Prime Video" is tracked as its own streaming entry (distinct from the
+  // Amazon Prime membership), so route the shorthand to it rather than collapsing.
+  'prime video': 'amazon prime video',
   'youtube': 'youtube premium',
   'icloud': 'icloud+',
   'office 365': 'microsoft 365',

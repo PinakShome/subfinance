@@ -10,6 +10,7 @@
     "eval:alternatives": "ts-node src/eval/run.ts",
     "build:catalog": "ts-node src/eval/build-catalog.ts",
     "seed:catalog": "ts-node src/eval/seed-catalog.ts",
+    "check:catalog": "SUPABASE_URL=http://localhost SUPABASE_SERVICE_ROLE_KEY=dummy ts-node --transpileOnly src/eval/check-catalog.ts",
     "review:catalog": "ts-node src/eval/review.ts",
     "refine:catalog": "ts-node -e \"require('./src/lib/refine').runRefinementCycle().then(r=>{console.log(r);process.exit(0)})\""
   },

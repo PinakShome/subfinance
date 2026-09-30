@@ -512,7 +512,7 @@ const A = {
 };
 
 interface Seed { name: string; category: string; alts: Alt[]; }
-const SEED: Seed[] = [
+export const SEED: Seed[] = [
   // ── Streaming Video ──
   { name: 'Netflix', category: 'Streaming Video', alts: [A.tubi, A.pluto, A.roku, A.peacock, A.paramount, A.appletv, A.crunchyroll] },
   { name: 'Disney+', category: 'Streaming Video', alts: [A.tubi, A.pluto, A.roku, A.peacock, A.hoopla] },
@@ -603,7 +603,7 @@ const SEED: Seed[] = [
   // ── AI Tools ──
   { name: 'ChatGPT Plus', category: 'AI Tools', alts: [A.claude, A.gemini, A.copilotAI, A.perplexityFree, A.deepseek, A.chatgptGo] },
   { name: 'Claude Pro', category: 'AI Tools', alts: [A.claude, A.gemini, A.copilotAI, A.deepseek, A.mistral] },
-  { name: 'Google Gemini', category: 'AI Tools', alts: [A.gemini, A.claude, A.copilotAI, A.perplexityFree, A.deepseek] },
+  { name: 'Google Gemini', category: 'AI Tools', alts: [A.aiChatGPT, A.claude, A.copilotAI, A.perplexityFree, A.deepseek] },
   { name: 'Perplexity Pro', category: 'AI Tools', alts: [A.perplexityFree, A.gemini, A.claude, A.copilotAI] },
   { name: 'Microsoft Copilot Pro', category: 'AI Tools', alts: [A.copilotAI, A.gemini, A.claude, A.deepseek] },
   { name: 'SuperGrok', category: 'AI Tools', alts: [A.claude, A.gemini, A.deepseek, A.copilotAI] },
@@ -856,7 +856,7 @@ const SEED: Seed[] = [
   { name: 'Descript', category: 'AI Tools', alts: [A.capcutFree, A.davinci, A.clipchamp] },
   { name: 'Gamma', category: 'AI Tools', alts: [A.canvaFree, A.googleSlides, A.pitchApp] },
   // Productivity & Office
-  { name: 'Obsidian', category: 'Productivity & Office', alts: [A.obsidianFree, A.logseq, A.joplin, A.notionFree, A.appleNotes] },
+  { name: 'Obsidian', category: 'Productivity & Office', alts: [A.logseq, A.joplin, A.notionFree, A.appleNotes, A.keep] },
   { name: 'Fantastical', category: 'Productivity & Office', alts: [A.appleCalendar, A.googleCalendar, A.notionCalendar] },
   { name: 'Superhuman', category: 'Productivity & Office', alts: [A.gmailFree, A.sparkMail, A.shortwave, A.protonMailFree] },
   { name: 'TickTick', category: 'Productivity & Office', alts: [A.msToDo, A.googleTasks, A.appleReminders] },
@@ -1198,7 +1198,7 @@ const SEED: Seed[] = [
   { name: 'Bouncie', category: 'Auto & Connected Car', alts: [A.phoneHotspot, a('Apple AirTag', 0, 'https://www.apple.com/airtag', 'One-time locator, no fee.'), A.googleMaps] },
   // Dating
   { name: 'Zoosk', category: 'Dating', alts: [A.hingeFree, A.okcupidFree, A.pof, A.facebookDating] },
-  { name: 'Plenty of Fish', category: 'Dating', alts: [A.pof, A.okcupidFree, A.facebookDating, A.hingeFree] },
+  { name: 'Plenty of Fish', category: 'Dating', alts: [A.okcupidFree, A.facebookDating, A.hingeFree, A.badoo] },
   { name: 'Feeld', category: 'Dating', alts: [a('Feeld (Free)', 0, 'https://feeld.co', 'Free core matching.'), A.okcupidFree, A.hingeFree] },
   { name: 'The League', category: 'Dating', alts: [A.hingeFree, A.okcupidFree, A.facebookDating] },
   { name: 'Raya', category: 'Dating', alts: [A.hingeFree, A.okcupidFree, A.facebookDating] },
@@ -1414,4 +1414,8 @@ async function main() {
   }
   console.log(`Done. ${ok}/${SEED.length} services seeded, ${alts} alternatives total.`);
 }
-main().catch((e) => { console.error(e?.message ?? e); process.exit(1); });
+// Only seed when run directly (npm run seed:catalog); importing SEED elsewhere
+// (e.g. the catalogue checker) must not connect to the DB or write anything.
+if (require.main === module) {
+  main().catch((e) => { console.error(e?.message ?? e); process.exit(1); });
+}
