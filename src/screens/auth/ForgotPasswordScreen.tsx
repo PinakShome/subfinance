@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
+  StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showAlert } from '../../lib/alert';
@@ -9,12 +9,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { supabase } from '../../lib/supabase';
 import { AuthStackParamList } from '../../navigation/types';
+import { useTheme, Theme } from '../../theme/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword'>;
 };
 
 export default function ForgotPasswordScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
@@ -42,7 +45,6 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Glow */}
       <View style={styles.glow} pointerEvents="none" />
 
       <ScrollView
@@ -53,20 +55,17 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-      {/* Back button */}
       <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={20} color="#6a6782" />
+        <Ionicons name="arrow-back" size={20} color={c.textMuted} />
         <Text style={styles.backText}>Back to sign in</Text>
       </TouchableOpacity>
 
       <View style={styles.card}>
-        {/* Icon */}
         <View style={styles.iconWrap}>
-          <Ionicons name="lock-open-outline" size={28} color="#8b5cf6" />
+          <Ionicons name="lock-open-outline" size={28} color={c.accent} />
         </View>
 
         {sent ? (
-          /* ─── Success state ─── */
           <>
             <Text style={styles.title}>Check your email</Text>
             <Text style={styles.sub}>
@@ -81,18 +80,17 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
             </TouchableOpacity>
           </>
         ) : (
-          /* ─── Form state ─── */
           <>
             <Text style={styles.title}>Reset password</Text>
             <Text style={styles.sub}>Enter your email and we'll send you a reset link.</Text>
 
             <Text style={styles.label}>EMAIL</Text>
             <View style={styles.inputWrap}>
-              <Ionicons name="mail-outline" size={16} color="#8a8698" style={{ marginRight: 10 }} />
+              <Ionicons name="mail-outline" size={16} color={c.textMuted} style={{ marginRight: 10 }} />
               <TextInput
                 style={styles.input}
                 placeholder="you@example.com"
-                placeholderTextColor="#b6b2c6"
+                placeholderTextColor={c.textFaint}
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={email}
@@ -118,51 +116,41 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f5f4fb' },
-  scrollContent: {
-    flexGrow: 1, justifyContent: 'center', padding: 20,
-  },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  flex: { flex: 1, backgroundColor: c.bg },
+  scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 20 },
   glow: {
     position: 'absolute', top: -100, alignSelf: 'center',
-    width: 280, height: 280, borderRadius: 140,
-    backgroundColor: '#8b5cf612',
+    width: 280, height: 280, borderRadius: 140, backgroundColor: '#8b5cf612',
   },
-  back: {
-    flexDirection: 'row', alignItems: 'center', gap: 8,
-    marginBottom: 32, alignSelf: 'flex-start',
-  },
-  backText: { color: '#6a6782', fontSize: 14 },
+  back: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 32, alignSelf: 'flex-start' },
+  backText: { color: c.textMuted, fontSize: 14 },
 
   card: {
-    backgroundColor: '#ffffff', borderRadius: 28, padding: 28,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: c.surface, borderRadius: 28, padding: 28,
+    borderWidth: 1, borderColor: c.border,
   },
   iconWrap: {
     width: 56, height: 56, borderRadius: 18,
     backgroundColor: '#8b5cf618', borderWidth: 1, borderColor: '#8b5cf630',
     justifyContent: 'center', alignItems: 'center', marginBottom: 20,
   },
-  title: { color: '#1b1830', fontSize: 22, fontWeight: '800', marginBottom: 8 },
-  sub: { color: '#787591', fontSize: 14, lineHeight: 22, marginBottom: 24 },
-  emailHighlight: { color: '#7c4dff', fontWeight: '700' },
+  title: { color: c.text, fontSize: 22, fontWeight: '800', marginBottom: 8 },
+  sub: { color: c.textMuted, fontSize: 14, lineHeight: 22, marginBottom: 24 },
+  emailHighlight: { color: c.accent, fontWeight: '700' },
   hint: {
-    color: '#8a8698', fontSize: 13, lineHeight: 20,
-    marginBottom: 24, backgroundColor: '#ffffff',
+    color: c.textMuted, fontSize: 13, lineHeight: 20,
+    marginBottom: 24, backgroundColor: c.surfaceAlt,
     padding: 14, borderRadius: 12,
   },
 
-  label: {
-    color: '#8a8698', fontSize: 10, fontWeight: '800',
-    letterSpacing: 1.5, marginBottom: 8,
-  },
+  label: { color: c.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 8 },
   inputWrap: {
     flexDirection: 'row', alignItems: 'center',
-    backgroundColor: '#ffffff', borderRadius: 14,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
-    paddingHorizontal: 14, marginBottom: 20,
+    backgroundColor: c.surfaceAlt, borderRadius: 14,
+    borderWidth: 1, borderColor: c.border, paddingHorizontal: 14, marginBottom: 20,
   },
-  input: { flex: 1, color: '#1b1830', fontSize: 15, paddingVertical: 14 },
+  input: { flex: 1, color: c.text, fontSize: 15, paddingVertical: 14 },
 
   btn: {
     backgroundColor: '#8b5cf6', borderRadius: 16,

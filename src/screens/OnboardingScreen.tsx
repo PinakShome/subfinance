@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Dimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTheme, Theme } from '../theme/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -29,6 +30,8 @@ const SLIDES: Slide[] = [
 ];
 
 export default function OnboardingScreen({ onDone }: { onDone: () => void }) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [index, setIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
 
@@ -88,22 +91,22 @@ export default function OnboardingScreen({ onDone }: { onDone: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.surface },
   skipRow: { height: 44, justifyContent: 'center', alignItems: 'flex-end', paddingHorizontal: 20 },
-  skip: { color: '#8a8698', fontSize: 15, fontWeight: '600' },
+  skip: { color: c.textMuted, fontSize: 15, fontWeight: '600' },
   slide: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 36, gap: 8 },
   iconWrap: {
     width: 140, height: 140, borderRadius: 40, borderWidth: 1,
     justifyContent: 'center', alignItems: 'center', marginBottom: 28,
   },
-  title: { color: '#1b1830', fontSize: 24, fontWeight: '800', textAlign: 'center' },
-  body: { color: '#6a6782', fontSize: 15, lineHeight: 23, textAlign: 'center', marginTop: 6 },
+  title: { color: c.text, fontSize: 24, fontWeight: '800', textAlign: 'center' },
+  body: { color: c.textMuted, fontSize: 15, lineHeight: 23, textAlign: 'center', marginTop: 6 },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, marginVertical: 24 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#e5e3ef' },
-  dotActive: { backgroundColor: '#6366f1', width: 22 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.border },
+  dotActive: { backgroundColor: c.primary, width: 22 },
   button: {
-    backgroundColor: '#6366f1', marginHorizontal: 24, marginBottom: 12, borderRadius: 14,
+    backgroundColor: c.primary, marginHorizontal: 24, marginBottom: 12, borderRadius: 14,
     paddingVertical: 16, alignItems: 'center',
   },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },

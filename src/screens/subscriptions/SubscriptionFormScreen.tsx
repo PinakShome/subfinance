@@ -12,6 +12,7 @@ import { getDefaultCurrency } from '../../lib/prefs';
 import { BillingCycle, SubscriptionInsert } from '../../types/database';
 import { HomeStackParamList } from '../../navigation/types';
 import { CATALOGUE_INDEX } from '../../data/catalogueIndex';
+import { useTheme, Theme } from '../../theme/theme';
 
 type AddProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'AddSubscription'>;
@@ -34,6 +35,8 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   const editId = (route as RouteProp<HomeStackParamList, 'EditSubscription'>).params?.id;
   const { subscriptions, categories, add, update, fetchCategories } = useSubscriptionStore();
   const existing = editId ? subscriptions.find((s) => s.id === editId) : undefined;
+  const t = useTheme();
+  const styles = useMemo(() => makeStyles(t), [t]);
 
   const [name, setName] = useState(existing?.name ?? '');
   const [cost, setCost] = useState(existing?.cost.toString() ?? '');
@@ -70,7 +73,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
     return [...starts, ...contains].slice(0, 6);
   }, [name, justPicked]);
 
-  const onNameChange = (t: string) => { setName(t); setJustPicked(false); };
+  const onNameChange = (text: string) => { setName(text); setJustPicked(false); };
 
   const pickSuggestion = (e: (typeof CATALOGUE_INDEX)[number]) => {
     setName(e.name);
@@ -148,7 +151,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>Name</Text>
-      <TextInput style={styles.input} value={name} onChangeText={onNameChange} maxLength={100} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" autoCorrect={false} />
+      <TextInput style={styles.input} value={name} onChangeText={onNameChange} maxLength={100} placeholder="e.g. Netflix" placeholderTextColor={t.textMuted} autoCorrect={false} />
       {suggestions.length > 0 && (
         <View style={styles.suggestBox}>
           {suggestions.map((e, i) => (
@@ -186,7 +189,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
           onChangeText={setCost}
           keyboardType="decimal-pad"
           placeholder="0.00"
-          placeholderTextColor="#8a8698"
+          placeholderTextColor={t.textMuted}
         />
       </View>
 
@@ -209,12 +212,12 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
           onChangeText={setIntervalDays}
           keyboardType="number-pad"
           placeholder="Every X days"
-          placeholderTextColor="#8a8698"
+          placeholderTextColor={t.textMuted}
         />
       )}
 
       <Text style={styles.sectionLabel}>Next Renewal Date (YYYY-MM-DD)</Text>
-      <TextInput style={styles.input} value={nextRenewal} onChangeText={setNextRenewal} placeholder="2025-01-01" placeholderTextColor="#8a8698" />
+      <TextInput style={styles.input} value={nextRenewal} onChangeText={setNextRenewal} placeholder="2025-01-01" placeholderTextColor={t.textMuted} />
 
       <Text style={styles.sectionLabel}>Category</Text>
       <TouchableOpacity
@@ -259,16 +262,16 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
       </Modal>
 
       <Text style={styles.sectionLabel}>Website URL (optional)</Text>
-      <TextInput style={styles.input} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." placeholderTextColor="#8a8698" autoCapitalize="none" keyboardType="url" />
+      <TextInput style={styles.input} value={websiteUrl} onChangeText={setWebsiteUrl} placeholder="https://..." placeholderTextColor={t.textMuted} autoCapitalize="none" keyboardType="url" />
 
       <View style={styles.row}>
         <Text style={styles.sectionLabel}>Free Trial?</Text>
-        <Switch value={isTrial} onValueChange={setIsTrial} thumbColor={isTrial ? '#6366f1' : '#8a8698'} trackColor={{ true: '#4f46e5', false: '#f1eff9' }} />
+        <Switch value={isTrial} onValueChange={setIsTrial} thumbColor={isTrial ? t.primary : t.textMuted} trackColor={{ true: t.primaryDark, false: t.surfaceAlt }} />
       </View>
       {isTrial && (
         <>
           <Text style={styles.sectionLabel}>Trial Ends (YYYY-MM-DD)</Text>
-          <TextInput style={styles.input} value={trialEndsOn} onChangeText={setTrialEndsOn} placeholder="2025-01-15" placeholderTextColor="#8a8698" />
+          <TextInput style={styles.input} value={trialEndsOn} onChangeText={setTrialEndsOn} placeholder="2025-01-15" placeholderTextColor={t.textMuted} />
         </>
       )}
 
@@ -280,7 +283,7 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
         maxLength={500}
         multiline
         placeholder="Any extra info…"
-        placeholderTextColor="#8a8698"
+        placeholderTextColor={t.textMuted}
       />
 
       <TouchableOpacity style={[styles.button, busy && styles.buttonDisabled]} onPress={handleSave} disabled={busy}>
@@ -290,56 +293,56 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
   content: { padding: 20, paddingBottom: 60 },
-  sectionLabel: { color: '#6a6782', fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 16 },
+  sectionLabel: { color: c.textMuted, fontSize: 13, fontWeight: '600', marginBottom: 6, marginTop: 16 },
   input: {
-    backgroundColor: '#f1eff9', borderRadius: 12, padding: 14,
-    color: '#1b1830', fontSize: 15, borderWidth: 1, borderColor: '#e5e3ef',
+    backgroundColor: c.surfaceAlt, borderRadius: 12, padding: 14,
+    color: c.text, fontSize: 15, borderWidth: 1, borderColor: c.border,
   },
   row: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 },
   chip: {
     borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8,
-    borderWidth: 1, borderColor: '#e5e3ef', backgroundColor: '#f1eff9',
+    borderWidth: 1, borderColor: c.border, backgroundColor: c.surfaceAlt,
   },
-  chipActive: { backgroundColor: '#6366f1', borderColor: '#6366f1' },
-  chipText: { color: '#6a6782', fontSize: 13, fontWeight: '600' },
+  chipActive: { backgroundColor: c.primary, borderColor: c.primary },
+  chipText: { color: c.textMuted, fontSize: 13, fontWeight: '600' },
   chipTextActive: { color: '#fff' },
   dropdown: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: '#f1eff9', borderRadius: 12, padding: 14,
-    borderWidth: 1, borderColor: '#e5e3ef',
+    backgroundColor: c.surfaceAlt, borderRadius: 12, padding: 14,
+    borderWidth: 1, borderColor: c.border,
   },
-  dropdownText: { color: '#1b1830', fontSize: 15 },
-  dropdownPlaceholder: { color: '#8a8698' },
-  dropdownCaret: { color: '#6a6782', fontSize: 14, marginLeft: 8 },
+  dropdownText: { color: c.text, fontSize: 15 },
+  dropdownPlaceholder: { color: c.textMuted },
+  dropdownCaret: { color: c.textMuted, fontSize: 14, marginLeft: 8 },
   suggestBox: {
-    marginTop: 6, backgroundColor: '#ffffff', borderRadius: 12,
-    borderWidth: 1, borderColor: '#e5e3ef', overflow: 'hidden',
-    shadowColor: '#1b1830', shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08, shadowRadius: 12, elevation: 3,
+    marginTop: 6, backgroundColor: c.surface, borderRadius: 12,
+    borderWidth: 1, borderColor: c.border, overflow: 'hidden',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12, shadowRadius: 12, elevation: 3,
   },
   suggestRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 11, paddingHorizontal: 14, gap: 10 },
-  suggestRowBorder: { borderBottomWidth: 1, borderBottomColor: '#f1eff9' },
-  suggestName: { color: '#1b1830', fontSize: 15, fontWeight: '600' },
-  suggestCat: { color: '#8a8698', fontSize: 12, marginTop: 1 },
-  suggestPrice: { color: '#6366f1', fontSize: 13, fontWeight: '700' },
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
+  suggestRowBorder: { borderBottomWidth: 1, borderBottomColor: c.border },
+  suggestName: { color: c.text, fontSize: 15, fontWeight: '600' },
+  suggestCat: { color: c.textMuted, fontSize: 12, marginTop: 1 },
+  suggestPrice: { color: c.primary, fontSize: 13, fontWeight: '700' },
+  modalOverlay: { flex: 1, backgroundColor: c.overlay, justifyContent: 'flex-end' },
   modalSheet: {
-    backgroundColor: '#ffffff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
+    backgroundColor: c.surface, borderTopLeftRadius: 20, borderTopRightRadius: 20,
     paddingTop: 14, paddingHorizontal: 20, paddingBottom: 30, maxHeight: '70%',
   },
-  modalTitle: { color: '#1b1830', fontSize: 16, fontWeight: '700', marginBottom: 8 },
+  modalTitle: { color: c.text, fontSize: 16, fontWeight: '700', marginBottom: 8 },
   modalRow: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: '#f1eff9',
+    paddingVertical: 14, borderBottomWidth: 1, borderBottomColor: c.border,
   },
-  modalRowText: { color: '#1b1830', fontSize: 15 },
-  modalRowTextActive: { color: '#6366f1', fontWeight: '700' },
-  modalCheck: { color: '#6366f1', fontSize: 16, fontWeight: '700' },
+  modalRowText: { color: c.text, fontSize: 15 },
+  modalRowTextActive: { color: c.primary, fontWeight: '700' },
+  modalCheck: { color: c.primary, fontSize: 16, fontWeight: '700' },
   button: {
-    backgroundColor: '#6366f1', borderRadius: 12, padding: 16,
+    backgroundColor: c.primary, borderRadius: 12, padding: 16,
     alignItems: 'center', marginTop: 32,
   },
   buttonDisabled: { opacity: 0.6 },

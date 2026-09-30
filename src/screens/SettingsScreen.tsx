@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Switch, Linking } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
@@ -10,6 +10,8 @@ import { getNotificationsEnabled, setNotificationsEnabled } from '../lib/notific
 import { apiFetch } from '../lib/api';
 import { showAlert } from '../lib/alert';
 import { SettingsStackParamList } from '../navigation/types';
+import { useTheme, useThemePref, Theme } from '../theme/theme';
+import { ThemePref } from '../lib/prefs';
 
 const PRIVACY_POLICY_URL = 'https://subscription-tracker-gilt.vercel.app/privacy-policy.html';
 const TERMS_URL = 'https://subscription-tracker-gilt.vercel.app/terms.html';
@@ -18,71 +20,10 @@ type Props = {
   navigation: NativeStackNavigationProp<SettingsStackParamList, 'SettingsHome'>;
 };
 
-function SettingsRow({
-  icon, label, description, color = '#8b5cf6', danger = false, badge, onPress,
-}: {
-  icon: string; label: string; description?: string; color?: string;
-  danger?: boolean; badge?: string; onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      style={[styles.row, danger && styles.rowDanger]}
-      onPress={onPress}
-      activeOpacity={0.75}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityHint={description}
-    >
-      <View style={[styles.rowIcon, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
-        <Ionicons name={icon as any} size={18} color={color} />
-      </View>
-      <View style={styles.rowBody}>
-        <Text style={[styles.rowLabel, danger && { color }]}>{label}</Text>
-        {description && <Text style={styles.rowDesc}>{description}</Text>}
-      </View>
-      {badge && (
-        <View style={[styles.rowBadge, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
-          <Text style={[styles.rowBadgeText, { color }]}>{badge}</Text>
-        </View>
-      )}
-      {!danger && <Ionicons name="chevron-forward" size={14} color="#b6b2c6" />}
-    </TouchableOpacity>
-  );
-}
-
-function SettingsToggleRow({
-  icon, label, description, color = '#8b5cf6', value, onValueChange, disabled,
-}: {
-  icon: string; label: string; description?: string; color?: string;
-  value: boolean; onValueChange: (v: boolean) => void; disabled?: boolean;
-}) {
-  return (
-    <View style={styles.row}>
-      <View style={[styles.rowIcon, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
-        <Ionicons name={icon as any} size={18} color={color} />
-      </View>
-      <View style={styles.rowBody}>
-        <Text style={styles.rowLabel}>{label}</Text>
-        {description && <Text style={styles.rowDesc}>{description}</Text>}
-      </View>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        disabled={disabled}
-        accessibilityLabel={label}
-        accessibilityHint={description}
-        thumbColor={value ? color : '#8a8698'}
-        trackColor={{ true: color + '80', false: '#f1eff9' }}
-      />
-    </View>
-  );
-}
-
-function SectionHeader({ title }: { title: string }) {
-  return <Text style={styles.sectionHdr}>{title}</Text>;
-}
-
 export default function SettingsScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const { pref, setPref } = useThemePref();
   const { user, signOut } = useAuthStore();
   const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
 
@@ -101,8 +42,6 @@ export default function SettingsScreen({ navigation }: Props) {
     getNotificationsEnabled().then(setNotifEnabled).catch(() => {});
   }, [user?.id]);
 
-  // Keep the display currency current — on mount and each time this screen
-  // regains focus (e.g. after returning from the currency picker).
   useEffect(() => {
     loadDefaultCurrency();
     const unsub = navigation.addListener('focus', () => { loadDefaultCurrency(); });
@@ -124,8 +63,6 @@ export default function SettingsScreen({ navigation }: Props) {
     const effective = await setNotificationsEnabled(next);
     setNotifEnabled(effective);
     setNotifBusy(false);
-    // If the user tried to enable but it didn't stick, permission was denied
-    // or push isn't available on this platform/build.
     if (next && !effective) {
       showAlert(
         'Notifications unavailable',
@@ -163,8 +100,63 @@ export default function SettingsScreen({ navigation }: Props) {
     );
   };
 
-  // Avatar initials from email
   const initials = user?.email?.split('@')[0].slice(0, 2).toUpperCase() ?? '??';
+
+  const SettingsRow = ({ icon, label, description, color = c.accent, danger = false, badge, onPress }: {
+    icon: string; label: string; description?: string; color?: string;
+    danger?: boolean; badge?: string; onPress: () => void;
+  }) => (
+    <TouchableOpacity
+      style={[styles.row, danger && styles.rowDanger]}
+      onPress={onPress}
+      activeOpacity={0.75}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint={description}
+    >
+      <View style={[styles.rowIcon, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
+        <Ionicons name={icon as any} size={18} color={color} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={[styles.rowLabel, danger && { color }]}>{label}</Text>
+        {description && <Text style={styles.rowDesc}>{description}</Text>}
+      </View>
+      {badge && (
+        <View style={[styles.rowBadge, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
+          <Text style={[styles.rowBadgeText, { color }]}>{badge}</Text>
+        </View>
+      )}
+      {!danger && <Ionicons name="chevron-forward" size={14} color={c.textFaint} />}
+    </TouchableOpacity>
+  );
+
+  const SettingsToggleRow = ({ icon, label, description, color = c.accent, value, onValueChange, disabled }: {
+    icon: string; label: string; description?: string; color?: string;
+    value: boolean; onValueChange: (v: boolean) => void; disabled?: boolean;
+  }) => (
+    <View style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: color + '18', borderColor: color + '30', borderWidth: 1 }]}>
+        <Ionicons name={icon as any} size={18} color={color} />
+      </View>
+      <View style={styles.rowBody}>
+        <Text style={styles.rowLabel}>{label}</Text>
+        {description && <Text style={styles.rowDesc}>{description}</Text>}
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        disabled={disabled}
+        accessibilityLabel={label}
+        accessibilityHint={description}
+        thumbColor={value ? color : c.textMuted}
+        trackColor={{ true: color + '80', false: c.surfaceAlt }}
+      />
+    </View>
+  );
+
+  const SectionHeader = ({ title }: { title: string }) => <Text style={styles.sectionHdr}>{title}</Text>;
+
+  const THEME_OPTIONS: ThemePref[] = ['system', 'light', 'dark'];
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
@@ -184,19 +176,49 @@ export default function SettingsScreen({ navigation }: Props) {
 
         <View style={styles.statsRow}>
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: '#8b5cf6' }]}>{activeCount}</Text>
+            <Text style={[styles.statVal, { color: c.accent }]}>{activeCount}</Text>
             <Text style={styles.statLbl}>subscriptions</Text>
           </View>
           <View style={styles.statDiv} />
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: '#06b6d4' }]}>{formatCurrency(totalMonthly, defaultCurrency, 0)}</Text>
+            <Text style={[styles.statVal, { color: c.cyan }]}>{formatCurrency(totalMonthly, defaultCurrency, 0)}</Text>
             <Text style={styles.statLbl}>monthly</Text>
           </View>
           <View style={styles.statDiv} />
           <View style={styles.stat}>
-            <Text style={[styles.statVal, { color: overdueCount > 0 ? '#f43f5e' : '#10b981' }]}>{overdueCount}</Text>
+            <Text style={[styles.statVal, { color: overdueCount > 0 ? c.red : c.green }]}>{overdueCount}</Text>
             <Text style={styles.statLbl}>overdue</Text>
           </View>
+        </View>
+      </View>
+
+      {/* ─── Appearance ─── */}
+      <SectionHeader title="APPEARANCE" />
+      <View style={styles.section}>
+        <View style={styles.row}>
+          <View style={[styles.rowIcon, { backgroundColor: c.accent + '18', borderColor: c.accent + '30', borderWidth: 1 }]}>
+            <Ionicons name="contrast-outline" size={18} color={c.accent} />
+          </View>
+          <View style={styles.rowBody}>
+            <Text style={styles.rowLabel}>Theme</Text>
+            <Text style={styles.rowDesc}>Match your device, or force light/dark</Text>
+          </View>
+        </View>
+        <View style={styles.segment}>
+          {THEME_OPTIONS.map((opt) => (
+            <TouchableOpacity
+              key={opt}
+              style={[styles.segmentBtn, pref === opt && styles.segmentBtnActive]}
+              onPress={() => setPref(opt)}
+              accessibilityRole="button"
+              accessibilityState={{ selected: pref === opt }}
+              accessibilityLabel={`${opt} theme`}
+            >
+              <Text style={[styles.segmentText, pref === opt && styles.segmentTextActive]}>
+                {opt.charAt(0).toUpperCase() + opt.slice(1)}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -243,7 +265,7 @@ export default function SettingsScreen({ navigation }: Props) {
           icon="document-text-outline"
           label="Terms of Use"
           description="The terms you agree to when using SubFinance"
-          color="#6a6782"
+          color={c.textMuted}
           onPress={() => openURL(TERMS_URL, 'Could not open the terms. Please try again.')}
         />
         <SettingsRow
@@ -268,13 +290,12 @@ export default function SettingsScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f4fb' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
   content: { padding: 16, paddingBottom: 60 },
 
-  // Profile card
   profileCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: c.surface,
     borderRadius: 28, padding: 26,
     alignItems: 'center', marginBottom: 24,
     borderWidth: 1, borderColor: '#8b5cf630',
@@ -283,9 +304,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2, shadowRadius: 24, elevation: 10,
   },
-  profileBlob: {
-    position: 'absolute', width: 200, height: 200, borderRadius: 100,
-  },
+  profileBlob: { position: 'absolute', width: 200, height: 200, borderRadius: 100 },
   avatarRing: {
     width: 90, height: 90, borderRadius: 45,
     borderWidth: 2, borderColor: '#8b5cf650',
@@ -300,41 +319,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   avatarText: { color: '#fff', fontSize: 28, fontWeight: '900' },
-  profileEmail: { color: '#1b1830', fontSize: 16, fontWeight: '700', marginBottom: 4 },
-  profileJoined: { color: '#8a8698', fontSize: 12, marginBottom: 20 },
+  profileEmail: { color: c.text, fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  profileJoined: { color: c.textMuted, fontSize: 12, marginBottom: 20 },
   statsRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'stretch' },
   stat: { flex: 1, alignItems: 'center' },
   statVal: { fontSize: 22, fontWeight: '900' },
-  statLbl: { color: '#8a8698', fontSize: 11, marginTop: 3 },
-  statDiv: { width: 1, height: 34, backgroundColor: 'rgba(0,0,0,0.06)' },
+  statLbl: { color: c.textMuted, fontSize: 11, marginTop: 3 },
+  statDiv: { width: 1, height: 34, backgroundColor: c.border },
 
-  // Section header
   sectionHdr: {
-    color: '#8a8698', fontSize: 10, fontWeight: '800',
+    color: c.textMuted, fontSize: 10, fontWeight: '800',
     letterSpacing: 2, marginBottom: 8, marginTop: 4, paddingLeft: 4,
   },
 
-  // Section
   section: {
-    backgroundColor: '#ffffff', borderRadius: 20,
-    marginBottom: 20, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: c.surface, borderRadius: 20,
+    marginBottom: 20, borderWidth: 1, borderColor: c.border,
     overflow: 'hidden',
   },
 
-  // Row
   row: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
-    padding: 16, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.04)',
+    padding: 16, borderBottomWidth: 1, borderBottomColor: c.border,
   },
   rowDanger: { borderBottomWidth: 0 },
   rowIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
   rowBody: { flex: 1 },
-  rowLabel: { color: '#2b2842', fontSize: 14, fontWeight: '600' },
-  rowDesc: { color: '#8a8698', fontSize: 12, marginTop: 2 },
-  rowBadge: {
-    borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, marginRight: 6,
-  },
+  rowLabel: { color: c.text, fontSize: 14, fontWeight: '600' },
+  rowDesc: { color: c.textMuted, fontSize: 12, marginTop: 2 },
+  rowBadge: { borderRadius: 10, paddingHorizontal: 10, paddingVertical: 4, marginRight: 6 },
   rowBadgeText: { fontSize: 11, fontWeight: '800' },
 
-  version: { color: '#b6b2c6', fontSize: 12, textAlign: 'center', marginTop: 8 },
+  segment: { flexDirection: 'row', gap: 8, padding: 12 },
+  segmentBtn: {
+    flex: 1, paddingVertical: 10, borderRadius: 12, alignItems: 'center',
+    backgroundColor: c.surfaceAlt, borderWidth: 1, borderColor: c.border,
+  },
+  segmentBtnActive: { backgroundColor: c.primary, borderColor: c.primary },
+  segmentText: { color: c.textMuted, fontSize: 13, fontWeight: '700' },
+  segmentTextActive: { color: '#fff' },
+
+  version: { color: c.textFaint, fontSize: 12, textAlign: 'center', marginTop: 8 },
 });

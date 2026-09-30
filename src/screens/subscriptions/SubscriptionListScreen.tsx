@@ -10,6 +10,7 @@ import { Subscription } from '../../types/database';
 import { daysUntilRenewal, formatCurrency, monthlyEquivalent, totalMonthlySpend } from '../../lib/subscriptionUtils';
 import { convert } from '../../lib/currency';
 import { HomeStackParamList } from '../../navigation/types';
+import { useTheme, Theme } from '../../theme/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'SubscriptionList'>;
@@ -32,21 +33,21 @@ function getInitials(name: string) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-function getBadgeColor(days: number) {
-  if (days < 0) return { bg: '#fef2f2', text: '#ef4444', label: 'Overdue' };
-  if (days === 0) return { bg: '#fff7ed', text: '#f59e0b', label: 'Today' };
-  if (days <= 3) return { bg: '#fee2e2', text: '#ef4444', label: `${days}d` };
-  if (days <= 7) return { bg: '#e8f1ff', text: '#3b82f6', label: `${days}d` };
-  return { bg: '#f1eff9', text: '#8a8698', label: `${days}d` };
+function getBadgeColor(days: number, c: Theme) {
+  if (days < 0) return { bg: '#f43f5e22', text: c.red, label: 'Overdue' };
+  if (days === 0) return { bg: '#f59e0b22', text: c.amber, label: 'Today' };
+  if (days <= 3) return { bg: '#f43f5e22', text: c.red, label: `${days}d` };
+  if (days <= 7) return { bg: '#3b82f622', text: '#3b82f6', label: `${days}d` };
+  return { bg: c.surfaceAlt, text: c.textMuted, label: `${days}d` };
 }
 
 function getTrialBadge(trialDays: number) {
-  if (trialDays <= 1) return { bg: '#fef2f2', text: '#ef4444', label: `⚗ TRIAL ${trialDays < 0 ? 'END' : trialDays === 0 ? 'TODAY' : '1d'}` };
-  if (trialDays <= 3) return { bg: '#fff7ed', text: '#f59e0b', label: `⚗ TRIAL ${trialDays}d` };
-  return { bg: '#ede8ff', text: '#8b5cf6', label: `⚗ TRIAL ${trialDays}d` };
+  if (trialDays <= 1) return { bg: '#f43f5e22', text: '#f43f5e', label: `⚗ TRIAL ${trialDays < 0 ? 'END' : trialDays === 0 ? 'TODAY' : '1d'}` };
+  if (trialDays <= 3) return { bg: '#f59e0b22', text: '#f59e0b', label: `⚗ TRIAL ${trialDays}d` };
+  return { bg: '#8b5cf622', text: '#8b5cf6', label: `⚗ TRIAL ${trialDays}d` };
 }
 
-function SubscriptionCard({ item, onPress }: { item: Subscription; onPress: () => void }) {
+function SubscriptionCard({ item, onPress, styles, c }: { item: Subscription; onPress: () => void; styles: any; c: Theme }) {
   const days = daysUntilRenewal(item.next_renewal);
   const monthly = monthlyEquivalent(item.cost, item.billing_cycle, item.interval_days);
   const color = item.category?.color ?? getSubColor(item.name);
@@ -56,7 +57,7 @@ function SubscriptionCard({ item, onPress }: { item: Subscription; onPress: () =
   if (item.is_trial && item.trial_ends_on) {
     badge = getTrialBadge(Math.round((new Date(item.trial_ends_on).getTime() - Date.now()) / 86400000));
   } else {
-    badge = getBadgeColor(days);
+    badge = getBadgeColor(days, c);
   }
 
   return (
@@ -68,7 +69,6 @@ function SubscriptionCard({ item, onPress }: { item: Subscription; onPress: () =
       accessibilityLabel={`${item.name}, ${formatCurrency(monthly, item.currency)} per month, ${badge.label}`}
       accessibilityHint="Opens subscription details"
     >
-      {/* Coloured initials circle */}
       <View style={[styles.cardAvatar, { backgroundColor: color + '25', borderColor: color + '50' }]}>
         <Text style={[styles.cardAvatarText, { color }]}>{initials}</Text>
       </View>
@@ -103,20 +103,18 @@ const FILTER_CHIP_STYLES: Record<FilterType, { bg: string; border: string; text:
   trial:  { bg: '#06b6d420', border: '#06b6d450', text: '#06b6d4' },
 };
 
-function FilterChip({ label, active, onPress, filterType, icon, prominent }: {
+function FilterChip({ label, active, onPress, filterType, icon, prominent, styles, c }: {
   label: string; active: boolean; onPress: () => void; filterType: FilterType;
-  icon?: string; prominent?: boolean;
+  icon?: string; prominent?: boolean; styles: any; c: Theme;
 }) {
   const activeStyle = FILTER_CHIP_STYLES[filterType];
-  // "prominent" gives a filled, call-to-action look even when unselected — used
-  // for Trials when any exist, so users clearly see it's a tappable view.
   const filled = prominent && !active;
   const containerStyle = filled
     ? { backgroundColor: activeStyle.text, borderColor: activeStyle.text }
     : active
       ? { backgroundColor: activeStyle.bg, borderColor: activeStyle.border }
-      : { backgroundColor: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)' };
-  const contentColor = filled ? '#ffffff' : active ? activeStyle.text : '#787591';
+      : { backgroundColor: c.surfaceAlt, borderColor: c.border };
+  const contentColor = filled ? '#ffffff' : active ? activeStyle.text : c.textMuted;
   return (
     <TouchableOpacity
       style={[styles.filterChip, styles.filterChipRow, containerStyle]}
@@ -133,6 +131,8 @@ function FilterChip({ label, active, onPress, filterType, icon, prominent }: {
 }
 
 export default function SubscriptionListScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const { subscriptions, loading, error, fetchAll, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
   const [filter, setFilter] = useState<FilterType>('all');
   const [search, setSearch] = useState('');
@@ -140,12 +140,8 @@ export default function SubscriptionListScreen({ navigation }: Props) {
   useEffect(() => { fetchAll(); loadDefaultCurrency(); }, []);
   const onRefresh = useCallback(() => { fetchAll(); }, []);
 
-  // All totals are converted into the user's display currency so a mix of per-sub
-  // currencies sums correctly and every surface shows the same currency.
   const totalMonthly = totalMonthlySpend(subscriptions, defaultCurrency);
   const annualTotal = totalMonthly * 12;
-  // Actual charges due in the next 30 days — a metric users can act on, unlike a
-  // total/count average which mixes billing cycles and means little.
   const due30 = subscriptions
     .filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
     .reduce((sum, s) => sum + convert(s.cost, s.currency, defaultCurrency), 0);
@@ -183,17 +179,17 @@ export default function SubscriptionListScreen({ navigation }: Props) {
         </View>
         <View style={styles.heroStats}>
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: '#06b6d4' }]}>{formatCurrency(annualTotal, defaultCurrency, 0)}</Text>
+            <Text style={[styles.heroStatVal, { color: c.cyan }]}>{formatCurrency(annualTotal, defaultCurrency, 0)}</Text>
             <Text style={styles.heroStatLbl}>per year</Text>
           </View>
           <View style={styles.heroStatDiv} />
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: '#10b981' }]}>{formatCurrency(due30, defaultCurrency, 0)}</Text>
+            <Text style={[styles.heroStatVal, { color: c.green }]}>{formatCurrency(due30, defaultCurrency, 0)}</Text>
             <Text style={styles.heroStatLbl}>due in 30d</Text>
           </View>
           <View style={styles.heroStatDiv} />
           <View style={styles.heroStat}>
-            <Text style={[styles.heroStatVal, { color: overdueCount > 0 ? '#f43f5e' : '#6a6782' }]}>{overdueCount}</Text>
+            <Text style={[styles.heroStatVal, { color: overdueCount > 0 ? c.red : c.textMuted }]}>{overdueCount}</Text>
             <Text style={styles.heroStatLbl}>overdue</Text>
           </View>
         </View>
@@ -201,28 +197,28 @@ export default function SubscriptionListScreen({ navigation }: Props) {
 
       {/* ─── Search ─── */}
       <View style={styles.searchWrap}>
-        <Ionicons name="search-outline" size={16} color="#8a8698" />
+        <Ionicons name="search-outline" size={16} color={c.textMuted} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search subscriptions…"
-          placeholderTextColor="#8a8698"
+          placeholderTextColor={c.textMuted}
           value={search}
           onChangeText={setSearch}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch('')}>
-            <Ionicons name="close-circle" size={16} color="#8a8698" />
+            <Ionicons name="close-circle" size={16} color={c.textMuted} />
           </TouchableOpacity>
         )}
       </View>
 
       {/* ─── Filter Chips ─── */}
       <View style={styles.filterRow}>
-        <FilterChip label="All" active={filter === 'all'} filterType="all" onPress={() => setFilter('all')} />
-        <FilterChip label={`Overdue${overdueCount > 0 ? ` (${overdueCount})` : ''}`} active={filter === 'overdue'} filterType="overdue" onPress={() => setFilter('overdue')} />
-        <FilterChip label={`Due Soon${dueSoonCount > 0 ? ` (${dueSoonCount})` : ''}`} active={filter === 'soon'} filterType="soon" onPress={() => setFilter('soon')} />
-        <FilterChip label="Active" active={filter === 'active'} filterType="active" onPress={() => setFilter('active')} />
-        <FilterChip label={`Trials${trialCount > 0 ? ` (${trialCount})` : ''}`} icon="flask-outline" prominent={trialCount > 0} active={filter === 'trial'} filterType="trial" onPress={() => setFilter('trial')} />
+        <FilterChip label="All" active={filter === 'all'} filterType="all" onPress={() => setFilter('all')} styles={styles} c={c} />
+        <FilterChip label={`Overdue${overdueCount > 0 ? ` (${overdueCount})` : ''}`} active={filter === 'overdue'} filterType="overdue" onPress={() => setFilter('overdue')} styles={styles} c={c} />
+        <FilterChip label={`Due Soon${dueSoonCount > 0 ? ` (${dueSoonCount})` : ''}`} active={filter === 'soon'} filterType="soon" onPress={() => setFilter('soon')} styles={styles} c={c} />
+        <FilterChip label="Active" active={filter === 'active'} filterType="active" onPress={() => setFilter('active')} styles={styles} c={c} />
+        <FilterChip label={`Trials${trialCount > 0 ? ` (${trialCount})` : ''}`} icon="flask-outline" prominent={trialCount > 0} active={filter === 'trial'} filterType="trial" onPress={() => setFilter('trial')} styles={styles} c={c} />
       </View>
 
       {/* ─── List ─── */}
@@ -233,9 +229,11 @@ export default function SubscriptionListScreen({ navigation }: Props) {
           <SubscriptionCard
             item={item}
             onPress={() => navigation.navigate('SubscriptionDetail', { id: item.id })}
+            styles={styles}
+            c={c}
           />
         )}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor="#8b5cf6" />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} tintColor={c.accent} />}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           !loading ? (
@@ -244,7 +242,7 @@ export default function SubscriptionListScreen({ navigation }: Props) {
                 <Ionicons
                   name={error ? 'cloud-offline-outline' : 'receipt-outline'}
                   size={36}
-                  color={error ? '#ef4444' : '#8b5cf6'}
+                  color={error ? c.red : c.accent}
                 />
               </View>
               <Text style={styles.emptyTitle}>
@@ -272,85 +270,71 @@ export default function SubscriptionListScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f4fb' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
 
-  // Hero
   heroCard: {
     margin: 16, marginBottom: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.surface,
     borderRadius: 24, padding: 22,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1, borderColor: c.border,
     overflow: 'hidden',
     shadowColor: '#8b5cf6',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2, shadowRadius: 24, elevation: 12,
+    shadowOpacity: c.mode === 'dark' ? 0.3 : 0.2, shadowRadius: 24, elevation: 12,
   },
-  heroGlob: {
-    position: 'absolute', width: 200, height: 200, borderRadius: 100,
-  },
+  heroGlob: { position: 'absolute', width: 200, height: 200, borderRadius: 100 },
   heroTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  heroLabel: { color: '#8b5cf6', fontSize: 10, fontWeight: '800', letterSpacing: 2, marginBottom: 6 },
-  heroAmount: { color: '#1b1830', fontSize: 44, fontWeight: '900', letterSpacing: -1.5 },
+  heroLabel: { color: c.accent, fontSize: 10, fontWeight: '800', letterSpacing: 2, marginBottom: 6 },
+  heroAmount: { color: c.text, fontSize: 44, fontWeight: '900', letterSpacing: -1.5 },
   heroBadge: {
     backgroundColor: '#8b5cf620', borderRadius: 20,
     paddingHorizontal: 14, paddingVertical: 7,
     borderWidth: 1, borderColor: '#8b5cf640',
   },
-  heroBadgeText: { color: '#7c4dff', fontSize: 12, fontWeight: '700' },
+  heroBadgeText: { color: c.accent, fontSize: 12, fontWeight: '700' },
   heroStats: { flexDirection: 'row', alignItems: 'center' },
   heroStat: { flex: 1, alignItems: 'center' },
   heroStatVal: { fontSize: 16, fontWeight: '800' },
-  heroStatLbl: { color: '#8a8698', fontSize: 11, marginTop: 3 },
-  heroStatDiv: { width: 1, height: 30, backgroundColor: 'rgba(255,255,255,0.07)' },
+  heroStatLbl: { color: c.textMuted, fontSize: 11, marginTop: 3 },
+  heroStatDiv: { width: 1, height: 30, backgroundColor: c.border },
 
-  // Search
   searchWrap: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
-    backgroundColor: '#ffffff', borderRadius: 14,
+    backgroundColor: c.surface, borderRadius: 14,
     paddingHorizontal: 14, paddingVertical: 11,
     marginHorizontal: 16, marginBottom: 10,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    borderWidth: 1, borderColor: c.border,
   },
-  searchInput: { flex: 1, color: '#1b1830', fontSize: 14 },
+  searchInput: { flex: 1, color: c.text, fontSize: 14 },
 
-  // Filter chips
   filterRow: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 14, flexWrap: 'wrap' },
-  filterChip: {
-    paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1,
-  },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 7, borderRadius: 20, borderWidth: 1 },
   filterChipRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   filterChipText: { fontSize: 12, fontWeight: '600' },
 
-  // Card
   card: {
     flexDirection: 'row', alignItems: 'center', gap: 12,
-    borderRadius: 18, marginBottom: 10, padding: 14,
-    borderWidth: 1,
+    borderRadius: 18, marginBottom: 10, padding: 14, borderWidth: 1,
   },
   cardAvatar: {
     width: 46, height: 46, borderRadius: 14,
-    justifyContent: 'center', alignItems: 'center',
-    borderWidth: 1,
+    justifyContent: 'center', alignItems: 'center', borderWidth: 1,
   },
   cardAvatarText: { fontSize: 15, fontWeight: '900' },
   cardBody: { flex: 1 },
   cardRow1: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 },
-  cardName: { color: '#1b1830', fontSize: 15, fontWeight: '700', flex: 1, marginRight: 8 },
+  cardName: { color: c.text, fontSize: 15, fontWeight: '700', flex: 1, marginRight: 8 },
   cardCost: { fontSize: 15, fontWeight: '800' },
-  cardCostUnit: { color: '#8a8698', fontSize: 11, fontWeight: '400' },
+  cardCostUnit: { color: c.textMuted, fontSize: 11, fontWeight: '400' },
   cardRow2: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  cardCycleTag: {
-    borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1,
-  },
+  cardCycleTag: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, borderWidth: 1 },
   cardCycleText: { fontSize: 11, fontWeight: '700' },
   badgePill: { borderRadius: 8, paddingHorizontal: 9, paddingVertical: 3 },
   badgeText: { fontSize: 11, fontWeight: '700' },
 
-  // List
   list: { paddingHorizontal: 16, paddingBottom: 120 },
 
-  // Empty state
   empty: { alignItems: 'center', marginTop: 80, paddingHorizontal: 40 },
   emptyIcon: {
     width: 80, height: 80, borderRadius: 28,
@@ -358,10 +342,9 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#8b5cf640',
     justifyContent: 'center', alignItems: 'center', marginBottom: 20,
   },
-  emptyTitle: { color: '#6a6782', fontSize: 18, fontWeight: '700', textAlign: 'center' },
-  emptySub: { color: '#8a8698', fontSize: 14, marginTop: 6, textAlign: 'center' },
+  emptyTitle: { color: c.text, fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  emptySub: { color: c.textMuted, fontSize: 14, marginTop: 6, textAlign: 'center' },
 
-  // FAB
   fab: {
     position: 'absolute', right: 20, bottom: 28,
     width: 60, height: 60, borderRadius: 30,

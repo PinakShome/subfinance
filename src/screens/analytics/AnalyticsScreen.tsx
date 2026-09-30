@@ -7,27 +7,37 @@ import { formatCurrency, monthlyEquivalent, daysUntilRenewal } from '../../lib/s
 import { convert } from '../../lib/currency';
 import { CURRENCIES } from '../../lib/prefs';
 import { Subscription } from '../../types/database';
+import { useTheme, Theme } from '../../theme/theme';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CHART_WIDTH = SCREEN_WIDTH - 48;
 
 const PIE_COLORS = ['#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#f43f5e', '#d946ef', '#f97316', '#3b82f6'];
 
-const CHART_CONFIG = {
-  backgroundGradientFrom: '#ffffff',
-  backgroundGradientTo: '#ffffff',
-  color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
-  labelColor: () => '#8a8698',
-  barPercentage: 0.55,
-  decimalPlaces: 0,
-  propsForBackgroundLines: { stroke: 'rgba(255,255,255,0.05)', strokeDasharray: '' },
-  propsForLabels: { fontSize: 11 },
-};
+export default function AnalyticsScreen() {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
+  useEffect(() => { loadDefaultCurrency(); }, []);
+  const active = subscriptions.filter((s) => s.is_active);
 
-function MetricCard({ label, value, sub, accentColor = '#8b5cf6', icon }: {
-  label: string; value: string; sub?: string; accentColor?: string; icon?: string
-}) {
-  return (
+  const chartConfig = {
+    backgroundGradientFrom: c.surface,
+    backgroundGradientTo: c.surface,
+    color: (opacity = 1) => `rgba(139, 92, 246, ${opacity})`,
+    labelColor: () => c.textMuted,
+    barPercentage: 0.55,
+    decimalPlaces: 0,
+    propsForBackgroundLines: { stroke: c.border, strokeDasharray: '' },
+    propsForLabels: { fontSize: 11 },
+  };
+
+  const conv = (s: Subscription) => convert(monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), s.currency, defaultCurrency);
+  const currencySymbol = CURRENCIES.find((cur) => cur.code === defaultCurrency)?.symbol ?? '$';
+
+  const MetricCard = ({ label, value, sub, accentColor = c.accent, icon }: {
+    label: string; value: string; sub?: string; accentColor?: string; icon?: string
+  }) => (
     <View style={[styles.metricCard, { borderColor: accentColor + '30' }]}>
       <View style={[styles.metricGlow, { backgroundColor: accentColor + '15' }]} />
       {icon && <Ionicons name={icon as any} size={16} color={accentColor} style={{ marginBottom: 10 }} />}
@@ -36,63 +46,48 @@ function MetricCard({ label, value, sub, accentColor = '#8b5cf6', icon }: {
       {sub && <Text style={styles.metricSub}>{sub}</Text>}
     </View>
   );
-}
 
-function SectionHeader({ title, icon }: { title: string; icon: string }) {
-  return (
+  const SectionHeader = ({ title, icon }: { title: string; icon: string }) => (
     <View style={styles.sectionHeader}>
-      <Ionicons name={icon as any} size={13} color="#8b5cf6" />
+      <Ionicons name={icon as any} size={13} color={c.accent} />
       <Text style={styles.sectionTitle}>{title}</Text>
     </View>
   );
-}
 
-function UpcomingRow({ sub }: { sub: Subscription }) {
-  const days = daysUntilRenewal(sub.next_renewal);
-  const monthly = monthlyEquivalent(sub.cost, sub.billing_cycle, sub.interval_days);
-  const urgent = days <= 3;
-  const dotColor = days < 0 ? '#f43f5e' : urgent ? '#f97316' : '#8b5cf6';
-  return (
-    <View style={styles.upcomingRow}>
-      <View style={[styles.upcomingDot, { backgroundColor: dotColor }]} />
-      <Text style={styles.upcomingName} numberOfLines={1}>{sub.name}</Text>
-      <Text style={[styles.upcomingDays, { color: dotColor }]}>{days === 0 ? 'Today' : `${days}d`}</Text>
-      <Text style={styles.upcomingAmt}>{formatCurrency(monthly, sub.currency)}/mo</Text>
-    </View>
-  );
-}
-
-function CategoryBar({ name, amount, total, color, currency }: { name: string; amount: number; total: number; color: string; currency: string }) {
-  const pct = total > 0 ? (amount / total) * 100 : 0;
-  return (
-    <View style={styles.catRow}>
-      <View style={[styles.catDot, { backgroundColor: color }]} />
-      <Text style={styles.catName} numberOfLines={1}>{name}</Text>
-      <View style={styles.catTrack}>
-        <View style={[styles.catFill, { width: `${pct}%` as any, backgroundColor: color }]} />
+  const UpcomingRow = ({ sub }: { sub: Subscription }) => {
+    const days = daysUntilRenewal(sub.next_renewal);
+    const monthly = monthlyEquivalent(sub.cost, sub.billing_cycle, sub.interval_days);
+    const urgent = days <= 3;
+    const dotColor = days < 0 ? c.red : urgent ? '#f97316' : c.accent;
+    return (
+      <View style={styles.upcomingRow}>
+        <View style={[styles.upcomingDot, { backgroundColor: dotColor }]} />
+        <Text style={styles.upcomingName} numberOfLines={1}>{sub.name}</Text>
+        <Text style={[styles.upcomingDays, { color: dotColor }]}>{days === 0 ? 'Today' : `${days}d`}</Text>
+        <Text style={styles.upcomingAmt}>{formatCurrency(monthly, sub.currency)}/mo</Text>
       </View>
-      <Text style={[styles.catAmt, { color }]}>{formatCurrency(amount, currency, 0)}</Text>
-    </View>
-  );
-}
+    );
+  };
 
-export default function AnalyticsScreen() {
-  const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
-  useEffect(() => { loadDefaultCurrency(); }, []);
-  const active = subscriptions.filter((s) => s.is_active);
-
-  // A sub's monthly cost, converted into the display currency (so totals and
-  // comparisons across mixed currencies are apples-to-apples).
-  const conv = (s: Subscription) => convert(monthlyEquivalent(s.cost, s.billing_cycle, s.interval_days), s.currency, defaultCurrency);
-  const currencySymbol = CURRENCIES.find((c) => c.code === defaultCurrency)?.symbol ?? '$';
+  const CategoryBar = ({ name, amount, total, color, currency }: { name: string; amount: number; total: number; color: string; currency: string }) => {
+    const pct = total > 0 ? (amount / total) * 100 : 0;
+    return (
+      <View style={styles.catRow}>
+        <View style={[styles.catDot, { backgroundColor: color }]} />
+        <Text style={styles.catName} numberOfLines={1}>{name}</Text>
+        <View style={styles.catTrack}>
+          <View style={[styles.catFill, { width: `${pct}%` as any, backgroundColor: color }]} />
+        </View>
+        <Text style={[styles.catAmt, { color }]}>{formatCurrency(amount, currency, 0)}</Text>
+      </View>
+    );
+  };
 
   const monthly = useMemo(
     () => active.reduce((sum, s) => sum + conv(s), 0),
     [active, defaultCurrency],
   );
 
-  // Real cash leaving the account in the next 30 days (actual charge amounts,
-  // converted to the display currency) — the metric a user can actually act on.
   const due30 = useMemo(
     () => active
       .filter((s) => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
@@ -108,7 +103,6 @@ export default function AnalyticsScreen() {
     (min, s) => !min || conv(s) < conv(min) ? s : min, null,
   );
 
-  // Upcoming renewals in next 30 days
   const upcoming = useMemo(() =>
     [...active]
       .filter(s => { const d = daysUntilRenewal(s.next_renewal); return d >= 0 && d <= 30; })
@@ -117,7 +111,6 @@ export default function AnalyticsScreen() {
     [active],
   );
 
-  // Category breakdown
   const categoryData = useMemo(() => {
     const map: Record<string, { amount: number; color: string }> = {};
     active.forEach((s, i) => {
@@ -133,7 +126,7 @@ export default function AnalyticsScreen() {
     name: name.length > 10 ? name.slice(0, 10) : name,
     population: Math.round(amount * 100) / 100,
     color: color ?? PIE_COLORS[i % PIE_COLORS.length],
-    legendFontColor: '#787591',
+    legendFontColor: c.textMuted,
     legendFontSize: 12,
   }));
 
@@ -148,7 +141,7 @@ export default function AnalyticsScreen() {
   if (active.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="bar-chart-outline" size={52} color="#f1eff9" />
+        <Ionicons name="bar-chart-outline" size={52} color={c.border} />
         <Text style={styles.emptyText}>No data yet</Text>
         <Text style={styles.emptySubText}>Add subscriptions to see analytics</Text>
       </View>
@@ -211,7 +204,7 @@ export default function AnalyticsScreen() {
               data={pieData}
               width={CHART_WIDTH}
               height={190}
-              chartConfig={CHART_CONFIG}
+              chartConfig={chartConfig}
               accessor="population"
               backgroundColor="transparent"
               paddingLeft="8"
@@ -230,7 +223,7 @@ export default function AnalyticsScreen() {
               data={barData}
               width={CHART_WIDTH}
               height={210}
-              chartConfig={CHART_CONFIG}
+              chartConfig={chartConfig}
               yAxisLabel={currencySymbol}
               yAxisSuffix=""
               showValuesOnTopOfBars
@@ -254,85 +247,65 @@ export default function AnalyticsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f4fb' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
   content: { padding: 16, paddingBottom: 60 },
 
-  // KPI grid
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 16 },
   metricCard: {
     width: (SCREEN_WIDTH - 52) / 2,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.surface,
     borderRadius: 20, padding: 18,
     borderWidth: 1,
     overflow: 'hidden',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15, shadowRadius: 12, elevation: 6,
   },
-  metricGlow: {
-    position: 'absolute', top: -30, right: -30,
-    width: 100, height: 100, borderRadius: 50,
-  },
+  metricGlow: { position: 'absolute', top: -30, right: -30, width: 100, height: 100, borderRadius: 50 },
   metricValue: { fontSize: 24, fontWeight: '900', marginBottom: 4, letterSpacing: -0.5 },
-  metricLabel: { color: '#787591', fontSize: 12, fontWeight: '600' },
-  metricSub: { color: '#b6b2c6', fontSize: 11, marginTop: 4 },
+  metricLabel: { color: c.textMuted, fontSize: 12, fontWeight: '600' },
+  metricSub: { color: c.textFaint, fontSize: 11, marginTop: 4 },
 
-  // Section header
-  sectionHeader: {
-    flexDirection: 'row', alignItems: 'center',
-    gap: 7, marginBottom: 12, marginTop: 6,
-  },
-  sectionTitle: {
-    color: '#787591', fontSize: 11, fontWeight: '800', letterSpacing: 1.5,
-  },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 7, marginBottom: 12, marginTop: 6 },
+  sectionTitle: { color: c.textMuted, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
 
-  // Highlight cards
   highlightRow: { flexDirection: 'row', gap: 10, marginBottom: 16 },
-  highlightCard: {
-    flex: 1, borderRadius: 20, padding: 18, borderWidth: 1, overflow: 'hidden',
-  },
+  highlightCard: { flex: 1, borderRadius: 20, padding: 18, borderWidth: 1, overflow: 'hidden' },
   hlDanger: { backgroundColor: '#f43f5e10', borderColor: '#f43f5e30' },
   hlGreen: { backgroundColor: '#10b98110', borderColor: '#10b98130' },
   hlLabel: { color: '#f43f5e', fontSize: 11, fontWeight: '700', marginTop: 6 },
   hlLabelGreen: { color: '#10b981' },
-  hlName: { color: '#1b1830', fontSize: 15, fontWeight: '800', marginTop: 4 },
+  hlName: { color: c.text, fontSize: 15, fontWeight: '800', marginTop: 4 },
   hlAmt: { fontSize: 13, fontWeight: '700', marginTop: 2 },
 
-  // Generic card
   card: {
-    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
-    marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: c.surface, borderRadius: 18, padding: 16,
+    marginBottom: 16, borderWidth: 1, borderColor: c.border,
   },
   chartCard: {
-    backgroundColor: '#ffffff', borderRadius: 18, padding: 14,
-    marginBottom: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: c.surface, borderRadius: 18, padding: 14,
+    marginBottom: 16, borderWidth: 1, borderColor: c.border,
     alignItems: 'center',
   },
 
-  // Category rows
   catRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 14 },
   catDot: { width: 8, height: 8, borderRadius: 4 },
-  catName: { color: '#6a6782', fontSize: 13, width: 80 },
-  catTrack: {
-    flex: 1, height: 6, backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 3, overflow: 'hidden',
-  },
+  catName: { color: c.textMuted, fontSize: 13, width: 80 },
+  catTrack: { flex: 1, height: 6, backgroundColor: c.surfaceAlt, borderRadius: 3, overflow: 'hidden' },
   catFill: { height: 6, borderRadius: 3 },
   catAmt: { fontSize: 12, fontWeight: '700', width: 60, textAlign: 'right' },
 
-  // Upcoming
   upcomingRow: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     paddingVertical: 11,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+    borderBottomWidth: 1, borderBottomColor: c.border,
   },
   upcomingDot: { width: 8, height: 8, borderRadius: 4 },
-  upcomingName: { flex: 1, color: '#2b2842', fontSize: 14, fontWeight: '600' },
+  upcomingName: { flex: 1, color: c.text, fontSize: 14, fontWeight: '600' },
   upcomingDays: { fontSize: 13, fontWeight: '800', width: 40, textAlign: 'center' },
-  upcomingAmt: { color: '#787591', fontSize: 13, width: 70, textAlign: 'right' },
+  upcomingAmt: { color: c.textMuted, fontSize: 13, width: 70, textAlign: 'right' },
 
-  // Empty state
-  emptyContainer: { flex: 1, backgroundColor: '#f5f4fb', justifyContent: 'center', alignItems: 'center', gap: 12 },
-  emptyText: { color: '#787591', fontSize: 16, fontWeight: '600' },
-  emptySubText: { color: '#b6b2c6', fontSize: 13 },
+  emptyContainer: { flex: 1, backgroundColor: c.bg, justifyContent: 'center', alignItems: 'center', gap: 12 },
+  emptyText: { color: c.textMuted, fontSize: 16, fontWeight: '600' },
+  emptySubText: { color: c.textFaint, fontSize: 13 },
 });

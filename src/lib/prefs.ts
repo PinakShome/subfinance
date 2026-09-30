@@ -20,6 +20,27 @@ export const CURRENCIES: { code: string; name: string; symbol: string }[] = [
 
 const DEFAULT_CURRENCY_KEY = 'pref.defaultCurrency';
 const ONBOARDING_KEY = 'pref.onboardingSeen';
+const THEME_KEY = 'pref.theme';
+
+export type ThemePref = 'system' | 'light' | 'dark';
+
+/** The user's theme choice: follow the system, or force light/dark. */
+export async function getThemePref(): Promise<ThemePref> {
+  try {
+    const v = await AsyncStorage.getItem(THEME_KEY);
+    return v === 'light' || v === 'dark' ? v : 'system';
+  } catch {
+    return 'system';
+  }
+}
+
+export async function setThemePref(pref: ThemePref): Promise<void> {
+  try {
+    await AsyncStorage.setItem(THEME_KEY, pref);
+  } catch {
+    /* non-fatal */
+  }
+}
 
 /** Whether the user has completed the first-launch onboarding. */
 export async function getOnboardingSeen(): Promise<boolean> {

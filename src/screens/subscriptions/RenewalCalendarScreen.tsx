@@ -7,6 +7,7 @@ import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { formatCurrency } from '../../lib/subscriptionUtils';
 import { convert } from '../../lib/currency';
 import { Subscription } from '../../types/database';
+import { useTheme, Theme } from '../../theme/theme';
 
 type Props = { navigation: NativeStackNavigationProp<HomeStackParamList, 'RenewalCalendar'> };
 
@@ -16,6 +17,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (y: number, m: number, d: number) => `${y}-${pad(m + 1)}-${pad(d)}`;
 
 export default function RenewalCalendarScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const { subscriptions, defaultCurrency, loadDefaultCurrency } = useSubscriptionStore();
   useEffect(() => { loadDefaultCurrency(); }, []);
 
@@ -69,11 +72,11 @@ export default function RenewalCalendarScreen({ navigation }: Props) {
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.monthBar}>
         <TouchableOpacity onPress={() => step(-1)} style={styles.navBtn} accessibilityRole="button" accessibilityLabel="Previous month">
-          <Ionicons name="chevron-back" size={20} color="#6366f1" />
+          <Ionicons name="chevron-back" size={20} color={c.primary} />
         </TouchableOpacity>
         <Text style={styles.monthLabel}>{MONTHS[month]} {year}</Text>
         <TouchableOpacity onPress={() => step(1)} style={styles.navBtn} accessibilityRole="button" accessibilityLabel="Next month">
-          <Ionicons name="chevron-forward" size={20} color="#6366f1" />
+          <Ionicons name="chevron-forward" size={20} color={c.primary} />
         </TouchableOpacity>
       </View>
 
@@ -133,7 +136,7 @@ export default function RenewalCalendarScreen({ navigation }: Props) {
               {s.is_trial && <Text style={styles.subTrial}>Trial</Text>}
             </View>
             <Text style={styles.subCost}>{formatCurrency(s.cost, s.currency)}</Text>
-            <Ionicons name="chevron-forward" size={16} color="#b6b2c6" />
+            <Ionicons name="chevron-forward" size={16} color={c.textFaint} />
           </TouchableOpacity>
         ))}
       </View>
@@ -147,29 +150,29 @@ function formatSelected(dateStr: string): string {
 }
 
 const CELL = `${100 / 7}%`;
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f4fb' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
   content: { padding: 16, paddingBottom: 40 },
   monthBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  navBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#eceaff', justifyContent: 'center', alignItems: 'center' },
-  monthLabel: { color: '#1b1830', fontSize: 18, fontWeight: '800' },
-  monthTotal: { color: '#6a6782', fontSize: 13, textAlign: 'center', marginTop: 8, marginBottom: 12 },
+  navBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.surfaceAlt, justifyContent: 'center', alignItems: 'center' },
+  monthLabel: { color: c.text, fontSize: 18, fontWeight: '800' },
+  monthTotal: { color: c.textMuted, fontSize: 13, textAlign: 'center', marginTop: 8, marginBottom: 12 },
   weekRow: { flexDirection: 'row' },
-  weekday: { width: CELL as any, textAlign: 'center', color: '#a5a1b8', fontSize: 12, fontWeight: '700' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', backgroundColor: '#ffffff', borderRadius: 16, paddingVertical: 6, borderWidth: 1, borderColor: '#e5e3ef', marginTop: 4 },
+  weekday: { width: CELL as any, textAlign: 'center', color: c.textMuted, fontSize: 12, fontWeight: '700' },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', backgroundColor: c.surface, borderRadius: 16, paddingVertical: 6, borderWidth: 1, borderColor: c.border, marginTop: 4 },
   cell: { width: CELL as any, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  cellSelected: { backgroundColor: '#eceaff', borderRadius: 12 },
-  dayNum: { color: '#2b2842', fontSize: 15 },
-  dayNumSelected: { fontWeight: '800', color: '#4f46e5' },
-  dayToday: { color: '#6366f1', fontWeight: '800' },
-  dot: { minWidth: 16, height: 16, borderRadius: 8, backgroundColor: '#6366f1', justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3 },
+  cellSelected: { backgroundColor: c.surfaceAlt, borderRadius: 12 },
+  dayNum: { color: c.text, fontSize: 15 },
+  dayNumSelected: { fontWeight: '800', color: c.primaryDark },
+  dayToday: { color: c.primary, fontWeight: '800' },
+  dot: { minWidth: 16, height: 16, borderRadius: 8, backgroundColor: c.primary, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 3 },
   dotSingle: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' },
   dotCount: { color: '#fff', fontSize: 10, fontWeight: '800' },
   dayList: { marginTop: 18 },
-  dayListTitle: { color: '#1b1830', fontSize: 15, fontWeight: '700', marginBottom: 8 },
-  empty: { color: '#8a8698', fontSize: 13 },
-  subRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#ffffff', borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: '#e5e3ef' },
-  subName: { color: '#1b1830', fontSize: 15, fontWeight: '600' },
-  subTrial: { color: '#f59e0b', fontSize: 11, fontWeight: '700', marginTop: 2 },
-  subCost: { color: '#1b1830', fontSize: 15, fontWeight: '800' },
+  dayListTitle: { color: c.text, fontSize: 15, fontWeight: '700', marginBottom: 8 },
+  empty: { color: c.textMuted, fontSize: 13 },
+  subRow: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.surface, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: c.border },
+  subName: { color: c.text, fontSize: 15, fontWeight: '600' },
+  subTrial: { color: c.amber, fontSize: 11, fontWeight: '700', marginTop: 2 },
+  subCost: { color: c.text, fontSize: 15, fontWeight: '800' },
 });

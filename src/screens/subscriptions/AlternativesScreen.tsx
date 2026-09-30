@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, FlatList, StyleSheet, ActivityIndicator, Linking, TouchableOpacity,
 } from 'react-native';
@@ -9,6 +9,7 @@ import { useSubscriptionStore } from '../../store/subscriptionStore';
 import { useAuthStore } from '../../store/authStore';
 import { supabase } from '../../lib/supabase';
 import { formatCurrency, monthlyEquivalent } from '../../lib/subscriptionUtils';
+import { useTheme, Theme } from '../../theme/theme';
 
 const API_BASE = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3001';
 
@@ -33,6 +34,8 @@ function isSafeWebUrl(url?: string | null): boolean {
 }
 
 export default function AlternativesScreen({ route }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const { id, name } = route.params;
   const { subscriptions } = useSubscriptionStore();
   const sub = subscriptions.find((s) => s.id === id);
@@ -126,12 +129,12 @@ export default function AlternativesScreen({ route }: Props) {
 
       {loading ? (
         <View style={styles.center}>
-          <ActivityIndicator color="#8b5cf6" />
+          <ActivityIndicator color={c.accent} />
           <Text style={styles.centerText}>Finding cheaper options…</Text>
         </View>
       ) : error ? (
         <View style={styles.center}>
-          <Ionicons name="cloud-offline-outline" size={40} color="#ef4444" />
+          <Ionicons name="cloud-offline-outline" size={40} color={c.red} />
           <Text style={styles.centerText}>{error}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchAlternatives} accessibilityRole="button" accessibilityLabel="Try again">
             <Text style={styles.retryText}>Try Again</Text>
@@ -139,7 +142,7 @@ export default function AlternativesScreen({ route }: Props) {
         </View>
       ) : alternatives.length === 0 ? (
         <View style={styles.center}>
-          <Ionicons name="sparkles-outline" size={40} color="#8b5cf6" />
+          <Ionicons name="sparkles-outline" size={40} color={c.accent} />
           <Text style={styles.emptyTitle}>No cheaper alternatives found</Text>
           <Text style={styles.centerText}>
             We couldn't find a well-known option cheaper than {name}. You may already have a good deal.
@@ -168,7 +171,7 @@ export default function AlternativesScreen({ route }: Props) {
                 </View>
                 {saving && (
                   <View style={styles.savingPill}>
-                    <Ionicons name="trending-down-outline" size={12} color="#10b981" />
+                    <Ionicons name="trending-down-outline" size={12} color={c.green} />
                     <Text style={styles.savingText}>{saving}</Text>
                   </View>
                 )}
@@ -181,7 +184,7 @@ export default function AlternativesScreen({ route }: Props) {
                       accessibilityRole="button"
                       accessibilityLabel={`Visit ${item.name} website`}
                     >
-                      <Ionicons name="open-outline" size={14} color="#8b5cf6" />
+                      <Ionicons name="open-outline" size={14} color={c.accent} />
                       <Text style={styles.websiteBtnText}>Visit website</Text>
                     </TouchableOpacity>
                   ) : <View />}
@@ -197,7 +200,7 @@ export default function AlternativesScreen({ route }: Props) {
                         accessibilityLabel={`Mark ${item.name} helpful`}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Ionicons name="thumbs-up-outline" size={18} color="#10b981" />
+                        <Ionicons name="thumbs-up-outline" size={18} color={c.green} />
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={() => sendFeedback(item.name, false)}
@@ -205,7 +208,7 @@ export default function AlternativesScreen({ route }: Props) {
                         accessibilityLabel={`Mark ${item.name} not helpful`}
                         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                       >
-                        <Ionicons name="thumbs-down-outline" size={18} color="#a5a1b8" />
+                        <Ionicons name="thumbs-down-outline" size={18} color={c.textMuted} />
                       </TouchableOpacity>
                     </View>
                   )}
@@ -219,43 +222,43 @@ export default function AlternativesScreen({ route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffffff' },
-  headerBox: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: '#f1eff9' },
-  headerTitle: { color: '#1b1830', fontSize: 20, fontWeight: '800' },
-  headerSub: { color: '#787591', fontSize: 13, marginTop: 4 },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
+  headerBox: { padding: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: c.border },
+  headerTitle: { color: c.text, fontSize: 20, fontWeight: '800' },
+  headerSub: { color: c.textMuted, fontSize: 13, marginTop: 4 },
 
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 },
-  centerText: { color: '#787591', fontSize: 14, textAlign: 'center', lineHeight: 20 },
-  emptyTitle: { color: '#1b1830', fontSize: 17, fontWeight: '700', textAlign: 'center' },
+  centerText: { color: c.textMuted, fontSize: 14, textAlign: 'center', lineHeight: 20 },
+  emptyTitle: { color: c.text, fontSize: 17, fontWeight: '700', textAlign: 'center' },
   retryBtn: {
-    marginTop: 6, backgroundColor: '#8b5cf6', paddingVertical: 12, paddingHorizontal: 28, borderRadius: 12,
+    marginTop: 6, backgroundColor: c.accent, paddingVertical: 12, paddingHorizontal: 28, borderRadius: 12,
   },
   retryText: { color: '#fff', fontSize: 15, fontWeight: '700' },
 
   list: { padding: 16 },
   card: {
-    backgroundColor: '#faf9ff', borderRadius: 16, padding: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: '#e5e3ef',
+    backgroundColor: c.surface, borderRadius: 16, padding: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: c.border,
   },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  altName: { color: '#1b1830', fontSize: 16, fontWeight: '700', flexShrink: 1, paddingRight: 8 },
-  altPrice: { color: '#1b1830', fontSize: 15, fontWeight: '800' },
+  altName: { color: c.text, fontSize: 16, fontWeight: '700', flexShrink: 1, paddingRight: 8 },
+  altPrice: { color: c.text, fontSize: 15, fontWeight: '800' },
   savingPill: {
     flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-start',
-    backgroundColor: '#10b98115', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 8,
+    backgroundColor: c.green + '18', borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginTop: 8,
   },
-  savingText: { color: '#10b981', fontSize: 12, fontWeight: '700' },
-  altDesc: { color: '#6a6782', fontSize: 13, lineHeight: 20, marginTop: 8 },
+  savingText: { color: c.green, fontSize: 12, fontWeight: '700' },
+  altDesc: { color: c.textMuted, fontSize: 13, lineHeight: 20, marginTop: 8 },
   cardFooter: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     marginTop: 12, minHeight: 22,
   },
   websiteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  websiteBtnText: { color: '#8b5cf6', fontSize: 13, fontWeight: '600' },
+  websiteBtnText: { color: c.accent, fontSize: 13, fontWeight: '600' },
   fbRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  fbLabel: { color: '#a5a1b8', fontSize: 12 },
-  thanks: { color: '#10b981', fontSize: 12, fontWeight: '600' },
+  fbLabel: { color: c.textMuted, fontSize: 12 },
+  thanks: { color: c.green, fontSize: 12, fontWeight: '600' },
 
-  disclaimer: { color: '#a5a1b8', fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 8, paddingHorizontal: 12 },
+  disclaimer: { color: c.textFaint, fontSize: 11, lineHeight: 16, textAlign: 'center', marginTop: 8, paddingHorizontal: 12 },
 });

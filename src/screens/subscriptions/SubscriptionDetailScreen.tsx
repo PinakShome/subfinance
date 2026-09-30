@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet, Alert, Linking,
+  View, Text, TouchableOpacity, ScrollView, StyleSheet, Linking,
 } from 'react-native';
 import { showAlert } from '../../lib/alert';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,6 +12,7 @@ import { HomeStackParamList } from '../../navigation/types';
 import {
   annualEquivalent, daysUntilRenewal, formatCurrency, formatDate, monthlyEquivalent,
 } from '../../lib/subscriptionUtils';
+import { useTheme, Theme } from '../../theme/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'SubscriptionDetail'>;
@@ -29,19 +30,29 @@ function getSubColor(name: string): string {
   return VIVID_COLORS[Math.abs(hash) % VIVID_COLORS.length];
 }
 
-function InfoRow({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
-  return (
+export default function SubscriptionDetailScreen({ navigation, route }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
+  const { subscriptions, remove, fetchPriceHistory } = useSubscriptionStore();
+  const sub = subscriptions.find((s) => s.id === route.params.id);
+  const [priceHistory, setPriceHistory] = React.useState<PriceHistoryEntry[]>([]);
+
+  React.useEffect(() => {
+    if (sub?.id) {
+      fetchPriceHistory(sub.id).then(setPriceHistory);
+    }
+  }, [sub?.id]);
+
+  const InfoRow = ({ label, value, last = false }: { label: string; value: string; last?: boolean }) => (
     <View style={[styles.infoRow, last && styles.infoRowLast]}>
       <Text style={styles.infoLabel}>{label}</Text>
       <Text style={styles.infoValue} numberOfLines={1}>{value}</Text>
     </View>
   );
-}
 
-function ActionButton({ icon, label, color, bg, borderColor, onPress }: {
-  icon: string; label: string; color: string; bg: string; borderColor: string; onPress: () => void;
-}) {
-  return (
+  const ActionButton = ({ icon, label, color, bg, borderColor, onPress }: {
+    icon: string; label: string; color: string; bg: string; borderColor: string; onPress: () => void;
+  }) => (
     <TouchableOpacity
       style={[styles.actionBtn, { backgroundColor: bg, borderColor }]}
       onPress={onPress}
@@ -54,23 +65,11 @@ function ActionButton({ icon, label, color, bg, borderColor, onPress }: {
       <Ionicons name="chevron-forward" size={16} color={color + '88'} style={{ marginLeft: 'auto' }} />
     </TouchableOpacity>
   );
-}
-
-export default function SubscriptionDetailScreen({ navigation, route }: Props) {
-  const { subscriptions, remove, fetchPriceHistory } = useSubscriptionStore();
-  const sub = subscriptions.find((s) => s.id === route.params.id);
-  const [priceHistory, setPriceHistory] = React.useState<PriceHistoryEntry[]>([]);
-
-  React.useEffect(() => {
-    if (sub?.id) {
-      fetchPriceHistory(sub.id).then(setPriceHistory);
-    }
-  }, [sub?.id]);
 
   if (!sub) {
     return (
       <View style={styles.centerContainer}>
-        <Ionicons name="warning-outline" size={48} color="#e5e3ef" />
+        <Ionicons name="warning-outline" size={48} color={c.border} />
         <Text style={styles.notFound}>Subscription not found</Text>
       </View>
     );
@@ -84,10 +83,10 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
   const isOverdue = days < 0;
 
   const getRenewalDisplay = () => {
-    if (days < 0) return { text: `Overdue by ${-days}d · ${formatDate(sub.next_renewal)}`, color: '#ef4444', bg: '#fef2f2', borderColor: '#ef444433', icon: 'warning-outline' };
-    if (days === 0) return { text: `Renews today · ${formatDate(sub.next_renewal)}`, color: '#f59e0b', bg: '#fff7ed', borderColor: '#f59e0b33', icon: 'time-outline' };
-    if (days <= 3) return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#ef4444', bg: '#fee2e2', borderColor: '#ef444433', icon: 'time-outline' };
-    return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#3b82f6', bg: '#e8f1ff22', borderColor: '#3b82f633', icon: 'calendar-outline' };
+    if (days < 0) return { text: `Overdue by ${-days}d · ${formatDate(sub.next_renewal)}`, color: c.red, bg: '#f43f5e22', borderColor: '#f43f5e33', icon: 'warning-outline' };
+    if (days === 0) return { text: `Renews today · ${formatDate(sub.next_renewal)}`, color: c.amber, bg: '#f59e0b22', borderColor: '#f59e0b33', icon: 'time-outline' };
+    if (days <= 3) return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: c.red, bg: '#f43f5e22', borderColor: '#f43f5e33', icon: 'time-outline' };
+    return { text: `Renews in ${days} days · ${formatDate(sub.next_renewal)}`, color: '#3b82f6', bg: '#3b82f622', borderColor: '#3b82f633', icon: 'calendar-outline' };
   };
 
   const renewal = getRenewalDisplay();
@@ -106,11 +105,9 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
 
       {/* ─── Hero ─── */}
       <View style={[styles.hero, { borderColor: accentColor + '40' }]}>
-        {/* Two layered glow blobs */}
         <View style={[styles.heroBlob1, { backgroundColor: accentColor + '20' }]} />
         <View style={[styles.heroBlob2, { backgroundColor: accentColor + '0a' }]} />
 
-        {/* Logo */}
         <View style={[styles.heroLogoWrap, {
           backgroundColor: accentColor + '20',
           borderColor: accentColor + '50',
@@ -158,14 +155,14 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
           : null;
 
         const trialBannerStyle = trialDays === null
-          ? { bg: '#f0ecff', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' }
+          ? { bg: '#8b5cf622', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' }
           : trialDays < 0
-          ? { bg: '#fef2f2', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
+          ? { bg: '#f43f5e22', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
           : trialDays <= 1
-          ? { bg: '#fef2f2', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
+          ? { bg: '#f43f5e22', borderColor: '#ef444433', color: '#ef4444', icon: 'warning-outline' }
           : trialDays <= 3
-          ? { bg: '#fff7ed', borderColor: '#f59e0b33', color: '#f59e0b', icon: 'time-outline' }
-          : { bg: '#f0ecff', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' };
+          ? { bg: '#f59e0b22', borderColor: '#f59e0b33', color: '#f59e0b', icon: 'time-outline' }
+          : { bg: '#8b5cf622', borderColor: '#7c3aed33', color: '#7c4dff', icon: 'flask-outline' };
 
         const trialMsg = trialDays === null
           ? 'Free trial active'
@@ -233,7 +230,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         </View>
         <View style={styles.quickDiv} />
         <View style={styles.quickStat}>
-          <Text style={[styles.quickVal, { color: isOverdue ? '#ef4444' : '#7c4dff' }]}>
+          <Text style={[styles.quickVal, { color: isOverdue ? c.red : c.accent }]}>
             {isOverdue ? `${-days}d ago` : days === 0 ? 'Today' : `in ${days}d`}
           </Text>
           <Text style={styles.quickLbl}>next payment</Text>
@@ -256,18 +253,18 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
                 <Ionicons
                   name={increased ? 'arrow-up-outline' : 'arrow-down-outline'}
                   size={14}
-                  color={increased ? '#ef4444' : '#10b981'}
+                  color={increased ? c.red : c.green}
                 />
                 <Text style={styles.priceHistoryDate}>{date}</Text>
                 <View style={styles.priceHistoryChange}>
                   <Text style={styles.priceHistoryOld}>{formatCurrency(entry.old_cost, entry.currency)}</Text>
-                  <Ionicons name="arrow-forward" size={10} color="#8a8698" />
-                  <Text style={[styles.priceHistoryNew, { color: increased ? '#ef4444' : '#10b981' }]}>
+                  <Ionicons name="arrow-forward" size={10} color={c.textMuted} />
+                  <Text style={[styles.priceHistoryNew, { color: increased ? c.red : c.green }]}>
                     {formatCurrency(entry.new_cost, entry.currency)}
                   </Text>
                 </View>
-                <View style={[styles.priceHistoryBadge, { backgroundColor: increased ? '#fef2f2' : '#ecfdf5' }]}>
-                  <Text style={[styles.priceHistoryBadgeText, { color: increased ? '#ef4444' : '#10b981' }]}>
+                <View style={[styles.priceHistoryBadge, { backgroundColor: increased ? '#f43f5e22' : '#10b98122' }]}>
+                  <Text style={[styles.priceHistoryBadgeText, { color: increased ? c.red : c.green }]}>
                     {increased ? '+' : ''}{pct}%
                   </Text>
                 </View>
@@ -283,9 +280,9 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
       <ActionButton
         icon="create-outline"
         label="Edit Subscription"
-        color="#8b5cf6"
-        bg="#ffffff"
-        borderColor="#8b5cf633"
+        color={c.accent}
+        bg={c.surface}
+        borderColor={c.accent + '33'}
         onPress={() => navigation.navigate('EditSubscription', { id: sub.id })}
       />
       {/* A free subscription has nothing cheaper to switch to — hide the CTA. */}
@@ -293,9 +290,9 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         <ActionButton
           icon="search-outline"
           label="Find Cheaper Alternatives"
-          color="#10b981"
-          bg="#ecfdf5"
-          borderColor="#10b98133"
+          color={c.green}
+          bg={c.green + '18'}
+          borderColor={c.green + '33'}
           onPress={() => navigation.navigate('Alternatives', { id: sub.id, name: sub.name })}
         />
       )}
@@ -303,7 +300,7 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
         icon="trash-outline"
         label="Remove Subscription"
         color="#f43f5e"
-        bg="#fef2f2"
+        bg="#f43f5e18"
         borderColor="#f43f5e33"
         onPress={handleDelete}
       />
@@ -311,16 +308,15 @@ export default function SubscriptionDetailScreen({ navigation, route }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f4fb' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  container: { flex: 1, backgroundColor: c.bg },
   content: { padding: 16, paddingBottom: 60 },
-  centerContainer: { flex: 1, backgroundColor: '#f5f4fb', justifyContent: 'center', alignItems: 'center', gap: 16 },
-  notFound: { color: '#787591', fontSize: 16 },
+  centerContainer: { flex: 1, backgroundColor: c.bg, justifyContent: 'center', alignItems: 'center', gap: 16 },
+  notFound: { color: c.textMuted, fontSize: 16 },
 
-  // Hero
   hero: {
     alignItems: 'center', padding: 32,
-    backgroundColor: '#ffffff',
+    backgroundColor: c.surface,
     borderRadius: 28, marginBottom: 14,
     borderWidth: 1, overflow: 'hidden',
   },
@@ -334,7 +330,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5, shadowRadius: 20, elevation: 10,
   },
   heroLogoText: { fontSize: 26, fontWeight: '900' },
-  heroName: { color: '#1b1830', fontSize: 28, fontWeight: '900', marginBottom: 10, letterSpacing: -0.5 },
+  heroName: { color: c.text, fontSize: 28, fontWeight: '900', marginBottom: 10, letterSpacing: -0.5 },
   heroCatBadge: {
     paddingHorizontal: 14, paddingVertical: 6,
     borderRadius: 20, borderWidth: 1, marginBottom: 4,
@@ -348,74 +344,66 @@ const styles = StyleSheet.create({
   },
   trialText: { color: '#f59e0b', fontSize: 11, fontWeight: '800' },
 
-  // Cost cards
   costRow: { flexDirection: 'row', gap: 10, marginBottom: 14 },
   costCard: {
-    backgroundColor: '#ffffff', borderRadius: 18, padding: 18,
-    borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: c.surface, borderRadius: 18, padding: 18,
+    borderWidth: 1, borderColor: c.border,
   },
   costMain: { flex: 1.4, justifyContent: 'center' },
   costGroup: { flex: 1, gap: 10, backgroundColor: 'transparent', borderWidth: 0, padding: 0 },
   costSmall: { flex: 1 },
-  costLabel: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
+  costLabel: { color: c.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 1.2, marginBottom: 6 },
   costCardAmount: { fontSize: 34, fontWeight: '900', letterSpacing: -0.5 },
-  costAmount: { color: '#1b1830', fontSize: 15, fontWeight: '800' },
+  costAmount: { color: c.text, fontSize: 15, fontWeight: '800' },
 
-  // Banners
   banner: {
     flexDirection: 'row', alignItems: 'center', gap: 10,
     borderRadius: 16, padding: 15, marginBottom: 10, borderWidth: 1,
   },
   bannerText: { fontSize: 14, fontWeight: '700', flex: 1 },
-  priceAlertBanner: {
-    backgroundColor: '#fff7ed22', borderColor: '#f59e0b33',
-  },
+  priceAlertBanner: { backgroundColor: '#f59e0b22', borderColor: '#f59e0b33' },
   priceAlertText: { color: '#f59e0b' },
 
-  // Detail card
   detailCard: {
-    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
-    marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: c.surface, borderRadius: 18, padding: 16,
+    marginBottom: 14, borderWidth: 1, borderColor: c.border,
   },
-  detailTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12 },
+  detailTitle: { color: c.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 12 },
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.border,
   },
   infoRowLast: { borderBottomWidth: 0 },
-  infoLabel: { color: '#787591', fontSize: 13 },
-  infoValue: { color: '#4b4864', fontSize: 13, fontWeight: '600', maxWidth: '55%', textAlign: 'right' },
+  infoLabel: { color: c.textMuted, fontSize: 13 },
+  infoValue: { color: c.text, fontSize: 13, fontWeight: '600', maxWidth: '55%', textAlign: 'right' },
 
-  // Quick stats
   quickRow: {
-    flexDirection: 'row', backgroundColor: '#ffffff', borderRadius: 18,
-    padding: 18, marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    flexDirection: 'row', backgroundColor: c.surface, borderRadius: 18,
+    padding: 18, marginBottom: 14, borderWidth: 1, borderColor: c.border,
   },
   quickStat: { flex: 1, alignItems: 'center' },
-  quickVal: { color: '#7c4dff', fontSize: 18, fontWeight: '800' },
-  quickLbl: { color: '#8a8698', fontSize: 11, marginTop: 4, textAlign: 'center' },
-  quickDiv: { width: 1, backgroundColor: 'rgba(255,255,255,0.07)', marginVertical: 4 },
+  quickVal: { color: c.accent, fontSize: 18, fontWeight: '800' },
+  quickLbl: { color: c.textMuted, fontSize: 11, marginTop: 4, textAlign: 'center' },
+  quickDiv: { width: 1, backgroundColor: c.border, marginVertical: 4 },
 
-  // Price history
   priceHistoryCard: {
-    backgroundColor: '#ffffff', borderRadius: 18, padding: 16,
-    marginBottom: 14, borderWidth: 1, borderColor: 'rgba(255,255,255,0.07)',
+    backgroundColor: c.surface, borderRadius: 18, padding: 16,
+    marginBottom: 14, borderWidth: 1, borderColor: c.border,
   },
   priceHistoryHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 },
-  priceHistoryTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
+  priceHistoryTitle: { color: c.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 1.5 },
   priceHistoryRow: {
     flexDirection: 'row', alignItems: 'center', gap: 8,
-    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.05)',
+    paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: c.border,
   },
-  priceHistoryDate: { color: '#787591', fontSize: 12, flex: 1 },
+  priceHistoryDate: { color: c.textMuted, fontSize: 12, flex: 1 },
   priceHistoryChange: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  priceHistoryOld: { color: '#8a8698', fontSize: 12, textDecorationLine: 'line-through' },
+  priceHistoryOld: { color: c.textMuted, fontSize: 12, textDecorationLine: 'line-through' },
   priceHistoryNew: { fontSize: 13, fontWeight: '700' },
   priceHistoryBadge: { borderRadius: 8, paddingHorizontal: 8, paddingVertical: 3, marginLeft: 4 },
   priceHistoryBadgeText: { fontSize: 11, fontWeight: '700' },
 
-  // Actions
-  actionsTitle: { color: '#8a8698', fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 10 },
+  actionsTitle: { color: c.textMuted, fontSize: 10, fontWeight: '800', letterSpacing: 1.5, marginBottom: 10 },
   actionBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 14,
     borderRadius: 18, padding: 18, marginBottom: 10, borderWidth: 1,

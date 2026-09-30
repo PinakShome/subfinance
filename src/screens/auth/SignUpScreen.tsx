@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, Alert, ScrollView,
+  Text, TextInput, TouchableOpacity,
+  StyleSheet, KeyboardAvoidingView, Platform, ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { showAlert } from '../../lib/alert';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuthStore } from '../../store/authStore';
 import { AuthStackParamList } from '../../navigation/types';
+import { useTheme, Theme } from '../../theme/theme';
 
 type Props = {
   navigation: NativeStackNavigationProp<AuthStackParamList, 'SignUp'>;
 };
 
 export default function SignUpScreen({ navigation }: Props) {
+  const c = useTheme();
+  const styles = useMemo(() => makeStyles(c), [c]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -59,7 +62,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Email"
-        placeholderTextColor="#6a6782"
+        placeholderTextColor={c.textMuted}
         autoCapitalize="none"
         keyboardType="email-address"
         value={email}
@@ -68,7 +71,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#6a6782"
+        placeholderTextColor={c.textMuted}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -76,7 +79,7 @@ export default function SignUpScreen({ navigation }: Props) {
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
-        placeholderTextColor="#6a6782"
+        placeholderTextColor={c.textMuted}
         secureTextEntry
         value={confirm}
         onChangeText={setConfirm}
@@ -98,22 +101,22 @@ export default function SignUpScreen({ navigation }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#ffffff' },
+const makeStyles = (c: Theme) => StyleSheet.create({
+  flex: { flex: 1, backgroundColor: c.bg },
   scrollContent: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  title: { fontSize: 32, fontWeight: '800', color: '#6366f1', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 16, color: '#6a6782', textAlign: 'center', marginBottom: 32 },
+  title: { fontSize: 32, fontWeight: '800', color: c.primary, textAlign: 'center', marginBottom: 4 },
+  subtitle: { fontSize: 16, color: c.textMuted, textAlign: 'center', marginBottom: 32 },
   input: {
-    backgroundColor: '#f1eff9', borderRadius: 12, padding: 16,
-    color: '#1b1830', fontSize: 16, marginBottom: 12,
-    borderWidth: 1, borderColor: '#e5e3ef',
+    backgroundColor: c.surfaceAlt, borderRadius: 12, padding: 16,
+    color: c.text, fontSize: 16, marginBottom: 12,
+    borderWidth: 1, borderColor: c.border,
   },
   button: {
-    backgroundColor: '#6366f1', borderRadius: 12, padding: 16,
+    backgroundColor: c.primary, borderRadius: 12, padding: 16,
     alignItems: 'center', marginTop: 8, marginBottom: 24,
   },
   buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  link: { color: '#6a6782', textAlign: 'center', fontSize: 14 },
-  linkBold: { color: '#6366f1', fontWeight: '700' },
+  link: { color: c.textMuted, textAlign: 'center', fontSize: 14 },
+  linkBold: { color: c.primary, fontWeight: '700' },
 });

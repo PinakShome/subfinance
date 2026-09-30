@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
+import { ThemeProvider, useTheme } from './src/theme/theme';
 import { supabase } from './src/lib/supabase';
 import { useAuthStore } from './src/store/authStore';
 import { useSubscriptionStore } from './src/store/subscriptionStore';
@@ -77,16 +78,28 @@ function AppContent() {
   return <AppNavigator />;
 }
 
+function ThemedRoot() {
+  const c = useTheme();
+  const navTheme = c.mode === 'dark'
+    ? { ...DarkTheme, colors: { ...DarkTheme.colors, background: c.bg, card: c.surface, text: c.text, border: c.border, primary: c.primary } }
+    : { ...DefaultTheme, colors: { ...DefaultTheme.colors, background: c.bg, card: c.surface, text: c.text, border: c.border, primary: c.primary } };
+  return (
+    <View style={{ flex: 1, backgroundColor: c.bg }}>
+      <NavigationContainer theme={navTheme}>
+        <StatusBar style={c.mode === 'dark' ? 'light' : 'dark'} />
+        <AppContent />
+      </NavigationContainer>
+    </View>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
-        <View style={{ flex: 1, backgroundColor: '#f5f4fb' }}>
-          <NavigationContainer>
-            <StatusBar style="dark" />
-            <AppContent />
-          </NavigationContainer>
-        </View>
+        <ThemeProvider>
+          <ThemedRoot />
+        </ThemeProvider>
       </SafeAreaProvider>
     </ErrorBoundary>
   );

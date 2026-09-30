@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackParamList, AppTabParamList, SettingsStackParamList } from './types';
+import { useTheme, Theme } from '../theme/theme';
 import SubscriptionListScreen from '../screens/subscriptions/SubscriptionListScreen';
 import SubscriptionDetailScreen from '../screens/subscriptions/SubscriptionDetailScreen';
 import SubscriptionFormScreen from '../screens/subscriptions/SubscriptionFormScreen';
@@ -18,15 +19,18 @@ const HomeStack = createNativeStackNavigator<HomeStackParamList>();
 const SettingsStack = createNativeStackNavigator<SettingsStackParamList>();
 const Tab = createBottomTabNavigator<AppTabParamList>();
 
-const NAV_OPTS = {
-  headerStyle: { backgroundColor: '#ffffff' },
-  headerTintColor: '#1b1830',
+const navOpts = (c: Theme) => ({
+  headerStyle: { backgroundColor: c.surface },
+  headerTintColor: c.text,
   headerTitleStyle: { fontWeight: '700' as const },
-};
+  headerShadowVisible: false,
+  contentStyle: { backgroundColor: c.bg },
+});
 
 function HomeStackNavigator() {
+  const c = useTheme();
   return (
-    <HomeStack.Navigator screenOptions={NAV_OPTS}>
+    <HomeStack.Navigator screenOptions={navOpts(c)}>
       <HomeStack.Screen
         name="SubscriptionList"
         component={SubscriptionListScreen}
@@ -39,7 +43,7 @@ function HomeStackNavigator() {
               accessibilityLabel="Renewal calendar"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <Ionicons name="calendar-outline" size={22} color="#6366f1" />
+              <Ionicons name="calendar-outline" size={22} color={c.primary} />
             </TouchableOpacity>
           ),
         })}
@@ -54,8 +58,9 @@ function HomeStackNavigator() {
 }
 
 function SettingsStackNavigator() {
+  const c = useTheme();
   return (
-    <SettingsStack.Navigator screenOptions={NAV_OPTS}>
+    <SettingsStack.Navigator screenOptions={navOpts(c)}>
       <SettingsStack.Screen name="SettingsHome" component={SettingsScreen} options={{ title: 'Settings' }} />
       <SettingsStack.Screen name="DefaultCurrency" component={CurrencyPickerScreen} options={{ title: 'Default Currency' }} />
       <SettingsStack.Screen name="HelpSupport" component={HelpSupportScreen} options={{ title: 'Help & Support' }} />
@@ -64,12 +69,13 @@ function SettingsStackNavigator() {
 }
 
 export default function AppNavigator() {
+  const c = useTheme();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        tabBarStyle: { backgroundColor: '#ffffff', borderTopColor: '#f1eff9' },
-        tabBarActiveTintColor: '#6366f1',
-        tabBarInactiveTintColor: '#8a8698',
+        tabBarStyle: { backgroundColor: c.surface, borderTopColor: c.border },
+        tabBarActiveTintColor: c.primary,
+        tabBarInactiveTintColor: c.textMuted,
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, keyof typeof Ionicons.glyphMap> = {
@@ -82,7 +88,7 @@ export default function AppNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeStackNavigator} options={{ title: 'Subscriptions' }} />
-      <Tab.Screen name="Analytics" component={AnalyticsScreen} options={{ headerShown: true, ...NAV_OPTS, title: 'Analytics' }} />
+      <Tab.Screen name="Analytics" component={AnalyticsScreen} options={{ headerShown: true, ...navOpts(c), title: 'Analytics' }} />
       <Tab.Screen name="Settings" component={SettingsStackNavigator} options={{ title: 'Settings' }} />
     </Tab.Navigator>
   );
