@@ -30,6 +30,38 @@ const NAME_ALIASES: Record<string, string> = {
   'microsoft office': 'microsoft 365',
   'amazon web services': 'aws',
   'gh copilot': 'github copilot',
+  // Common shorthands / brand variants across the widened catalogue.
+  'gpt': 'chatgpt plus',
+  'gpt plus': 'chatgpt plus',
+  'claude': 'claude pro',
+  'gemini': 'google gemini',
+  'yt premium': 'youtube premium',
+  'yt music': 'youtube music',
+  'amazon music': 'amazon music unlimited',
+  'hbo': 'max',
+  'hbo max': 'max',
+  'paramount plus': 'paramount+',
+  'discovery plus': 'discovery+',
+  'apple tv': 'apple tv+',
+  'espn plus': 'espn+',
+  'nord': 'nordvpn',
+  'nord vpn': 'nordvpn',
+  'express vpn': 'expressvpn',
+  'twitter': 'x premium',
+  'twitter blue': 'x premium',
+  'xbox game pass': 'xbox game pass ultimate',
+  'playstation plus': 'playstation plus',
+  'ps plus': 'playstation plus',
+  'nintendo online': 'nintendo switch online',
+  'quickbooks': 'quickbooks online',
+  'qbo': 'quickbooks online',
+  'creative cloud': 'adobe creative cloud',
+  'photoshop': 'adobe creative cloud',
+  'premiere pro': 'adobe creative cloud',
+  'gsuite': 'google workspace',
+  'g suite': 'google workspace',
+  'onedrive': 'microsoft onedrive',
+  'office 365 personal': 'microsoft 365',
 };
 
 // Trailing plan/tier words stripped only as a MISS FALLBACK (#6) — never on the
@@ -53,6 +85,56 @@ const QUALIFIERS = new Set([
 export function normalizeKey(name: string, _category?: string): string {
   const n = name.trim().toLowerCase().replace(/\s+/g, ' ');
   return NAME_ALIASES[n] ?? n;
+}
+
+/** Levenshtein edit distance (small strings; iterative two-row DP). */
+function editDistance(a: string, b: string): number {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  let cur = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i++) {
+    cur[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+    }
+    [prev, cur] = [cur, prev];
+  }
+  return prev[b.length];
+}
+
+// Cache the catalogue's key list so the fuzzy fallback doesn't query on every miss.
+let _keysCache: { at: number; keys: string[] } | null = null;
+const KEYS_TTL_MS = 10 * 60 * 1000;
+async function allServiceKeys(): Promise<string[]> {
+  if (_keysCache && Date.now() - _keysCache.at < KEYS_TTL_MS) return _keysCache.keys;
+  const { data } = await supabase.from('alternatives_catalogue').select('service_key');
+  const keys = ((data ?? []) as any[]).map((r) => r.service_key as string);
+  _keysCache = { at: Date.now(), keys };
+  return keys;
+}
+
+/**
+ * Fuzzy fallback (#miss): map a typo/spacing variant to the closest existing
+ * catalogue key before we pay for a generation. Conservative — small edit
+ * distance scaled to length, and a length-difference gate — so it never maps a
+ * genuinely-new service onto an unrelated one.
+ */
+export async function fuzzyKey(name: string): Promise<string | null> {
+  const q = normalizeKey(name);
+  if (q.length < 4) return null;
+  const keys = await allServiceKeys();
+  let best: string | null = null;
+  let bestD = Infinity;
+  for (const k of keys) {
+    if (k === q || Math.abs(k.length - q.length) > 3) continue;
+    const d = editDistance(q, k);
+    if (d < bestD) { bestD = d; best = k; }
+  }
+  const maxD = q.length <= 6 ? 1 : 2;
+  return best && bestD <= maxD ? best : null;
 }
 
 /** Strip trailing plan/tier words then re-alias; null if nothing was stripped. */
@@ -282,6 +364,14 @@ export async function getAlternativesForService(
   if (sk && sk !== key) {
     const alt = await readRow(sk);
     if (alt) { bump(sk); return applyCostFilter((alt.payload ?? []) as Alt[], costNum); }
+  }
+
+  // 2b. Fuzzy fallback: catch typos/spacing ("netflx", "chatgpt  plus") and map
+  // to the closest known catalogue entry before spending a generation.
+  const fz = await fuzzyKey(name);
+  if (fz && fz !== key) {
+    const fzRow = await readRow(fz);
+    if (fzRow) { bump(fz); return applyCostFilter((fzRow.payload ?? []) as Alt[], costNum); }
   }
 
   // 3. Category pool: answer from sibling entries in the same category (0 API).
