@@ -16,6 +16,7 @@ export type HomeStackParamList = {
   AddSubscription: undefined;
   EditSubscription: { id: string };
   Alternatives: { id: string; name: string };
+  RenewalCalendar: undefined;
 };
 
 export type SettingsStackParamList = {

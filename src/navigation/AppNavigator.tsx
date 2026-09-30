@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +8,7 @@ import SubscriptionListScreen from '../screens/subscriptions/SubscriptionListScr
 import SubscriptionDetailScreen from '../screens/subscriptions/SubscriptionDetailScreen';
 import SubscriptionFormScreen from '../screens/subscriptions/SubscriptionFormScreen';
 import AlternativesScreen from '../screens/subscriptions/AlternativesScreen';
+import RenewalCalendarScreen from '../screens/subscriptions/RenewalCalendarScreen';
 import AnalyticsScreen from '../screens/analytics/AnalyticsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import CurrencyPickerScreen from '../screens/CurrencyPickerScreen';
@@ -25,11 +27,28 @@ const NAV_OPTS = {
 function HomeStackNavigator() {
   return (
     <HomeStack.Navigator screenOptions={NAV_OPTS}>
-      <HomeStack.Screen name="SubscriptionList" component={SubscriptionListScreen} options={{ title: 'My Subscriptions' }} />
+      <HomeStack.Screen
+        name="SubscriptionList"
+        component={SubscriptionListScreen}
+        options={({ navigation }) => ({
+          title: 'My Subscriptions',
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate('RenewalCalendar')}
+              accessibilityRole="button"
+              accessibilityLabel="Renewal calendar"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="calendar-outline" size={22} color="#6366f1" />
+            </TouchableOpacity>
+          ),
+        })}
+      />
       <HomeStack.Screen name="SubscriptionDetail" component={SubscriptionDetailScreen} options={{ title: 'Details' }} />
       <HomeStack.Screen name="AddSubscription" component={SubscriptionFormScreen} options={{ title: 'Add Subscription' }} />
       <HomeStack.Screen name="EditSubscription" component={SubscriptionFormScreen} options={{ title: 'Edit Subscription' }} />
       <HomeStack.Screen name="Alternatives" component={AlternativesScreen} options={{ title: 'Cheaper Alternatives' }} />
+      <HomeStack.Screen name="RenewalCalendar" component={RenewalCalendarScreen} options={{ title: 'Renewal Calendar' }} />
     </HomeStack.Navigator>
   );
 }
