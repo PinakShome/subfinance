@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -8,6 +8,8 @@ import { useAuthStore } from './src/store/authStore';
 import { useSubscriptionStore } from './src/store/subscriptionStore';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import AppNavigator from './src/navigation/AppNavigator';
+import OnboardingScreen from './src/screens/OnboardingScreen';
+import { getOnboardingSeen, setOnboardingSeen } from './src/lib/prefs';
 import { useNotifications } from './src/hooks/useNotifications';
 import { ErrorBoundary } from './src/components/ErrorBoundary';
 
@@ -45,7 +47,10 @@ const DEMO_SUBS: any[] = [
 
 function AppContent() {
   const { session, loading, setSession } = useAuthStore();
+  const [onboardSeen, setOnboardSeen] = useState<boolean | null>(null);
   useNotifications();
+
+  useEffect(() => { getOnboardingSeen().then(setOnboardSeen); }, []);
 
   useEffect(() => {
     if (DEMO_MODE) {
@@ -64,8 +69,12 @@ function AppContent() {
   }, []);
 
   if (loading) return null;
-
-  return session ? <AppNavigator /> : <AuthNavigator />;
+  if (!session) return <AuthNavigator />;
+  if (onboardSeen === null) return null; // brief: reading the flag
+  if (!onboardSeen) {
+    return <OnboardingScreen onDone={() => { setOnboardingSeen(); setOnboardSeen(true); }} />;
+  }
+  return <AppNavigator />;
 }
 
 export default function App() {

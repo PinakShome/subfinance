@@ -19,6 +19,24 @@ export const CURRENCIES: { code: string; name: string; symbol: string }[] = [
 ];
 
 const DEFAULT_CURRENCY_KEY = 'pref.defaultCurrency';
+const ONBOARDING_KEY = 'pref.onboardingSeen';
+
+/** Whether the user has completed the first-launch onboarding. */
+export async function getOnboardingSeen(): Promise<boolean> {
+  try {
+    return (await AsyncStorage.getItem(ONBOARDING_KEY)) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export async function setOnboardingSeen(): Promise<void> {
+  try {
+    await AsyncStorage.setItem(ONBOARDING_KEY, '1');
+  } catch {
+    /* non-fatal */
+  }
+}
 
 /** The currency pre-selected when adding a new subscription. Falls back to USD. */
 export async function getDefaultCurrency(): Promise<string> {
