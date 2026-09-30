@@ -43,6 +43,10 @@
         <div class="card-title">Top categories</div>
         <div id="cat-bars" class="cat-bars"></div>
       </div>
+      <div class="card span2">
+        <div class="card-title">Most requested <span class="muted">(demand)</span></div>
+        <div id="demand-bars" class="cat-bars"></div>
+      </div>
     </section>
 
     <section class="main">
@@ -62,6 +66,11 @@
             <option value="refreshed_at">Recently refreshed</option>
             <option value="service_name">Name</option>
           </select>
+        </div>
+        <div class="list-actions">
+          <button id="queue-btn" class="ghost">⚠ Needs review</button>
+          <button id="reresolve-view-btn" class="ghost">↻ Re-resolve view</button>
+          <button id="export-btn" class="ghost">⭳ Export CSV</button>
         </div>
         <div id="list-meta" class="list-meta muted"></div>
         <div id="list" class="list"></div>

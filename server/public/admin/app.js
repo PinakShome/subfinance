@@ -85,6 +85,21 @@ async function loadStats() {
       el('span', { class: 'muted', text: c.services + ' · ' + c.alts + ' alts' }),
     ]));
   });
+
+  const db = $('demand-bars'); clear(db);
+  const demand = s.topRequested || [];
+  if (!demand.length) {
+    db.appendChild(el('div', { class: 'muted', text: 'No lookups recorded yet — this fills in as people request alternatives.' }));
+  } else {
+    const dmax = Math.max(1, ...demand.map((d) => d.count));
+    demand.forEach((d) => {
+      db.appendChild(el('div', { class: 'cat-row', onclick: () => { state.search = d.name; $('f-search').value = d.name; state.offset = 0; loadList(); }, style: 'cursor:pointer' }, [
+        el('span', { text: d.name }),
+        el('span', { class: 'bar' }, el('span', { style: 'width:' + Math.round((d.count / dmax) * 100) + '%' })),
+        el('span', { class: 'muted', text: d.count + ' req' }),
+      ]));
+    });
+  }
 }
 
 async function loadCategories() {
@@ -262,6 +277,37 @@ $('f-status').addEventListener('change', (ev) => { state.status = ev.target.valu
 $('f-sort').addEventListener('change', (ev) => { state.sort = ev.target.value; state.offset = 0; loadList(); });
 $('prev-btn').addEventListener('click', () => { state.offset = Math.max(0, state.offset - state.limit); loadList(); });
 $('next-btn').addEventListener('click', () => { state.offset += state.limit; loadList(); });
+
+// Needs-review queue: one-click filter to status=needs_review.
+$('queue-btn').addEventListener('click', () => {
+  state.status = 'needs_review'; $('f-status').value = 'needs_review'; state.offset = 0; loadList();
+});
+
+// Bulk re-resolve everything matching the current category + status filter.
+$('reresolve-view-btn').addEventListener('click', async () => {
+  const scope = [state.category && `category "${state.category}"`, state.status && `status "${state.status}"`].filter(Boolean).join(' + ') || 'up to 1000 entries';
+  if (!confirm(`Re-resolve ${scope}? This recomputes served payloads from current signals.`)) return;
+  try {
+    const res = await api('/bulk/reresolve', { method: 'POST', body: { category: state.category, status: state.status } });
+    toast(`Re-resolved ${res.reresolved} entries`, 'ok');
+    loadList(); loadStats();
+    if (state.currentKey) selectRow(state.currentKey);
+  } catch (e) { toast(e.message, 'err'); }
+});
+
+// CSV export — fetch with the token, then trigger a same-origin blob download.
+$('export-btn').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/api/admin/export.csv', { headers: { 'x-admin-token': token } });
+    if (!r.ok) throw new Error('Export failed');
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const link = el('a', { href: url, download: 'subfinance-catalogue.csv' });
+    document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    toast('CSV downloaded', 'ok');
+  } catch (e) { toast(e.message, 'err'); }
+});
 
 // ── Boot ──
 async function init() {

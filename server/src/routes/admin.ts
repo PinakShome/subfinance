@@ -87,6 +87,14 @@ router.get('/stats', async (_req, res) => {
     .from('alternative_feedback').select('*', { count: 'exact', head: true });
   const { count: overrideCount } = await supabase
     .from('alternative_overrides').select('*', { count: 'exact', head: true });
+  const { data: topReq } = await supabase
+    .from('alternatives_catalogue')
+    .select('service_name, request_count')
+    .order('request_count', { ascending: false })
+    .limit(10);
+  const topRequested = ((topReq ?? []) as any[])
+    .filter((r) => (r.request_count ?? 0) > 0)
+    .map((r) => ({ name: r.service_name, count: r.request_count }));
 
   res.json({
     totalServices: rows.length,
@@ -100,6 +108,7 @@ router.get('/stats', async (_req, res) => {
     overrideCount: overrideCount ?? 0,
     globalBlocklist: [...block],
     globalPromotions: [...promote],
+    topRequested,
     byStatus: Object.fromEntries(byStatus),
     byCategory: [...byCategory.entries()]
       .map(([category, v]) => ({ category, ...v }))
@@ -259,6 +268,62 @@ router.delete('/catalogue/:key/overrides/:id', async (req, res) => {
     await reresolve(key, (row as any).service_name, (row as any).raw_payload as Alt[], block, promote);
   }
   res.json({ ok: true });
+});
+
+// ── Bulk re-resolve: a set of keys, or everything matching a category/status ──
+router.post('/bulk/reresolve', async (req, res) => {
+  const keys = Array.isArray(req.body.keys) ? (req.body.keys as string[]).slice(0, 1000) : null;
+  const category = typeof req.body.category === 'string' ? req.body.category : '';
+  const status = typeof req.body.status === 'string' ? req.body.status : '';
+  let q = supabase.from('alternatives_catalogue').select('service_key, service_name, raw_payload');
+  if (keys) q = q.in('service_key', keys);
+  else {
+    if (category) q = q.eq('category', category);
+    if (status) q = q.eq('status', status);
+    q = q.limit(1000);
+  }
+  const { data, error } = await q;
+  if (error) return res.status(500).json({ error: error.message });
+  const rows = (data ?? []) as any[];
+  const [block, promote] = await Promise.all([getGlobalBlocklist(), getGlobalPromotions()]);
+  let n = 0;
+  for (const r of rows) {
+    await reresolve(r.service_key, r.service_name, (r.raw_payload ?? []) as Alt[], block, promote);
+    n++;
+  }
+  res.json({ ok: true, reresolved: n });
+});
+
+// ── Bulk status change for an explicit set of keys ──
+router.post('/bulk/status', async (req, res) => {
+  const keys = Array.isArray(req.body.keys) ? (req.body.keys as string[]).slice(0, 1000) : [];
+  const status = req.body.status;
+  if (!['active', 'needs_review', 'disabled'].includes(status)) return res.status(400).json({ error: 'invalid status' });
+  if (!keys.length) return res.status(400).json({ error: 'no keys' });
+  const { error } = await supabase.from('alternatives_catalogue').update({ status }).in('service_key', keys);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ ok: true, updated: keys.length });
+});
+
+// ── CSV export of the whole catalogue ──
+router.get('/export.csv', async (_req, res) => {
+  const { data, error } = await supabase
+    .from('alternatives_catalogue')
+    .select('service_key, service_name, category, status, quality_score, request_count, payload, raw_payload, refreshed_at')
+    .order('service_name', { ascending: true });
+  if (error) return res.status(500).json({ error: error.message });
+  const esc = (v: unknown) => {
+    const s = v === null || v === undefined ? '' : String(v);
+    return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  };
+  const header = ['service_key', 'service_name', 'category', 'status', 'quality_score', 'request_count', 'served', 'raw', 'refreshed_at'];
+  const lines = [header.join(',')];
+  for (const r of (data ?? []) as any[]) {
+    lines.push([r.service_key, r.service_name, r.category, r.status, r.quality_score ?? '', r.request_count ?? 0, nAlts(r.payload), nAlts(r.raw_payload), r.refreshed_at].map(esc).join(','));
+  }
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="subfinance-catalogue.csv"');
+  res.send(lines.join('\n'));
 });
 
 export default router;
