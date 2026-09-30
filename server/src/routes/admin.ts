@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import crypto from 'crypto';
 import { supabase } from '../lib/supabase';
 import {
-  reresolve, getFeedbackMap,
+  reresolve, getFeedbackMap, getClickMap,
   getGlobalBlocklist, getGlobalPromotions,
 } from '../lib/catalogue';
 import { Alt } from '../lib/alternatives-gen';
@@ -155,17 +155,19 @@ router.get('/catalogue/:key', async (req, res) => {
   if (!data) return res.status(404).json({ error: 'Not found' });
   // Fetch overrides WITH their id (the shared getOverrides helper omits it, but
   // the dashboard needs the id to delete a specific override).
-  const [{ data: overrides }, fb] = await Promise.all([
+  const [{ data: overrides }, fb, clicks] = await Promise.all([
     supabase.from('alternative_overrides')
       .select('id, alternative_name, action, patch')
       .eq('service_key', key)
       .order('created_at', { ascending: true }),
     getFeedbackMap((data as any).service_name),
+    getClickMap((data as any).service_name),
   ]);
   res.json({
     ...data,
     overrides: overrides ?? [],
     feedback: Object.fromEntries([...fb.entries()].map(([k, v]) => [k, v])),
+    clicks: Object.fromEntries([...clicks.entries()]),
   });
 });
 

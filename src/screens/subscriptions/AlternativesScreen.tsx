@@ -56,6 +56,19 @@ export default function AlternativesScreen({ route }: Props) {
     }
   };
 
+  // Implicit feedback: opening an alternative's site is a soft "this looks useful"
+  // signal that folds into ranking at a low weight (server-side).
+  const logClick = async (altName: string) => {
+    if (!userId) return;
+    try {
+      await supabase.from('alternative_clicks').insert({
+        user_id: userId, service_name: name, alternative_name: altName,
+      });
+    } catch {
+      /* non-fatal */
+    }
+  };
+
   useEffect(() => { fetchAlternatives(); }, []);
 
   const fetchAlternatives = async () => {
@@ -164,7 +177,7 @@ export default function AlternativesScreen({ route }: Props) {
                   {isSafeWebUrl(item.website) ? (
                     <TouchableOpacity
                       style={styles.websiteBtn}
-                      onPress={() => Linking.openURL(item.website!)}
+                      onPress={() => { logClick(item.name); Linking.openURL(item.website!); }}
                       accessibilityRole="button"
                       accessibilityLabel={`Visit ${item.name} website`}
                     >

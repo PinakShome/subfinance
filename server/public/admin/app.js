@@ -131,14 +131,18 @@ async function selectRow(key) {
   loadList();
 }
 
-function altView(a, fb) {
+function altView(a, fb, clicks) {
   const k = (a.name || '').toLowerCase();
   const f = fb && fb[k];
+  const c = clicks && clicks[k];
+  const fbKids = [];
+  if (f) { fbKids.push(el('span', { class: 'up', text: '▲ ' + f.up }), document.createTextNode(' '), el('span', { class: 'down', text: '▼ ' + f.down })); }
+  if (c) { fbKids.push(document.createTextNode('  '), el('span', { class: 'muted', text: '👆 ' + c })); }
   return el('div', { class: 'alt' }, [
     el('div', { class: 'aname', text: a.name }),
     el('div', { class: 'aprice', text: money(a.monthly_price) }),
     el('div', { class: 'adesc', text: a.description || (a.website || '') }),
-    el('div', { class: 'afb' }, f ? [el('span', { class: 'up', text: '▲ ' + f.up }), document.createTextNode('  '), el('span', { class: 'down', text: '▼ ' + f.down })] : [el('span', { class: 'muted', text: '' })]),
+    el('div', { class: 'afb' }, fbKids.length ? fbKids : [el('span', { class: 'muted', text: '' })]),
     el('div', { class: 'alt-actions' }, [
       el('button', { text: 'Pin', onclick: () => addOverride('pin', a.name, {}) }),
       el('button', { text: 'Block', onclick: () => addOverride('block', a.name, {}) }),
@@ -185,7 +189,7 @@ function renderDetail(e) {
   // Served
   const servedSec = el('div', { class: 'section' }, [el('h3', { text: 'Served to users (' + served.length + ')' })]);
   if (!served.length) servedSec.appendChild(el('div', { class: 'muted', text: 'Nothing served — thin or filtered out.' }));
-  served.forEach((a) => servedSec.appendChild(altView(a, fb)));
+  served.forEach((a) => servedSec.appendChild(altView(a, fb, e.clicks || {})));
   d.appendChild(servedSec);
 
   // Overrides

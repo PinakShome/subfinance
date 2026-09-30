@@ -163,6 +163,20 @@ export async function getFeedbackMap(serviceName: string): Promise<Map<string, F
   return map;
 }
 
+/** Per-alternative click-through counts for one service (implicit feedback). */
+export async function getClickMap(serviceName: string): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  const { data } = await supabase
+    .from('alternative_clicks')
+    .select('alternative_name')
+    .eq('service_name', serviceName);
+  for (const r of (data ?? []) as any[]) {
+    const k = String(r.alternative_name).toLowerCase();
+    map.set(k, (map.get(k) ?? 0) + 1);
+  }
+  return map;
+}
+
 export async function getOverrides(serviceKey: string): Promise<Override[]> {
   const { data } = await supabase
     .from('alternative_overrides')
@@ -215,6 +229,8 @@ export async function getGlobalPromotions(minServices = 3, minUp = 8, minRatio =
 }
 
 const PROMO_BONUS = 3; // soft boost: lifts globally-loved alts, but owner pins still win
+const CLICK_WEIGHT = 0.15; // implicit signal: weaker than an explicit vote
+const CLICK_CAP = 10;      // clamp so a few power-clickers can't dominate
 const feedbackScore = (s?: FeedbackStat) => (s ? s.up - s.down : 0);
 const isReviled = (s?: FeedbackStat) => !!s && s.down >= 5 && s.up / (s.up + s.down) < 0.3;
 
@@ -226,10 +242,12 @@ const isReviled = (s?: FeedbackStat) => !!s && s.down >= 5 && s.up / (s.up + s.d
 export function resolve(
   raw: Alt[], fb: Map<string, FeedbackStat>, overrides: Override[],
   globalBlock: Set<string>, globalPromote: Set<string> = new Set(),
+  clicks: Map<string, number> = new Map(),
 ): Alt[] {
   const rank = (a: Alt) => {
     const k = a.name.toLowerCase();
-    return feedbackScore(fb.get(k)) + (globalPromote.has(k) ? PROMO_BONUS : 0);
+    const clickBonus = Math.min(clicks.get(k) ?? 0, CLICK_CAP) * CLICK_WEIGHT;
+    return feedbackScore(fb.get(k)) + (globalPromote.has(k) ? PROMO_BONUS : 0) + clickBonus;
   };
   let list = raw
     .filter((a) => !globalBlock.has(a.name.toLowerCase()) && !isReviled(fb.get(a.name.toLowerCase())))
@@ -263,8 +281,10 @@ export async function reresolve(
   serviceKey: string, serviceName: string, raw: Alt[],
   globalBlock?: Set<string>, globalPromote?: Set<string>,
 ): Promise<Alt[]> {
-  const [fb, overrides] = await Promise.all([getFeedbackMap(serviceName), getOverrides(serviceKey)]);
-  const payload = resolve(raw, fb, overrides, globalBlock ?? new Set(), globalPromote ?? new Set());
+  const [fb, overrides, clicks] = await Promise.all([
+    getFeedbackMap(serviceName), getOverrides(serviceKey), getClickMap(serviceName),
+  ]);
+  const payload = resolve(raw, fb, overrides, globalBlock ?? new Set(), globalPromote ?? new Set(), clicks);
   await supabase.from('alternatives_catalogue').update({
     payload, resolved_at: new Date().toISOString(),
     status: payload.length < 2 ? 'needs_review' : 'active',
