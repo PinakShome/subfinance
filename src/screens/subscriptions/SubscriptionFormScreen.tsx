@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, Alert, Switch, Modal, FlatList, Pressable, Dimensions,
@@ -11,6 +11,7 @@ import { isRealDate } from '../../lib/subscriptionUtils';
 import { getDefaultCurrency } from '../../lib/prefs';
 import { BillingCycle, SubscriptionInsert } from '../../types/database';
 import { HomeStackParamList } from '../../navigation/types';
+import { CATALOGUE_INDEX } from '../../data/catalogueIndex';
 
 type AddProps = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'AddSubscription'>;
@@ -47,8 +48,41 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   const [websiteUrl, setWebsiteUrl] = useState(existing?.website_url ?? '');
   const [busy, setBusy] = useState(false);
   const [catModalOpen, setCatModalOpen] = useState(false);
+  const [justPicked, setJustPicked] = useState(!!existing);
 
   useEffect(() => { fetchCategories(); }, []);
+
+  // Add-time autocomplete: match what the user types against the bundled
+  // catalogue so name/category/cost are pre-filled and, crucially, the saved
+  // name matches a catalogue key exactly (so the alternatives lookup hits
+  // directly instead of falling back to a paid generation).
+  const suggestions = useMemo(() => {
+    const q = name.trim().toLowerCase();
+    if (justPicked || q.length < 2) return [];
+    if (CATALOGUE_INDEX.some((e) => e.name.toLowerCase() === q)) return [];
+    const starts: typeof CATALOGUE_INDEX = [];
+    const contains: typeof CATALOGUE_INDEX = [];
+    for (const e of CATALOGUE_INDEX) {
+      const n = e.name.toLowerCase();
+      if (n.startsWith(q)) starts.push(e);
+      else if (n.includes(q)) contains.push(e);
+    }
+    return [...starts, ...contains].slice(0, 6);
+  }, [name, justPicked]);
+
+  const onNameChange = (t: string) => { setName(t); setJustPicked(false); };
+
+  const pickSuggestion = (e: (typeof CATALOGUE_INDEX)[number]) => {
+    setName(e.name);
+    setJustPicked(true);
+    // Only pre-fill cost when the field is empty and the display currency is
+    // USD (catalogue prices are approximate US prices).
+    if (!cost.trim() && currency.trim().toUpperCase() === 'USD' && e.approx_monthly != null && e.approx_monthly > 0) {
+      setCost(String(e.approx_monthly));
+    }
+    const cat = categories.find((c) => c.name === e.category);
+    if (cat) setCategoryId(cat.id);
+  };
 
   // For new subscriptions, pre-fill the user's chosen default currency.
   useEffect(() => {
@@ -114,7 +148,28 @@ export default function SubscriptionFormScreen({ navigation, route }: Props) {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.sectionLabel}>Name</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} maxLength={100} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" />
+      <TextInput style={styles.input} value={name} onChangeText={onNameChange} maxLength={100} placeholder="e.g. Netflix" placeholderTextColor="#8a8698" autoCorrect={false} />
+      {suggestions.length > 0 && (
+        <View style={styles.suggestBox}>
+          {suggestions.map((e, i) => (
+            <TouchableOpacity
+              key={e.name}
+              style={[styles.suggestRow, i < suggestions.length - 1 && styles.suggestRowBorder]}
+              onPress={() => pickSuggestion(e)}
+              accessibilityRole="button"
+              accessibilityLabel={`Use ${e.name}, ${e.category}`}
+            >
+              <View style={{ flex: 1 }}>
+                <Text style={styles.suggestName}>{e.name}</Text>
+                <Text style={styles.suggestCat}>{e.category}</Text>
+              </View>
+              {e.approx_monthly != null && e.approx_monthly > 0 && (
+                <Text style={styles.suggestPrice}>≈ ${e.approx_monthly}/mo</Text>
+              )}
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
       <Text style={styles.sectionLabel}>Cost</Text>
       <View style={styles.row}>
@@ -259,6 +314,17 @@ const styles = StyleSheet.create({
   dropdownText: { color: '#1b1830', fontSize: 15 },
   dropdownPlaceholder: { color: '#8a8698' },
   dropdownCaret: { color: '#6a6782', fontSize: 14, marginLeft: 8 },
+  suggestBox: {
+    marginTop: 6, backgroundColor: '#ffffff', borderRadius: 12,
+    borderWidth: 1, borderColor: '#e5e3ef', overflow: 'hidden',
+    shadowColor: '#1b1830', shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08, shadowRadius: 12, elevation: 3,
+  },
+  suggestRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 11, paddingHorizontal: 14, gap: 10 },
+  suggestRowBorder: { borderBottomWidth: 1, borderBottomColor: '#f1eff9' },
+  suggestName: { color: '#1b1830', fontSize: 15, fontWeight: '600' },
+  suggestCat: { color: '#8a8698', fontSize: 12, marginTop: 1 },
+  suggestPrice: { color: '#6366f1', fontSize: 13, fontWeight: '700' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' },
   modalSheet: {
     backgroundColor: '#ffffff', borderTopLeftRadius: 20, borderTopRightRadius: 20,
