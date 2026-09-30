@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { advanceRenewal } from '../lib/subscriptionUtils';
 import { getDefaultCurrency as getDefaultCurrencyPref, setDefaultCurrency as setDefaultCurrencyPref } from '../lib/prefs';
 import { Subscription, SubscriptionInsert, SubscriptionUpdate, Category, PriceHistoryEntry } from '../types/database';
+import { notifyPriceIncrease } from '../lib/notifications';
 
 // Check if demo mode is enabled
 const DEMO_MODE = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
@@ -127,6 +128,16 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
           });
         }
       } catch { /* price_history table may not exist yet — fail silently */ }
+
+      // Fire a local alert on a genuine increase (same billing cycle, so a
+      // monthly→annual switch isn't mistaken for a hike).
+      const sameCycle = payload.billing_cycle === undefined || payload.billing_cycle === existing.billing_cycle;
+      if (sameCycle && payload.cost! > existing.cost) {
+        notifyPriceIncrease(
+          payload.name ?? existing.name, existing.cost, payload.cost!,
+          payload.currency ?? existing.currency,
+        ).catch(() => {});
+      }
     }
 
     await get().fetchAll();

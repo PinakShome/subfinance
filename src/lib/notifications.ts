@@ -120,6 +120,25 @@ export async function savePushToken(token: string): Promise<void> {
     );
 }
 
+/**
+ * Fire an immediate local alert when a tracked subscription's price rises.
+ * Respects the user's notification preference; a no-op on web or when off.
+ */
+export async function notifyPriceIncrease(
+  name: string, fromMonthly: number, toMonthly: number, currency: string,
+): Promise<void> {
+  if (Platform.OS === 'web') return;
+  if (!(await getNotificationsEnabled())) return;
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: `${name} went up in price`,
+      body: `Now ~${currency} ${toMonthly.toFixed(2)}/mo (was ${currency} ${fromMonthly.toFixed(2)}). Worth a look for a cheaper option.`,
+      data: { type: 'price_increase' },
+    },
+    trigger: null, // deliver now
+  }).catch(() => {});
+}
+
 /** Clear every pending local reminder (used on sign-out and when opting out). */
 export async function cancelAllReminders(): Promise<void> {
   if (Platform.OS === 'web') return;
