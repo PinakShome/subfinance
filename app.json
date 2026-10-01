@@ -5,7 +5,7 @@
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -18,6 +18,9 @@
       "buildNumber": "1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "entitlements": {
+        "com.apple.security.application-groups": ["group.com.subfinance.app"]
       }
     },
     "plugins": [
@@ -27,11 +30,15 @@
         {
           "color": "#6366f1"
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "extra": {
       "eas": {
         "projectId": "96dec651-eac4-42a6-ac6a-d08953308d67"
+      },
+      "appleTargets": {
+        "appGroup": "group.com.subfinance.app"
       }
     },
     "owner": "pinak_shome"

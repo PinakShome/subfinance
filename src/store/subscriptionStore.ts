@@ -4,6 +4,7 @@ import { advanceRenewal } from '../lib/subscriptionUtils';
 import { getDefaultCurrency as getDefaultCurrencyPref, setDefaultCurrency as setDefaultCurrencyPref } from '../lib/prefs';
 import { Subscription, SubscriptionInsert, SubscriptionUpdate, Category, PriceHistoryEntry } from '../types/database';
 import { notifyPriceIncrease } from '../lib/notifications';
+import { updateWidget } from '../lib/widget';
 
 // Check if demo mode is enabled
 const DEMO_MODE = process.env.EXPO_PUBLIC_DEMO_MODE === 'true';
@@ -76,11 +77,11 @@ export const useSubscriptionStore = create<SubscriptionState>((set, get) => ({
     });
 
     const changed = rolled.filter((sub, i) => sub.next_renewal !== (data as Subscription[])[i].next_renewal);
-    set({
-      subscriptions: rolled.sort((a, b) => a.next_renewal.localeCompare(b.next_renewal)),
-      loading: false,
-      error: null,
-    });
+    const sorted = rolled.sort((a, b) => a.next_renewal.localeCompare(b.next_renewal));
+    set({ subscriptions: sorted, loading: false, error: null });
+
+    // Refresh the iOS home-screen widget (no-op where the native target isn't built).
+    updateWidget(sorted, get().defaultCurrency);
 
     // Persist the advanced dates (best-effort; UI already reflects them).
     if (changed.length) {
