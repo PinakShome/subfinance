@@ -632,3 +632,22 @@ export const REFERENCE_CATALOG: RefCategory[] = [
 /** Flat list with category attached — what the catalogue builders consume. */
 export const REFERENCE_SERVICES: { name: string; category: string; approx_monthly?: number }[] =
   REFERENCE_CATALOG.flatMap((c) => c.services.map((s) => ({ ...s, category: c.category })));
+
+/** Approximate monthly price per service, keyed by lowercased name. */
+export const REFERENCE_PRICE: Map<string, number | undefined> = new Map(
+  REFERENCE_SERVICES.map((s) => [s.name.toLowerCase(), s.approx_monthly]),
+);
+
+/**
+ * Is `altPrice` a valid *cheaper* alternative to `serviceName`? The feature only
+ * promises cheaper-or-free options, so an alternative priced at or above the
+ * service is not one. Free/usage-based alts (null) are always kept; when the
+ * service's own price is unknown or free we can't judge, so we keep the alt and
+ * let the live cost filter decide against the user's actual cost.
+ */
+export function isCheaperAlt(altPrice: number | null, serviceName: string): boolean {
+  if (altPrice == null) return true;
+  const ref = REFERENCE_PRICE.get(serviceName.toLowerCase());
+  if (ref == null || ref <= 0) return true;
+  return altPrice < ref;
+}

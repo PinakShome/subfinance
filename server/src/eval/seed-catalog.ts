@@ -16,6 +16,7 @@ import 'dotenv/config';
 import { supabase } from '../lib/supabase';
 import { normalizeKey, reresolve } from '../lib/catalogue';
 import { Alt } from '../lib/alternatives-gen';
+import { isCheaperAlt } from './reference-catalog';
 
 const a = (name: string, monthly_price: number | null, website: string, description: string): Alt =>
   ({ name, monthly_price, website, currency: 'USD', description });
@@ -550,7 +551,7 @@ export const SEED: Seed[] = [
   { name: 'MLB.TV', category: 'Sports Streaming', alts: [A.antenna, A.espnplus, A.slingfree] },
   { name: 'NFL+', category: 'Sports Streaming', alts: [A.antenna, A.youtube, A.slingfree] },
   { name: 'F1 TV', category: 'Sports Streaming', alts: [A.slingsports, A.espnplus, A.youtube] },
-  { name: 'UFC Fight Pass', category: 'Sports Streaming', alts: [A.espnplus, A.youtube] },
+  { name: 'UFC Fight Pass', category: 'Sports Streaming', alts: [A.espnplus, A.youtube, A.slingfree] },
 
   // ── Music Streaming ──
   { name: 'Spotify', category: 'Music Streaming', alts: [A.spotifyFree, A.appleMusic, A.amazonMusic, A.ytMusicFree, A.deezerFree, A.pandora] },
@@ -579,19 +580,19 @@ export const SEED: Seed[] = [
   { name: 'PC Game Pass', category: 'Gaming', alts: [a('GeForce Now', 9.99, 'https://www.nvidia.com/geforce-now', 'Stream games you own; free tier available.'), a('EA Play', 5.99, 'https://www.ea.com/ea-play', 'Cheaper EA catalog.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games monthly with Prime.'), a('Epic Games Store', 0, 'https://store.epicgames.com', 'Free game every week.')] },
   { name: 'PlayStation Plus', category: 'Gaming', alts: [a('GeForce Now', 9.99, 'https://www.nvidia.com/geforce-now', 'Cheaper cloud gaming of games you own.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free monthly games with Prime.'), a('Epic Games Store', 0, 'https://store.epicgames.com', 'Free weekly games.'), a('EA Play', 5.99, 'https://www.ea.com/ea-play', 'Cheap catalog subscription.')] },
   { name: 'Nintendo Switch Online', category: 'Gaming', alts: [a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.'), a('Epic Games Store', 0, 'https://store.epicgames.com', 'Free weekly games.'), a('Google Play Pass', 4.99, 'https://play.google.com/pass', 'Cheap mobile game/app bundle.')] },
-  { name: 'GeForce Now', category: 'Gaming', alts: [a('Xbox Cloud Gaming', 13.99, 'https://www.xbox.com/play', 'Cloud gaming via PC Game Pass.'), a('Amazon Luna', 9.99, 'https://luna.amazon.com', 'Cheaper cloud gaming; free with Prime tier.'), a('Boosteroid', 8.99, 'https://boosteroid.com', 'Cheap cloud gaming of games you own.')] },
+  { name: 'GeForce Now', category: 'Gaming', alts: [a('Xbox Cloud Gaming', 13.99, 'https://www.xbox.com/play', 'Cloud gaming via PC Game Pass.'), a('Amazon Luna', 9.99, 'https://luna.amazon.com', 'Cheaper cloud gaming; free with Prime tier.'), a('Boosteroid', 8.99, 'https://boosteroid.com', 'Cheap cloud gaming of games you own.'), a('GeForce NOW (Free)', 0, 'https://www.nvidia.com/geforce-now', 'Free tier with 1-hour sessions.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games + cloud with Prime.')] },
   { name: 'Apple Arcade', category: 'Gaming', alts: [a('Google Play Pass', 4.99, 'https://play.google.com/pass', 'Cheaper bundle of games + apps.'), a('Netflix Games', 0, 'https://www.netflix.com', 'Included free with any Netflix plan.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.')] },
   { name: 'EA Play', category: 'Gaming', alts: [a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.'), a('Epic Games Store', 0, 'https://store.epicgames.com', 'Free weekly games.'), a('Humble Choice', 11.99, 'https://www.humblebundle.com/membership', 'Keep games you claim each month.')] },
   { name: 'Ubisoft+', category: 'Gaming', alts: [a('EA Play', 5.99, 'https://www.ea.com/ea-play', 'Cheaper catalog subscription.'), a('PC Game Pass', 13.99, 'https://www.xbox.com/xbox-game-pass/pc-game-pass', 'Includes Ubisoft+ Classics.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.')] },
-  { name: 'Amazon Luna+', category: 'Gaming', alts: [a('GeForce Now', 9.99, 'https://www.nvidia.com/geforce-now', 'Cloud gaming of your own library.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.'), a('Xbox Cloud Gaming', 13.99, 'https://www.xbox.com/play', 'Cloud gaming via Game Pass.')] },
+  { name: 'Amazon Luna+', category: 'Gaming', alts: [a('GeForce Now', 9.99, 'https://www.nvidia.com/geforce-now', 'Cloud gaming of your own library.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.'), a('Xbox Cloud Gaming', 13.99, 'https://www.xbox.com/play', 'Cloud gaming via Game Pass.'), a('GeForce NOW (Free)', 0, 'https://www.nvidia.com/geforce-now', 'Free cloud-gaming tier.'), a('Boosteroid', 8.99, 'https://boosteroid.com', 'Cheaper cloud gaming.')] },
   { name: 'Google Play Pass', category: 'Gaming', alts: [a('Apple Arcade', 6.99, 'https://www.apple.com/apple-arcade', 'Ad-free premium mobile games.'), a('Netflix Games', 0, 'https://www.netflix.com', 'Free with any Netflix plan.'), a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games with Prime.')] },
   { name: 'Humble Choice', category: 'Gaming', alts: [a('Prime Gaming', 0, 'https://gaming.amazon.com', 'Free games monthly with Prime.'), a('Epic Games Store', 0, 'https://store.epicgames.com', 'Free weekly games.'), a('PC Game Pass', 13.99, 'https://www.xbox.com/xbox-game-pass/pc-game-pass', 'Large rotating library.')] },
 
   // ── Cloud Storage ──
-  { name: 'Google One', category: 'Cloud Storage', alts: [A.pcloud, A.protonDrive, A.sync, A.mega, A.onedrive, A.icloud] },
+  { name: 'Google One', category: 'Cloud Storage', alts: [A.pcloud, A.protonDrive, A.sync, A.mega, A.onedrive, A.icloud, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('iCloud (Free)', 0, 'https://www.icloud.com', 'Free 5GB on Apple devices.')] },
   { name: 'iCloud+', category: 'Cloud Storage', alts: [A.googleOne, A.pcloud, A.protonDrive, A.sync, A.onedrive, A.mega] },
   { name: 'Dropbox', category: 'Cloud Storage', alts: [A.googleOne, A.pcloud, A.sync, A.protonDrive, A.icedrive, A.mega] },
-  { name: 'Microsoft OneDrive', category: 'Cloud Storage', alts: [A.googleOne, A.pcloud, A.mega, A.protonDrive, A.sync] },
+  { name: 'Microsoft OneDrive', category: 'Cloud Storage', alts: [A.googleOne, A.pcloud, A.mega, A.protonDrive, A.sync, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('Google Drive (Free)', 0, 'https://drive.google.com', 'Free 15GB cloud storage.')] },
   { name: 'Box', category: 'Cloud Storage', alts: [A.googleOne, A.pcloud, A.sync, A.mega, A.protonDrive] },
   { name: 'pCloud', category: 'Cloud Storage', alts: [A.mega, A.icedrive, A.sync, A.googleOne] },
   { name: 'Proton Drive', category: 'Cloud Storage', alts: [A.mega, A.sync, A.pcloud, A.icedrive] },
@@ -762,10 +763,10 @@ export const SEED: Seed[] = [
   { name: 'Home Chef', category: 'Food & Meal Delivery', alts: [A.everyplate, A.dinnerly, A.mealime, A.storePickup] },
   { name: 'Factor', category: 'Food & Meal Delivery', alts: [A.everyplate, A.mealime, A.storePickup] },
   { name: 'EveryPlate', category: 'Food & Meal Delivery', alts: [A.dinnerly, A.mealime, A.storePickup] },
-  { name: 'DoorDash DashPass', category: 'Food & Meal Delivery', alts: [a('Uber One', 9.99, 'https://www.uber.com/us/en/uber-one', 'Comparable delivery membership.'), A.storePickup, A.walmartPlusDelivery] },
-  { name: 'Uber One', category: 'Food & Meal Delivery', alts: [a('DoorDash DashPass', 9.99, 'https://www.doordash.com/dashpass', 'Comparable delivery membership.'), A.storePickup, A.walmartPlusDelivery] },
+  { name: 'DoorDash DashPass', category: 'Food & Meal Delivery', alts: [a('Uber One', 9.99, 'https://www.uber.com/us/en/uber-one', 'Comparable delivery membership.'), A.storePickup, A.walmartPlusDelivery, a('Order direct for pickup', 0, 'https://www.google.com', 'Order from the restaurant to skip delivery fees.')] },
+  { name: 'Uber One', category: 'Food & Meal Delivery', alts: [a('DoorDash DashPass', 9.99, 'https://www.doordash.com/dashpass', 'Comparable delivery membership.'), A.storePickup, A.walmartPlusDelivery, a('Order direct for pickup', 0, 'https://www.google.com', 'Order from the restaurant to skip delivery fees.')] },
   { name: 'Instacart+', category: 'Food & Meal Delivery', alts: [A.walmartPlusDelivery, A.storePickup, A.subscribeSave] },
-  { name: 'Grubhub+', category: 'Food & Meal Delivery', alts: [a('DoorDash DashPass', 9.99, 'https://www.doordash.com/dashpass', 'Comparable membership.'), A.storePickup] },
+  { name: 'Grubhub+', category: 'Food & Meal Delivery', alts: [a('DoorDash DashPass', 9.99, 'https://www.doordash.com/dashpass', 'Comparable membership.'), A.storePickup, a('Order direct for pickup', 0, 'https://www.google.com', 'Order from the restaurant to skip delivery fees.')] },
   { name: 'Thrive Market', category: 'Food & Meal Delivery', alts: [A.subscribeSave, A.aldi, A.storePickup] },
 
   // ── Retail & Shopping ──
@@ -820,7 +821,7 @@ export const SEED: Seed[] = [
   { name: 'Verizon', category: 'Telecom & Mobile', alts: [A.visible, A.usmobile, A.mint, A.tello] },
   { name: 'AT&T', category: 'Telecom & Mobile', alts: [A.cricket, A.usmobile, A.mint, A.tello] },
   { name: 'T-Mobile', category: 'Telecom & Mobile', alts: [A.mint, A.usmobile, A.tello, A.visible] },
-  { name: 'Mint Mobile', category: 'Telecom & Mobile', alts: [A.tello, A.usmobile, A.visible] },
+  { name: 'Mint Mobile', category: 'Telecom & Mobile', alts: [A.tello, A.usmobile, A.visible, A.textNow] },
   { name: 'Visible', category: 'Telecom & Mobile', alts: [A.usmobile, A.mint, A.tello] },
   { name: 'Google Fi', category: 'Telecom & Mobile', alts: [A.usmobile, A.mint, A.visible, A.tello] },
   { name: 'US Mobile', category: 'Telecom & Mobile', alts: [A.tello, A.mint, A.visible] },
@@ -840,7 +841,7 @@ export const SEED: Seed[] = [
   { name: 'Yahoo Finance Plus', category: 'Finance & Investing', alts: [A.finviz, A.stockanalysis, A.yahooFinance, A.simplywallst] },
 
   // ── Subscription Boxes ──
-  { name: 'Ipsy', category: 'Subscription Boxes', alts: [A.boxycharm, A.sephoraSample, a('Allure Beauty Box', 23, 'https://beautybox.allure.com', 'Curated deluxe/full-size beauty.')] },
+  { name: 'Ipsy', category: 'Subscription Boxes', alts: [A.boxycharm, A.sephoraSample, a('Allure Beauty Box', 23, 'https://beautybox.allure.com', 'Curated deluxe/full-size beauty.'), a('Target Beauty Box', 7, 'https://www.target.com/c/beauty-box', 'Cheaper seasonal beauty box.')] },
   { name: 'FabFitFun', category: 'Subscription Boxes', alts: [a('Birchbox', 17, 'https://www.birchbox.com', 'Cheaper beauty sampling box.'), A.boxycharm, A.sephoraSample] },
   { name: 'Birchbox', category: 'Subscription Boxes', alts: [a('Ipsy', 14, 'https://www.ipsy.com', 'Cheaper monthly beauty bag.'), A.sephoraSample, A.boxycharm] },
   { name: 'BarkBox', category: 'Subscription Boxes', alts: [A.chewy, a('Super Chewer', 29, 'https://www.superchewer.com', 'Compare to buying durable toys retail.'), A.subscribeSave] },
@@ -1177,11 +1178,11 @@ export const SEED: Seed[] = [
   { name: '8x8', category: 'Communication', alts: [A.googleVoice, A.zoomPhone, A.dialpad, A.openphoneAlt] },
   { name: 'Aircall', category: 'Communication', alts: [A.openphoneAlt, A.dialpad, A.zoomPhone, A.googleVoice] },
   // Cloud Storage
-  { name: 'Filen', category: 'Cloud Storage', alts: [A.mega, A.icedrive, A.pcloud, A.protonDrive] },
-  { name: 'Koofr', category: 'Cloud Storage', alts: [A.mega, A.icedrive, A.protonDrive, A.googleOne] },
+  { name: 'Filen', category: 'Cloud Storage', alts: [A.mega, A.icedrive, A.pcloud, A.protonDrive, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('Google Drive (Free)', 0, 'https://drive.google.com', 'Free 15GB cloud storage.')] },
+  { name: 'Koofr', category: 'Cloud Storage', alts: [A.mega, A.icedrive, A.protonDrive, A.googleOne, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('Google Drive (Free)', 0, 'https://drive.google.com', 'Free 15GB cloud storage.')] },
   { name: 'Jottacloud', category: 'Cloud Storage', alts: [A.mega, A.backblaze, A.idrive, A.icedrive] },
-  { name: 'NordLocker', category: 'Cloud Storage', alts: [A.protonDrive, A.mega, A.icedrive, A.sync] },
-  { name: 'Internxt', category: 'Cloud Storage', alts: [A.mega, A.protonDrive, A.icedrive, A.pcloud] },
+  { name: 'NordLocker', category: 'Cloud Storage', alts: [A.protonDrive, A.mega, A.icedrive, A.sync, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('Google Drive (Free)', 0, 'https://drive.google.com', 'Free 15GB cloud storage.')] },
+  { name: 'Internxt', category: 'Cloud Storage', alts: [A.mega, A.protonDrive, A.icedrive, A.pcloud, a('Proton Drive (Free)', 0, 'https://proton.me/drive', 'Free 5GB encrypted storage.'), a('Google Drive (Free)', 0, 'https://drive.google.com', 'Free 15GB cloud storage.')] },
   { name: 'Tresorit', category: 'Cloud Storage', alts: [A.protonDrive, A.sync, A.mega, A.icedrive] },
   // Smart Home & Security
   { name: 'Vivint', category: 'Smart Home & Security', alts: [A.ringAlarmCheap, A.eufy, A.wyzeCam, a('Abode (self-monitor)', 0, 'https://goabode.com', 'Self-monitored, no fee.')] },
@@ -1399,10 +1400,14 @@ export const SEED: Seed[] = [
 
 async function main() {
   console.log(`Seeding ${SEED.length} services (curated, zero API)…\n`);
-  let ok = 0, alts = 0;
+  let ok = 0, alts = 0, dropped = 0;
   for (const s of SEED) {
     const key = normalizeKey(s.name, s.category);
-    const clean = s.alts.filter(Boolean) as Alt[];
+    const present = s.alts.filter(Boolean) as Alt[];
+    // Only store genuinely cheaper-or-free alternatives — a pricier "alternative"
+    // is never served by the live cost filter anyway, so it's just dead weight.
+    const clean = present.filter((a) => isCheaperAlt(a.monthly_price, s.name));
+    dropped += present.length - clean.length;
     const { error } = await supabase.from('alternatives_catalogue').upsert({
       service_key: key, service_name: s.name, category: s.category,
       raw_payload: clean, payload: clean, quality_score: 90, status: 'active',
@@ -1412,7 +1417,7 @@ async function main() {
     await reresolve(key, s.name, clean);
     ok++; alts += clean.length;
   }
-  console.log(`Done. ${ok}/${SEED.length} services seeded, ${alts} alternatives total.`);
+  console.log(`Done. ${ok}/${SEED.length} services seeded, ${alts} alternatives total (${dropped} pricier peers dropped).`);
 }
 // Only seed when run directly (npm run seed:catalog); importing SEED elsewhere
 // (e.g. the catalogue checker) must not connect to the DB or write anything.

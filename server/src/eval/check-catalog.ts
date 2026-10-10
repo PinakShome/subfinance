@@ -5,17 +5,13 @@
  *   cd server && npm run check:catalog
  */
 import { SEED } from './seed-catalog';
-import { REFERENCE_SERVICES } from './reference-catalog';
+import { REFERENCE_SERVICES, isCheaperAlt } from './reference-catalog';
 import { normalizeKey } from '../lib/catalogue';
 
 let errors = 0;
 let warnings = 0;
 const err = (m: string) => { console.error('  ERROR  ' + m); errors++; };
 const warn = (m: string) => { console.warn('  warn   ' + m); warnings++; };
-
-// Reference price by canonical key (name-only, matching normalizeKey).
-const refPrice = new Map<string, number | undefined>();
-for (const s of REFERENCE_SERVICES) refPrice.set(normalizeKey(s.name), s.approx_monthly);
 
 // 1. Duplicate service keys in SEED (would silently overwrite on upsert).
 const seen = new Map<string, string>();
@@ -28,10 +24,11 @@ for (const s of SEED) {
 
 // 2. Per-entry alternative checks.
 const urlRe = /^https:\/\/[^\s]+$/i;
+let droppedPeers = 0; // alts priced >= their service — auto-removed at seed time
 for (const s of SEED) {
   if (!s.alts || s.alts.length === 0) { err(`"${s.name}" has no alternatives`); continue; }
-  const svcPrice = refPrice.get(normalizeKey(s.name));
   const altNames = new Set<string>();
+  let cheaperCount = 0;
   for (const alt of s.alts) {
     if (!alt || !alt.name) { err(`"${s.name}" has an alternative with no name`); continue; }
     const an = alt.name.toLowerCase();
@@ -40,12 +37,13 @@ for (const s of SEED) {
     altNames.add(an);
     if (alt.website != null && !urlRe.test(alt.website)) err(`"${s.name}" -> "${alt.name}" has a non-https website: ${alt.website}`);
     if (typeof alt.monthly_price === 'number' && alt.monthly_price < 0) err(`"${s.name}" -> "${alt.name}" has a negative price`);
-    // Every alternative should be cheaper than (or free vs) the original.
-    if (typeof alt.monthly_price === 'number' && alt.monthly_price > 0 &&
-        typeof svcPrice === 'number' && svcPrice > 0 && alt.monthly_price >= svcPrice) {
-      warn(`"${s.name}" ($${svcPrice}) -> "${alt.name}" ($${alt.monthly_price}) is not cheaper`);
-    }
+    // Pricier/equal peers are dropped at seed time (see seed-catalog main()); count them.
+    if (isCheaperAlt(alt.monthly_price, s.name)) cheaperCount++;
+    else droppedPeers++;
   }
+  // A service left with <2 genuinely-cheaper options after cleanup is worth a look
+  // — it will serve thin and land in the admin "needs review" queue.
+  if (cheaperCount < 2) warn(`"${s.name}" has only ${cheaperCount} cheaper-or-free alternative(s) after cleanup`);
 }
 
 // 3. Coverage report (informational).
@@ -56,5 +54,6 @@ const missing = [...refKeys].filter((k) => !seedKeys.has(k));
 console.log('');
 console.log(`Catalogue check — ${SEED.length} seeded services, ${REFERENCE_SERVICES.length} reference services.`);
 if (missing.length) console.log(`  ${missing.length} reference service(s) have no seed alternatives (fine if usage-based/one-time).`);
+if (droppedPeers) console.log(`  ${droppedPeers} pricier/equal peer alternative(s) will be auto-dropped at seed time.`);
 console.log(`Result: ${errors} error(s), ${warnings} warning(s).`);
 process.exit(errors > 0 ? 1 : 0);
