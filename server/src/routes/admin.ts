@@ -66,19 +66,24 @@ router.get('/stats', async (_req, res) => {
   const rows = (data ?? []) as any[];
 
   let totalAlts = 0, needsReview = 0, thin = 0, emptyServed = 0, requests = 0;
-  const byCategory = new Map<string, { services: number; alts: number }>();
+  const byCategory = new Map<string, { services: number; alts: number; needsReview: number; thin: number }>();
   const byStatus = new Map<string, number>();
   let qSum = 0, qN = 0;
   for (const r of rows) {
     const served = nAlts(r.payload);
     totalAlts += served;
     requests += r.request_count ?? 0;
-    if (r.status === 'needs_review') needsReview++;
-    if (served < 2) thin++;
+    const isNeedsReview = r.status === 'needs_review';
+    const isThin = served < 2;
+    if (isNeedsReview) needsReview++;
+    if (isThin) thin++;
     if (served === 0) emptyServed++;
     byStatus.set(r.status, (byStatus.get(r.status) ?? 0) + 1);
-    const c = byCategory.get(r.category) ?? { services: 0, alts: 0 };
-    c.services++; c.alts += served; byCategory.set(r.category, c);
+    const c = byCategory.get(r.category) ?? { services: 0, alts: 0, needsReview: 0, thin: 0 };
+    c.services++; c.alts += served;
+    if (isNeedsReview) c.needsReview++;
+    if (isThin) c.thin++;
+    byCategory.set(r.category, c);
     if (typeof r.quality_score === 'number') { qSum += r.quality_score; qN++; }
   }
 
@@ -268,6 +273,16 @@ router.delete('/catalogue/:key/overrides/:id', async (req, res) => {
     await reresolve(key, (row as any).service_name, (row as any).raw_payload as Alt[], block, promote);
   }
   res.json({ ok: true });
+});
+
+// ── Curation audit: every owner override across the catalogue ──
+router.get('/overrides', async (_req, res) => {
+  const { data, error } = await supabase
+    .from('alternative_overrides')
+    .select('id, service_key, alternative_name, action, patch, created_at')
+    .order('created_at', { ascending: false });
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ overrides: data ?? [] });
 });
 
 // ── Bulk re-resolve: a set of keys, or everything matching a category/status ──

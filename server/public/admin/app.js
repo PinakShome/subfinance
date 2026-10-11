@@ -79,10 +79,11 @@ async function loadStats() {
   const top = s.byCategory.slice(0, 8);
   const max = Math.max(1, ...top.map((c) => c.services));
   top.forEach((c) => {
+    const flag = (c.thin || 0) + (c.needsReview || 0);
     cb.appendChild(el('div', { class: 'cat-row' }, [
       el('span', { text: c.category }),
       el('span', { class: 'bar' }, el('span', { style: 'width:' + Math.round((c.services / max) * 100) + '%' })),
-      el('span', { class: 'muted', text: c.services + ' · ' + c.alts + ' alts' }),
+      el('span', { class: flag ? 'warnflag' : 'muted', text: flag ? (c.services + ' · ⚠' + flag) : (c.services + ' · ' + c.alts + ' alts') }),
     ]));
   });
 
@@ -261,11 +262,11 @@ async function delEntry(key, name) {
 }
 async function addOverride(action, name, patch) {
   if (!name) { toast('Enter an alternative name', 'err'); return; }
-  try { const res = await api('/catalogue/' + encodeURIComponent(state.currentKey) + '/overrides', { method: 'POST', body: { action, alternative_name: name, patch } }); toast(action + ' applied · ' + res.servedCount + ' served', 'ok'); selectRow(state.currentKey); loadStats(); }
+  try { const res = await api('/catalogue/' + encodeURIComponent(state.currentKey) + '/overrides', { method: 'POST', body: { action, alternative_name: name, patch } }); toast(action + ' applied · ' + res.servedCount + ' served', 'ok'); selectRow(state.currentKey); loadStats(); loadOverrides(); }
   catch (e) { toast(e.message, 'err'); }
 }
 async function delOverride(key, id) {
-  try { await api('/catalogue/' + encodeURIComponent(key) + '/overrides/' + encodeURIComponent(id), { method: 'DELETE' }); toast('Override removed', 'ok'); selectRow(key); loadStats(); }
+  try { await api('/catalogue/' + encodeURIComponent(key) + '/overrides/' + encodeURIComponent(id), { method: 'DELETE' }); toast('Override removed', 'ok'); selectRow(key); loadStats(); loadOverrides(); }
   catch (e) { toast(e.message, 'err'); }
 }
 
@@ -310,8 +311,43 @@ $('export-btn').addEventListener('click', async () => {
 });
 
 // ── Boot ──
+async function loadOverrides() {
+  const panel = $('overrides-panel'); const countEl = $('ov-count');
+  try {
+    const { overrides } = await api('/overrides');
+    countEl.textContent = '(' + overrides.length + ')';
+    clear(panel);
+    if (!overrides.length) {
+      panel.appendChild(el('div', { class: 'muted', text: 'No owner overrides yet — pin / block / edit alternatives from a service to curate.' }));
+      return;
+    }
+    overrides.forEach((o) => {
+      panel.appendChild(el('div', { class: 'override' }, [
+        el('div', {}, [
+          el('span', { class: 'ov-tag ' + o.action, text: o.action }),
+          document.createTextNode(' ' + o.alternative_name + '  '),
+          el('span', { class: 'muted', text: o.service_key }),
+        ]),
+        el('div', { class: 'row-actions' }, [
+          el('button', { class: 'ghost', text: 'Open', onclick: () => selectRow(o.service_key) }),
+          el('button', { class: 'danger', text: 'Remove', onclick: () => removeOverrideAudit(o.service_key, o.id) }),
+        ]),
+      ]));
+    });
+  } catch (e) { /* leave panel as-is on error */ }
+}
+
+async function removeOverrideAudit(key, id) {
+  try {
+    await api('/catalogue/' + encodeURIComponent(key) + '/overrides/' + encodeURIComponent(id), { method: 'DELETE' });
+    toast('Override removed', 'ok');
+    loadOverrides(); loadStats();
+    if (state.currentKey === key) selectRow(key);
+  } catch (e) { toast(e.message, 'err'); }
+}
+
 async function init() {
-  try { await Promise.all([loadStats(), loadCategories()]); await loadList(); }
+  try { await Promise.all([loadStats(), loadCategories(), loadOverrides()]); await loadList(); }
   catch (e) { /* gate shown on auth error */ }
 }
 (function boot() {
