@@ -24,11 +24,13 @@ for (const s of SEED) {
 
 // 2. Per-entry alternative checks.
 const urlRe = /^https:\/\/[^\s]+$/i;
-let droppedPeers = 0; // alts priced >= their service — auto-removed at seed time
+// Alts priced at/above their service's *reference* estimate. These are kept and
+// still served to a user whose actual cost is higher than the estimate — the
+// live cost filter decides against real cost — so this is informational, not a bug.
+let pricierThanRef = 0;
 for (const s of SEED) {
   if (!s.alts || s.alts.length === 0) { err(`"${s.name}" has no alternatives`); continue; }
   const altNames = new Set<string>();
-  let cheaperCount = 0;
   for (const alt of s.alts) {
     if (!alt || !alt.name) { err(`"${s.name}" has an alternative with no name`); continue; }
     const an = alt.name.toLowerCase();
@@ -37,13 +39,10 @@ for (const s of SEED) {
     altNames.add(an);
     if (alt.website != null && !urlRe.test(alt.website)) err(`"${s.name}" -> "${alt.name}" has a non-https website: ${alt.website}`);
     if (typeof alt.monthly_price === 'number' && alt.monthly_price < 0) err(`"${s.name}" -> "${alt.name}" has a negative price`);
-    // Pricier/equal peers are dropped at seed time (see seed-catalog main()); count them.
-    if (isCheaperAlt(alt.monthly_price, s.name)) cheaperCount++;
-    else droppedPeers++;
+    if (!isCheaperAlt(alt.monthly_price, s.name)) pricierThanRef++;
   }
-  // A service left with <2 genuinely-cheaper options after cleanup is worth a look
-  // — it will serve thin and land in the admin "needs review" queue.
-  if (cheaperCount < 2) warn(`"${s.name}" has only ${cheaperCount} cheaper-or-free alternative(s) after cleanup`);
+  // A service offering only one alternative is a thin entry worth filling out.
+  if (s.alts.length < 2) warn(`"${s.name}" has only ${s.alts.length} alternative(s)`);
 }
 
 // 3. Coverage report (informational).
@@ -54,6 +53,6 @@ const missing = [...refKeys].filter((k) => !seedKeys.has(k));
 console.log('');
 console.log(`Catalogue check — ${SEED.length} seeded services, ${REFERENCE_SERVICES.length} reference services.`);
 if (missing.length) console.log(`  ${missing.length} reference service(s) have no seed alternatives (fine if usage-based/one-time).`);
-if (droppedPeers) console.log(`  ${droppedPeers} pricier/equal peer alternative(s) will be auto-dropped at seed time.`);
+if (pricierThanRef) console.log(`  ${pricierThanRef} alternative(s) priced ≥ their service's reference estimate (served only when below the user's actual cost).`);
 console.log(`Result: ${errors} error(s), ${warnings} warning(s).`);
 process.exit(errors > 0 ? 1 : 0);

@@ -633,21 +633,25 @@ export const REFERENCE_CATALOG: RefCategory[] = [
 export const REFERENCE_SERVICES: { name: string; category: string; approx_monthly?: number }[] =
   REFERENCE_CATALOG.flatMap((c) => c.services.map((s) => ({ ...s, category: c.category })));
 
-/** Approximate monthly price per service, keyed by lowercased name. */
+// Normalize a service name to its price-map key: lowercase + collapsed whitespace.
+// (SEED and REFERENCE use the same canonical names, so no aliasing is needed here.)
+const priceKey = (name: string) => name.trim().toLowerCase().replace(/\s+/g, ' ');
+
+/** Approximate monthly price per service, keyed by normalized name. */
 export const REFERENCE_PRICE: Map<string, number | undefined> = new Map(
-  REFERENCE_SERVICES.map((s) => [s.name.toLowerCase(), s.approx_monthly]),
+  REFERENCE_SERVICES.map((s) => [priceKey(s.name), s.approx_monthly]),
 );
 
 /**
- * Is `altPrice` a valid *cheaper* alternative to `serviceName`? The feature only
- * promises cheaper-or-free options, so an alternative priced at or above the
- * service is not one. Free/usage-based alts (null) are always kept; when the
- * service's own price is unknown or free we can't judge, so we keep the alt and
- * let the live cost filter decide against the user's actual cost.
+ * Is `altPrice` cheaper than the *reference estimate* for `serviceName`? Used
+ * only for reporting/informational signals — the authoritative cheaper-than-cost
+ * decision is made live against the user's actual cost (which can exceed the
+ * estimate). Free/usage-based alts (null) and services with an unknown/free
+ * reference price are treated as "keep".
  */
 export function isCheaperAlt(altPrice: number | null, serviceName: string): boolean {
   if (altPrice == null) return true;
-  const ref = REFERENCE_PRICE.get(serviceName.toLowerCase());
+  const ref = REFERENCE_PRICE.get(priceKey(serviceName));
   if (ref == null || ref <= 0) return true;
   return altPrice < ref;
 }

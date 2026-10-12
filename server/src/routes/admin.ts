@@ -66,7 +66,7 @@ router.get('/stats', async (_req, res) => {
   const rows = (data ?? []) as any[];
 
   let totalAlts = 0, needsReview = 0, thin = 0, emptyServed = 0, requests = 0;
-  const byCategory = new Map<string, { services: number; alts: number; needsReview: number; thin: number }>();
+  const byCategory = new Map<string, { services: number; alts: number; needsReview: number; thin: number; flagged: number }>();
   const byStatus = new Map<string, number>();
   let qSum = 0, qN = 0;
   for (const r of rows) {
@@ -79,10 +79,11 @@ router.get('/stats', async (_req, res) => {
     if (isThin) thin++;
     if (served === 0) emptyServed++;
     byStatus.set(r.status, (byStatus.get(r.status) ?? 0) + 1);
-    const c = byCategory.get(r.category) ?? { services: 0, alts: 0, needsReview: 0, thin: 0 };
+    const c = byCategory.get(r.category) ?? { services: 0, alts: 0, needsReview: 0, thin: 0, flagged: 0 };
     c.services++; c.alts += served;
     if (isNeedsReview) c.needsReview++;
     if (isThin) c.thin++;
+    if (isNeedsReview || isThin) c.flagged++; // distinct services needing attention (no double-count)
     byCategory.set(r.category, c);
     if (typeof r.quality_score === 'number') { qSum += r.quality_score; qN++; }
   }
@@ -280,7 +281,8 @@ router.get('/overrides', async (_req, res) => {
   const { data, error } = await supabase
     .from('alternative_overrides')
     .select('id, service_key, alternative_name, action, patch, created_at')
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(500);
   if (error) return res.status(500).json({ error: error.message });
   res.json({ overrides: data ?? [] });
 });

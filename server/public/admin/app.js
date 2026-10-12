@@ -79,11 +79,11 @@ async function loadStats() {
   const top = s.byCategory.slice(0, 8);
   const max = Math.max(1, ...top.map((c) => c.services));
   top.forEach((c) => {
-    const flag = (c.thin || 0) + (c.needsReview || 0);
+    const flagged = c.flagged || 0;
     cb.appendChild(el('div', { class: 'cat-row' }, [
       el('span', { text: c.category }),
       el('span', { class: 'bar' }, el('span', { style: 'width:' + Math.round((c.services / max) * 100) + '%' })),
-      el('span', { class: flag ? 'warnflag' : 'muted', text: flag ? (c.services + ' · ⚠' + flag) : (c.services + ' · ' + c.alts + ' alts') }),
+      el('span', { class: flagged ? 'warnflag' : 'muted', text: flagged ? (c.alts + ' alts · ⚠' + flagged) : (c.services + ' · ' + c.alts + ' alts') }),
     ]));
   });
 

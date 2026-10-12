@@ -16,7 +16,6 @@ import 'dotenv/config';
 import { supabase } from '../lib/supabase';
 import { normalizeKey, reresolve } from '../lib/catalogue';
 import { Alt } from '../lib/alternatives-gen';
-import { isCheaperAlt } from './reference-catalog';
 
 const a = (name: string, monthly_price: number | null, website: string, description: string): Alt =>
   ({ name, monthly_price, website, currency: 'USD', description });
@@ -1400,14 +1399,12 @@ export const SEED: Seed[] = [
 
 async function main() {
   console.log(`Seeding ${SEED.length} services (curated, zero API)…\n`);
-  let ok = 0, alts = 0, dropped = 0;
+  let ok = 0, alts = 0;
   for (const s of SEED) {
     const key = normalizeKey(s.name, s.category);
-    const present = s.alts.filter(Boolean) as Alt[];
-    // Only store genuinely cheaper-or-free alternatives — a pricier "alternative"
-    // is never served by the live cost filter anyway, so it's just dead weight.
-    const clean = present.filter((a) => isCheaperAlt(a.monthly_price, s.name));
-    dropped += present.length - clean.length;
+    // Store the full raw list — the live path filters to cheaper-than-the-user's-
+    // actual-cost per request, which can exceed a service's reference estimate.
+    const clean = s.alts.filter(Boolean) as Alt[];
     const { error } = await supabase.from('alternatives_catalogue').upsert({
       service_key: key, service_name: s.name, category: s.category,
       raw_payload: clean, payload: clean, quality_score: 90, status: 'active',
@@ -1417,7 +1414,7 @@ async function main() {
     await reresolve(key, s.name, clean);
     ok++; alts += clean.length;
   }
-  console.log(`Done. ${ok}/${SEED.length} services seeded, ${alts} alternatives total (${dropped} pricier peers dropped).`);
+  console.log(`Done. ${ok}/${SEED.length} services seeded, ${alts} alternatives total.`);
 }
 // Only seed when run directly (npm run seed:catalog); importing SEED elsewhere
 // (e.g. the catalogue checker) must not connect to the DB or write anything.
